@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120" role="img" aria-label="Yomitaku logo">
+  <!-- 和纸卡片底 -->
+  <rect x="3" y="3" width="114" height="114" rx="26" fill="#f6f5f0" stroke="#e0dcd0" stroke-width="2"/>
+  <!-- 朱色日轮 -->
+  <circle cx="60" cy="33" r="16" fill="#b5433c"/>
+  <text x="60" y="40" text-anchor="middle" font-family="'Noto Serif JP','Yu Mincho','Hiragino Mincho ProN','MS PMincho',serif" font-size="19" font-weight="700" fill="#ffffff">読</text>
+  <!-- 翻开的书 -->
+  <path d="M22 80 C 38 70 54 70 60 76 C 66 70 82 70 98 80 L 98 48 C 82 38 66 38 60 44 C 54 38 38 38 22 48 Z" fill="#ffffff" stroke="#23272e" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M60 44 L 60 76" stroke="#23272e" stroke-width="3" stroke-linecap="round"/>
+  <!-- 左页文字线 -->
+  <path d="M30 55 C 39 50 48 49 53 53" stroke="#a8a294" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+  <path d="M30 63 C 39 58 48 57 53 61" stroke="#a8a294" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+  <path d="M30 71 C 37 67 45 66 50 68" stroke="#a8a294" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+  <!-- 右页文字线 -->
+  <path d="M90 55 C 81 50 72 49 67 53" stroke="#a8a294" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+  <path d="M90 63 C 81 58 72 57 67 61" stroke="#a8a294" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+  <path d="M90 71 C 83 67 75 66 70 68" stroke="#a8a294" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+  <!-- 朱色笔触 -->
+  <path d="M32 94 C 46 100 74 100 88 94" stroke="#b5433c" stroke-width="3.2" fill="none" stroke-linecap="round"/>
+</svg>

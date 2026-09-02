@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="public/logo.svg" width="96" alt="Yomitaku Logo" />
+
 # 読解特訓 · Yomitaku
 
 **简洁而硬核的 JLPT N1 読解专项训练页 —— 技巧、计时、解析、错题本，一个静态页面全搞定**
@@ -85,9 +87,11 @@ jlpt-n1-Yomitaku/
 ├── index.html          # 页面骨架：概览 / 解题技巧 / 专项训练 / 错题本 / 题库管理
 ├── css/
 │   └── style.css       # 和风纸质感主题样式
-└── js/
-    ├── bank.js         # 内置题库（原创模拟题，可直接编辑追加）
-    └── app.js          # 训练引擎：计时、判分、解析、错题本、统计、导入导出
+├── js/
+│   ├── bank.js         # 内置题库（原创模拟题，可直接编辑追加）
+│   └── app.js          # 训练引擎：计时、判分、解析、错题本、统计、导入导出
+└── public/
+    └── logo.svg        # Logo 与站点图标（和纸底 · 朱色日轮「読」· 翻开的书）
 ```
 
 ## 🚀 快速开始
