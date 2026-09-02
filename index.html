@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Yomitaku · JLPT N1 読解特訓</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Noto+Serif+JP:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="site">
+  <div class="site-inner">
+    <div class="brand">Yomitaku<span class="dot">·</span><span class="sub">JLPT N1 読解特訓</span></div>
+    <nav class="tabs">
+      <a href="#home" data-page="home">概览</a>
+      <a href="#tech" data-page="tech">解题技巧</a>
+      <a href="#practice" data-page="practice">专项训练</a>
+      <a href="#review" data-page="review">错题本</a>
+      <a href="#bank" data-page="bank">真题·题库</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- ================= 概览 ================= -->
+  <section class="page" id="page-home">
+    <div class="hero">
+      <p class="eyebrow">読解６割を取れば、合格は見えてくる</p>
+      <h1>JLPT N1 <em>読解</em> 特訓</h1>
+      <p class="lead">按官方六大题型整理快速解题技巧，配「计时训练 → 逐项解析 → 错题重练」的闭环。内置一套按官方出题目标编写的原创模拟题库（明确标注非真题），也支持导入你自己的题库；练习数据只保存在你的浏览器里。</p>
+      <div class="facts">
+        <div class="fact"><div class="num">110<small> 分</small></div><div class="lbl">言語知識・読解 考试时长</div></div>
+        <div class="fact"><div class="num">60<small> / 180</small></div><div class="lbl">読解 满分（得分区分之一）</div></div>
+        <div class="fact"><div class="num">19<small> 点</small></div><div class="lbl">読解 基准点（低于即不合格）</div></div>
+        <div class="fact"><div class="num">9<small> 组题</small></div><div class="lbl">内置原创模拟题 · 18 问</div></div>
+      </div>
+      <a class="btn" id="btn-go-practice-home" href="#practice">开始专项训练 →</a>
+      <a class="btn ghost" id="btn-go-tech" href="#tech" style="margin-left:10px">先学解题技巧</a>
+    </div>
+
+    <h2 class="page-title" style="margin-top:34px">官方出题构成（N1 読解）</h2>
+    <p class="page-desc">下表依据日本国際交流基金会官方网站公布的「大題的测试目标」整理，字数为官方目标值；每年题数可能微调，以当次考试为准。</p>
+    <div class="card" style="overflow-x:auto">
+      <table class="tbl">
+        <tr><th>大題</th><th>形式</th><th>官方目标字数</th><th>官方测试目标</th><th>近年标准题数</th><th>建议用时</th></tr>
+        <tr><td>問題7</td><td><span class="jp">内容理解（短篇）</span></td><td>约 200 字</td><td>读懂生活、工作等话题的说明文、指示文的内容</td><td>4 问</td><td>每问 ≤ 90 秒</td></tr>
+        <tr><td>問題8</td><td><span class="jp">内容理解（中篇）</span></td><td>约 500 字</td><td>读懂评论、解说、随笔的因果关系与理由</td><td>6 问</td><td>每篇 4〜5 分钟</td></tr>
+        <tr><td>問題9</td><td><span class="jp">内容理解（长篇）</span></td><td>约 1000 字</td><td>读懂解说、随笔、小说的概要与作者思路</td><td>4 问</td><td>每篇 8〜10 分钟</td></tr>
+        <tr><td>問題10</td><td><span class="jp">統合理解</span></td><td>合计约 600 字</td><td>比较多篇文章，进行综合理解</td><td>2 问</td><td>每组 5〜6 分钟</td></tr>
+        <tr><td>問題11</td><td><span class="jp">主張理解（长篇）</span></td><td>约 1000 字</td><td>从社论、评论等抽象、逻辑性文章中掌握整体主张</td><td>3 问</td><td>每篇 8〜10 分钟</td></tr>
+        <tr><td>問題12</td><td><span class="jp">情報検索</span></td><td>约 700 字</td><td>从广告、宣传册、信息杂志、商务文件中提取必要信息</td><td>2 问</td><td>每问 ≤ 2 分钟</td></tr>
+      </table>
+    </div>
+
+    <h2 class="page-title" style="margin-top:30px">得分规则与策略意义</h2>
+    <div class="grid cols-3">
+      <div class="card"><h3>三区分各 60 分</h3><p>总分 180＝言語知識（文字·語彙·文法）＋読解＋聴解，各 60 分。読解是与语法词汇并列的最大得分区分之一。</p></div>
+      <div class="card"><h3>基准点 19 分</h3><p>N1 合格需要「总分 ≥ 100」且「三个区分各 ≥ 19」。任何一个区分低于 19 直接不合格——読解不能弃。</p></div>
+      <div class="card"><h3>标准计分制</h3><p>按题目整体正确率换算得分，人人都抢的简单题未必拉开差距；読解中后段的难文才是区分度所在，也正是技巧能发力的地方。</p></div>
+    </div>
+
+    <h2 class="page-title" style="margin-top:30px">我的进度</h2>
+    <div id="home-stats"></div>
+  </section>
+
+  <!-- ================= 解题技巧 ================= -->
+  <section class="page" id="page-tech">
+    <p class="eyebrow"> Techniques</p>
+    <h1 class="page-title">快速解题技巧</h1>
+    <p class="page-desc">方法论参考主流备考体系（『新完全マスター読解』『日本語総合攻略 N1読解』等）通行的训练思路，并结合官方出题目标整理；配官方例题反复套用，形成肌肉记忆。</p>
+
+    <h2 style="font-size:20px;margin:18px 0 12px">一、通用心法</h2>
+    <div class="grid cols-3">
+      <div class="card"><h3>① 设问导向阅读</h3><p>除短篇外，一律<b>先读设问再读文章</b>。带着「要找什么」去读，阅读量能减一半。划线题的答案几乎总在划线句前后 1〜2 句；指示语（これ・それ・この）的答案通常在<b>直前的句子</b>。</p></div>
+      <div class="card"><h3>② 逆接之后是重点</h3><p>「しかし／だが／とはいえ／にもかかわらず」之后的句子，往往才是作者的真正主张。先让步（たしかに〜もちろん〜）再反驳，是议论文的固定节奏。</p></div>
+      <div class="card"><h3>③ 主张看文末与信号句</h3><p>笔者的主张高频出现在：<b>末段</b>、逆接句后、以及「〜と考える／〜べきだ／〜のではないだろうか」这类表态句。引用（〜と言われる）是别人的话，<b>不是</b>笔者观点。</p></div>
+      <div class="card"><h3>④ 首末句读精，中间读快</h3><p>每段落首句提话题、末句收结论。长文先精读首段＋末段，中间段落只追关键词。一篇 1000 字的文，真正需要逐字读的往往不到 400 字。</p></div>
+      <div class="card"><h3>⑤ 消去法兜底</h3><p>内容一致题用逐项对照原文的消去法。四个选项里「听起来最有道理」的常是陷阱——答案永远以原文定位为准，不以常识为准。</p></div>
+      <div class="card"><h3>⑥ 时间即分数</h3><p>読解最大的失败不是读不懂，而是做不完。给每题型设定时间预算（见各题型卡片），超时先涂一个猜测答案并标记，最后再回来。</p></div>
+    </div>
+
+    <h2 style="font-size:20px;margin:26px 0 12px">二、信号词速查（点击训练时可一键高亮）</h2>
+    <div class="card">
+      <div class="chips">
+        <span class="chip"><b>しかし／だが／けれども</b><span class="zh">逆接·转折后见主张</span></span>
+        <span class="chip"><b>とはいえ／といっても</b><span class="zh">部分让步后的修正</span></span>
+        <span class="chip"><b>にもかかわらず</b><span class="zh">与预期相反</span></span>
+        <span class="chip"><b>つまり／すなわち／要するに</b><span class="zh">要约·答案常在此</span></span>
+        <span class="chip"><b>なぜなら／というのは</b><span class="zh">原因说明·对应理由题</span></span>
+        <span class="chip"><b>そのため／したがって</b><span class="zh">因果推进</span></span>
+        <span class="chip"><b>一方／これに対して</b><span class="zh">对比·統合理解的关键</span></span>
+        <span class="chip"><b>たしかに／もちろん</b><span class="zh">让步铺垫·后面必有しかし</span></span>
+        <span class="chip"><b>ただし／もっとも</b><span class="zh">附加限制·情報検索的陷阱点</span></span>
+      </div>
+    </div>
+
+    <h2 style="font-size:20px;margin:26px 0 12px">三、陷阱选项的七种面孔（消去法 checklist）</h2>
+    <div class="card">
+      <table class="tbl">
+        <tr><th>陷阱类型</th><th>特征</th><th>对策</th></tr>
+        <tr><td>本文未提及</td><td>说法合理、符合常识，但原文没写过</td><td>每个选项回原文找定位句，找不到就排除</td></tr>
+        <tr><td>部分曲解</td><td>前半句对，后半句偷偷换掉一个词</td><td>盯紧程度词、否定词、主语宾语</td></tr>
+        <tr><td>范围扩大 / 绝对化</td><td>原文「ある〜」被换成「すべて〜」「必ず」</td><td>见到全部·一定·唯一，立刻回原文核范围</td></tr>
+        <tr><td>张冠李戴</td><td>把引用的他人观点、或另一段的话安到笔者头上</td><td>区分「〜と言われる」与笔者自己的表态</td></tr>
+        <tr><td>因果倒置</td><td>原文 A 引起 B，选项说成 B 引起 A</td><td>理由题要核对因果方向</td></tr>
+        <tr><td>过度推断</td><td>顺着原文多说了一步，原文只停在半路</td><td>「说得比原文多」的都算错，哪怕方向对</td></tr>
+        <tr><td>答非所问</td><td>内容与原文一致，但不是问的这个点</td><td>先确认设问问什么（理由？含义？一致？）</td></tr>
+      </table>
+    </div>
+
+    <h2 style="font-size:20px;margin:26px 0 12px">四、分题型打法（問題7〜12）</h2>
+    <div class="grid cols-2">
+      <div class="card typecard">
+        <h3>問題7 内容理解（短篇）<span class="badge gray">4问 · 每问≤90秒</span></h3>
+        <ol class="flow">
+          <li>先看设问动词：问「言いたいこと」还是「合っているもの」，读法完全不同。</li>
+          <li>只读一遍，禁止回读；短文的核心句八成在<b>文末</b>。</li>
+          <li>主旨题：抓逆接后＋文末表态句，直接对选项。</li>
+          <li>一致题：消去法，逐项回原文定位。</li>
+        </ol>
+        <p class="kv"><b>考点标签：</b>主旨把握 · 内容一致</p>
+      </div>
+      <div class="card typecard">
+        <h3>問題8 内容理解（中篇）<span class="badge gray">6问 · 每篇4〜5分</span></h3>
+        <ol class="flow">
+          <li>先读该篇的两个设问，记住关键词。</li>
+          <li>第 1 段精读找主题；之后每段<b>首句＋末句</b>精读、中间略读。</li>
+          <li>划线题：答案在划线句前后 1〜2 句；含义题做「替换填空」验证通顺。</li>
+          <li>理由题：找「なぜなら／そのため」或前一句的因果。</li>
+        </ol>
+        <p class="kv"><b>考点标签：</b>划线句含义 · 理由说明 · 内容一致</p>
+      </div>
+      <div class="card typecard">
+        <h3>問題9 内容理解（长篇）<span class="badge gray">4问 · 每篇8〜10分</span></h3>
+        <ol class="flow">
+          <li>先把 4 个设问全读一遍并排序：指示语题→划线题→细节题→全文题。</li>
+          <li>首段精读（主题＋笔者立场预告），末段往往是结论。</li>
+          <li>边读边扫设问关键词，命中即停笔作答，不要等读完再回头看。</li>
+          <li>最后的「本文の内容と合っているもの」用消去法，注意选项间的细微程度差。</li>
+        </ol>
+        <p class="kv"><b>考点标签：</b>指示语 · 划线句 · 内容一致</p>
+      </div>
+      <div class="card typecard">
+        <h3>問題10 統合理解<span class="badge gray">2问 · 每组5〜6分</span></h3>
+        <ol class="flow">
+          <li>先读设问（通常一问共通点、一问对立点）。</li>
+          <li>读文 A、文 B 的<b>首段</b>，确认共同话题与各自立场。</li>
+          <li>边读边在草稿记两行小笔记：A 赞成/反对/有条件，B 同上。</li>
+          <li>答案藏在「同一话题的不同说法」处——一方肯定、一方限定的地方就是命题点。</li>
+        </ol>
+        <p class="kv"><b>考点标签：</b>共通点 · 相違点</p>
+      </div>
+      <div class="card typecard">
+        <h3>問題11 主張理解（长篇）<span class="badge gray">3问 · 每篇8〜10分</span></h3>
+        <ol class="flow">
+          <li>议论文节奏固定：<b>现象→让步→反驳→主张</b>，反驳处（しかし 后）画竖线。</li>
+          <li>把「别人的话」（引用、世間一般の見方）标记出来，全部排除出笔者主张。</li>
+          <li>正确选项常把原文口语换成了抽象改写——意思对即对，别抠字面。</li>
+          <li>「最も筆者の言いたいこと」：优先对照末段与逆接后主张句。</li>
+        </ol>
+        <p class="kv"><b>考点标签：</b>主旨把握 · 理由说明 · 意见一致</p>
+      </div>
+      <div class="card typecard">
+        <h3>問題12 情報検索<span class="badge gray">2问 · 每问≤2分</span></h3>
+        <ol class="flow">
+          <li>这是全卷<b>性价比最高</b>的题型：不读全文，先读设问里的条件（身份、时间、可/不可）。</li>
+          <li>用专有名词、数字、日期在信息表里扫读定位。</li>
+          <li>逐条核对「注意書き」：〜は除く、〜に限る、〜不可——排除题的核心。</li>
+          <li>最后把剩余选项逐个过条件，全满足的才选。</li>
+        </ol>
+        <p class="kv"><b>考点标签：</b>条件筛选 · 注意事项</p>
+      </div>
+    </div>
+
+    <h2 style="font-size:20px;margin:26px 0 12px">五、110 分钟时间预算（经验参考值）</h2>
+    <div class="card">
+      <table class="tbl">
+        <tr><th>板块</th><th>预算</th><th>要点</th></tr>
+        <tr><td>文字·語彙＋文法</td><td>≤ 30 分钟</td><td>凭语感快答，犹豫超过 20 秒就标记跳过</td></tr>
+        <tr><td>問題7 短篇</td><td>约 6 分钟</td><td>全卷最简单的得分点，保节奏</td></tr>
+        <tr><td>問題8 中篇</td><td>约 13 分钟</td><td>6 问的大分块，控制在预算内</td></tr>
+        <tr><td>問題9 长篇</td><td>约 9 分钟</td><td>设问导向，段落扫描</td></tr>
+        <tr><td>問題10 統合</td><td>约 6 分钟</td><td>笔记两行，先答共通点</td></tr>
+        <tr><td>問題11 主張</td><td>约 10 分钟</td><td>难文允许超预算，从統合·情報里省回来</td></tr>
+        <tr><td>問題12 情報検索</td><td>约 4 分钟</td><td>必拿分，做不完也优先保它</td></tr>
+        <tr><td>涂卡与机动</td><td>约 10 分钟</td><td>留白给超时标记的题</td></tr>
+      </table>
+      <p style="font-size:13px;color:var(--muted);margin-top:10px">※ 上表为备考体系常用的经验配分（非官方规定），按个人强弱调整；总原则＝語彙文法不恋战、読解留足 70 分钟以上。</p>
+    </div>
+  </section>
+
+  <!-- ================= 专项训练 ================= -->
+  <section class="page" id="page-practice">
+    <p class="eyebrow">Practice</p>
+    <h1 class="page-title">专项训练</h1>
+    <p class="page-desc">选择一个题组开始：自动计时、逐选项解析、错题自动入本。题组来自内置原创模拟题库，以及你在<a href="#bank">真题·题库</a>页导入的题组。</p>
+
+    <div id="set-list">
+      <div class="filterbar" id="filterbar"></div>
+      <div class="grid cols-2" id="set-cards"></div>
+    </div>
+
+    <div id="session-view" style="display:none">
+      <div class="session-head">
+        <button class="btn sm sub" id="btn-back-top">← 组列表</button>
+        <h2 id="session-head-title" style="margin:0;font-size:19px;font-family:var(--serif)"></h2>
+        <div class="timer" id="timer" style="display:none"></div>
+        <label class="tgl" id="sig-wrap" style="margin-left:8px"><input type="checkbox" id="sig-toggle"> 信号词高亮</label>
+        <div class="big" id="session-result" style="font-family:var(--serif);font-size:22px;font-weight:600"></div>
+      </div>
+      <div id="session-body"></div>
+      <div class="actions" id="session-actions"></div>
+    </div>
+  </section>
+
+  <!-- ================= 错题本 ================= -->
+  <section class="page" id="page-review">
+    <p class="eyebrow">Review</p>
+    <h1 class="page-title">错题本</h1>
+    <p class="page-desc">做错的题自动收录。考前只刷错题，是性价比最高的复习方式。</p>
+    <button class="btn" id="btn-wrong-session" style="display:none;margin-bottom:16px">重练全部错题（答对自动移出）</button>
+    <div id="review-body"></div>
+  </section>
+
+  <!-- ================= 真题·题库 ================= -->
+  <section class="page" id="page-bank">
+    <p class="eyebrow">Sources &amp; Bank</p>
+    <h1 class="page-title">题库说明与管理</h1>
+    <p class="page-desc">先说实话：JLPT 真题只有官方一家，市面口碑题库（新完全マスター等）也全是受版权保护的商业书籍——任何第三方网页都无权转载它们。所以本页的做法是：内置一套<b>明确标注"非真题"</b>、严格对照官方出题目标编写的原创模拟题；想用成熟教材，按下面的指南购书后个人转录导入即可。</p>
+
+    <h2 style="font-size:20px;margin:18px 0 12px">一、内置题库（原创模拟 · 非真题）</h2>
+    <div class="card">
+      <h3>这是什么、不是什么</h3>
+      <p>内置 9 组共 18 问，覆盖問題7〜12 全部六大题型，每道题附<b>逐选项解析</b>（错项属于哪类陷阱、正解定位在哪）。文章长度与设问方式对照官方「大題的测试目标」编写（短篇约200字、中篇约500字、长篇约1000字等）。</p>
+      <p>它<b>能</b>帮你：训练设问导向阅读、时间预算、消去法 checklist、错题归因——即解题流程本身。<br>它<b>不能</b>替代：官方真题与成熟教材的打磨深度。题目标注「本站原创模拟（非真题）」，不会冒充真题误导你。</p>
+    </div>
+
+    <h2 style="font-size:20px;margin:26px 0 12px">二、口碑题库书指南（公认效果好 · 需自购）</h2>
+    <div class="card" style="overflow-x:auto">
+      <table class="tbl">
+        <tr><th>教材</th><th>出版</th><th>特点</th><th>适合</th></tr>
+        <tr><td>『新完全マスター読解 N1』</td><td>スリーエーネットワーク</td><td>分题型技巧讲解＋分项练习＋2 套模拟题，N1 読解备考口碑第一</td><td>系统提分（首选）</td></tr>
+        <tr><td>『日本語総合攻略読解 N1』</td><td>アルク</td><td>解题流程与时间战略讲得最细</td><td>总是做不完的人</td></tr>
+        <tr><td>『ドリル&amp;ドリル標準問題集 N1読解』</td><td>Jリサーチ出版</td><td>题量大、按出题形式分类刷题</td><td>要刷题量</td></tr>
+        <tr><td>『日本語能力試験公式問題集』（年度版）</td><td>JEES／国際交流基金</td><td>唯一由官方出版的真题集，含答案与解说；自购自用无版权问题</td><td>考前实战检验</td></tr>
+      </table>
+      <p style="font-size:13px;color:var(--muted);margin-top:10px">※ 日本书店或日本亚马逊等渠道有售。把手中教材的题目转录为 JSON 导入本页训练（计时、解析、错题本），属于个人使用范畴；本页不提供、也不应传播任何受版权保护题目的电子文本。</p>
+    </div>
+
+    <h2 style="font-size:20px;margin:26px 0 12px">三、官方资料参考（构成与得分机制的出处）</h2>
+    <div class="grid cols-2 src">
+      <div class="card">
+        <h3>考试制度与数据</h3>
+        <ul>
+          <li><a href="https://www.jlpt.jp/cn/guideline/testsections.html" target="_blank" rel="noopener">考试科目与试题构成（官方中文页）</a></li>
+          <li><a href="https://www.jlpt.jp/guideline/pdf/n1_cn_revised.pdf" target="_blank" rel="noopener">N1 大题的测试目标（官方 PDF）</a></li>
+          <li><a href="https://www.jlpt.jp/guideline/results.html" target="_blank" rel="noopener">得点区分・合否判定（官方）</a>／<a href="https://www.jlpt.jp/topics/201008301282900981.html" target="_blank" rel="noopener">合格点・基准点公告</a></li>
+          <li><a href="https://www.jees.or.jp/jlpt/" target="_blank" rel="noopener">日本国際教育支援協会（JEES）JLPT 页</a></li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>官方例题（自行下载自用）</h3>
+        <ul>
+          <li><a href="https://www.jlpt.jp/samples/sample2012/pdf/N1R.pdf" target="_blank" rel="noopener">N1 読解公式样题 PDF</a><span class="desc">共 20 页，含六大题型例题</span></li>
+          <li><a href="https://www.jlpt.jp/samples/sample2012/pdf/N1answer.pdf" target="_blank" rel="noopener">N1 公式样题正答表 PDF</a></li>
+          <li><a href="https://www.jlpt.jp/cn/samples/sampleindex.html" target="_blank" rel="noopener">全部科目样题索引（官方中文页）</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <h2 style="font-size:20px;margin:26px 0 12px">四、题库管理（导入 / 导出 / 移除）</h2>
+    <div class="card">
+      <h3>当前题库：<span id="bank-count"></span></h3>
+      <div id="bank-list" style="margin-top:8px"></div>
+    </div>
+    <div class="card">
+      <h3>导入题组</h3>
+      <p style="font-size:13.5px;color:var(--muted)">支持粘贴 JSON 或选择 .json 文件；同 id 题组会被覆盖更新。字段校验失败会提示具体位置。</p>
+      <textarea id="bank-import-text" rows="8" style="width:100%;font-family:Consolas,monospace;font-size:13px;border:1px solid var(--border);border-radius:10px;padding:12px" placeholder='在此粘贴题库 JSON（数组），或点击「填入格式模板」'></textarea>
+      <p style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+        <button class="btn" id="btn-import">导入</button>
+        <button class="btn sub" id="btn-example">填入格式模板</button>
+        <input type="file" id="bank-file" accept=".json,application/json" style="font-size:13px">
+      </p>
+      <p style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn sub" id="btn-export">导出当前题库到文本框</button>
+        <button class="btn sub" id="btn-download">下载题库 JSON</button>
+      </p>
+    </div>
+    <div class="card">
+      <h3>JSON 格式速览</h3>
+      <pre style="background:#f0eee8;border-radius:10px;padding:14px;font-size:12.5px;overflow-x:auto"><code>[
+  {
+    "id": "wb2012-q7-1",              // 唯一 ID，重复导入即更新
+    "typeKey": "tanbun",              // tanbun|chubun|chobun|togo|shucho|joho
+    "title": "官方問題例 問題7（一）",
+    "source": "官方問題例PDF（2012）", // 可选：显示为来源徽章
+    "sourceUrl": "https://www.jlpt.jp/samples/sample2012/pdf/N1R.pdf", // 可选
+    "minutes": 2,                     // 建议用时（分钟）
+    "passage": "文章正文，\\n分段",     // 統合理解用 passageA / passageB
+    "questions": [
+      { "q": "設問の原文", "label": "主旨把握",
+        "options": ["選択肢1", "選択肢2", "選択肢3", "選択肢4"],
+        "answer": 2,                  // 正解下标 0〜3
+        "explain": ["选项1解析(可选)", "选项2解析", "正解定位", "选项4解析"] }
+    ]
+  }
+]</code></pre>
+    </div>
+
+    <h2 style="font-size:20px;margin:26px 0 12px">五、本站内容出处说明</h2>
+    <div class="grid cols-2 src">
+      <div class="card">
+        <h3>系统教材（自购）</h3>
+        <ul>
+          <li>『日本語能力試験公式問題集』<span class="desc">官方真题集，含答案与解说，JEES 出版，书店有售</span></li>
+          <li>『新完全マスター読解 日本語能力試験N1』<span class="desc">スリーエーネットワーク，题型分项训练的代表作</span></li>
+          <li>『日本語総合攻略読解 N1』<span class="desc">アルク，以解题流程见长</span></li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>本站内容出处</h3>
+        <ul>
+          <li>出题构成・测试目标・字数<span class="desc">＝官方「大題的测试目标」PDF 与官网科目页</span></li>
+          <li>得分机制（60 分区分・19 基准点）<span class="desc">＝官方合否判定页与公告</span></li>
+          <li>解题方法论<span class="desc">＝主流备考体系通行训练思路的整理归纳（经验值非官方）</span></li>
+          <li>版权说明<span class="desc">＝本站不含任何试题原文；页面数据全部保存在本地浏览器</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site">
+  <div class="wrap">Yomitaku — 本页面为静态工具，不保存任何试题原文；练习记录仅存于本机浏览器。试题版权归 日本国際交流基金会／日本国際教育支援協会 所有。</div>
+</footer>
+
+<div id="toast" style="position:fixed;right:20px;bottom:20px;background:#fff;border:1.5px solid var(--ok);border-radius:10px;padding:10px 18px;font-size:14px;box-shadow:0 4px 16px rgba(0,0,0,.08);opacity:0;pointer-events:none;transition:opacity .25s;z-index:99"></div>
+
+<script src="js/bank.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
