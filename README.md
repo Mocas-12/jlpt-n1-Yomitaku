@@ -4,116 +4,116 @@
 
 # 読解特訓 · Yomitaku
 
-**简洁而硬核的 JLPT N1 読解专项训练页 —— 技巧、计时、解析、错题本，一个静态页面全搞定**
+**A lean, hardcore JLPT N1 読解 (reading-comprehension) trainer — techniques, timed practice, per-option explanations and a mistake notebook, all in one static page**
 
 ![Vanilla JavaScript](https://img.shields.io/badge/JavaScript-Vanilla-F7DF1E?logo=javascript&logoColor=black)
-![静态站点](https://img.shields.io/badge/部署-纯静态零依赖-39538C)
-![本地存储](https://img.shields.io/badge/数据-仅存本机浏览器-2E7D5B)
+![Static Site](https://img.shields.io/badge/Deploy-Pure_static_zero_dependencies-39538C)
+![Local Storage](https://img.shields.io/badge/Data-Stored_only_in_your_browser-2E7D5B)
 
-*打开页面 → 学技巧 → 计时训练 → 逐项解析 → 错题重练*
+*Open the page → learn the techniques → timed practice → per-option explanations → re-drill your mistakes*
 
-作者 **Unlimited Box** · [📧 a18577y@gmail.com](mailto:a18577y@gmail.com) · [GitHub @Mocas-12](https://github.com/Mocas-12)
+**English** | [简体中文](./README.zh-CN.md)
 
 </div>
 
 ---
 
-## 📖 目录
+## 📖 Table of Contents
 
-- [功能特性](#-功能特性)
-- [界面设计](#-界面设计)
-- [训练闭环](#-训练闭环)
-- [题库与版权说明](#-题库与版权说明)
-- [项目结构](#-项目结构)
-- [快速开始](#-快速开始)
-- [题库 JSON 格式](#-题库-json-格式)
-- [常见问题](#-常见问题)
-- [隐私与安全](#-隐私与安全)
-- [许可证](#-许可证)
+- [Features](#-features)
+- [UI Design](#-ui-design)
+- [Training Loop](#-training-loop)
+- [Question Bank & Copyright](#-question-bank--copyright)
+- [Project Structure](#-project-structure)
+- [Quick Start](#-quick-start)
+- [Question Bank JSON Format](#-question-bank-json-format)
+- [FAQ](#-faq)
+- [Privacy & Security](#-privacy--security)
+- [License](#-license)
 
-## ✨ 功能特性
+## ✨ Features
 
-- 🧭 **按官方题型组织**：对照 JLPT 官方《大題的测试目标》整理問題7〜12 六大题型（内容理解短/中/长篇、統合理解、主張理解、情報検索）的专属打法与时间预算
-- ⚡ **快速解题技巧库**：设问导向阅读、逆接信号词速查（训练中可一键高亮）、陷阱选项七类消去法 checklist、110 分钟时间预算表
-- ⏱️ **计时训练**：每组题按难度设定时间预算，实时计时，超时标红；还原考场节奏
-- 🔍 **逐选项解析**：提交后标出正解与误选，每个选项给出定位与陷阱归类，而非只给答案
-- 🔁 **错题本闭环**：做错自动收录，支持「重练全部错题」，答对自动移出；考前只刷错题
-- 📊 **按题型统计**：各题型正确率进度条 + 练习历史，弱项一目了然
-- 📥 **题库可扩展**：粘贴 JSON / 上传文件即可导入自己的题组（同 ID 自动覆盖），支持导出备份
-- 💾 **零后端**：所有数据仅存本机浏览器 localStorage，双击即用
+- 🧭 **Organized by official question types**: mapped against the JLPT official《大題的測試目標》(test goals of each large question), it compiles dedicated tactics and time budgets for the six big question types of 問題7〜12 (content comprehension short/medium/long passages, integrated comprehension, main-idea comprehension, information retrieval)
+- ⚡ **Quick technique library**: question-oriented reading, a quick reference for contrastive/concessive signal words (one-click highlighting during practice), a seven-category elimination checklist for trap options, and a 110-minute time budget table
+- ⏱️ **Timed practice**: each question set carries a difficulty-based time budget with a real-time timer; overtime is flagged in red, reproducing exam pacing
+- 🔍 **Per-option explanations**: after submitting, the correct answer and your choice are marked, and every option gets a text location plus a trap classification — not just an answer key
+- 🔁 **Mistake-notebook loop**: wrong answers are collected automatically; "re-drill all mistakes" is supported and a correct answer removes the item; before the exam, drill only your mistakes
+- 📊 **Per-type stats**: accuracy progress bars per question type + practice history — weak points at a glance
+- 📥 **Extensible question bank**: paste JSON / upload a file to import your own question sets (same ID auto-overwrites); export backup supported
+- 💾 **Zero backend**: all data lives only in your browser's localStorage — double-click and it works
 
-## 🎨 界面设计
+## 🎨 UI Design
 
-| 元素 | 设计 |
+| Element | Design |
 | --- | --- |
-| 整体风格 | 和风纸质感（米白底 + 朱色强调 + 墨色正文），无框架手写 CSS |
-| 阅读区 | 明朝体（Noto Serif JP）双倍行高、两端对齐，贴近试卷排版 |
-| 题型徽章 | 蓝底题型标签 + 灰底大题编号 + 来源徽章（原创/导入一目了然） |
-| 选项状态 | 悬停描边 → 选中靛蓝 → 正解绿 / 误选朱红，解析框左侧竖线引导 |
-| 信号词高亮 | しかし・つまり・一方等 22 类逻辑信号词一键衬底高亮 |
-| 动效 | 页面淡入、进度条过渡、Toast 提示；无重型动画 |
+| Overall style | Washi paper texture (off-white base + vermilion accents + ink-black text), hand-written CSS without frameworks |
+| Reading area | Mincho typeface (Noto Serif JP) with double line height and justified alignment, close to exam-paper typesetting |
+| Type badges | Blue question-type tags + gray big-question numbers + source badges (original/imported at a glance) |
+| Option states | Hover outline → selected indigo → correct green / wrong vermilion; explanation boxes guided by a left vertical rule |
+| Signal-word highlighting | 22 categories of logical signal words (しかし・つまり・一方 etc.) highlighted with one click |
+| Motion | Page fade-in, progress-bar transitions, toast notices; no heavy animation |
 
-## 🧠 训练闭环
+## 🧠 Training Loop
 
 ```mermaid
 flowchart LR
-    A[📚 官方出题构成<br/>問題7〜12] --> B[🧭 分题型技巧<br/>设问导向 · 信号词 · 消去法]
-    B --> C[⏱️ 计时训练<br/>内置原创模拟题 / 自导入题组]
-    C --> D[🔍 逐选项解析<br/>定位 + 陷阱归类]
-    D --> E[🔁 错题本<br/>自动收录 · 重练]
-    E --> F[📊 按题型统计<br/>正确率 · 历史]
+    A[📚 Official question structure<br/>問題7〜12] --> B[🧭 Per-type techniques<br/>question-oriented · signal words · elimination]
+    B --> C[⏱️ Timed practice<br/>built-in original mock sets / imported sets]
+    C --> D[🔍 Per-option explanations<br/>location + trap classification]
+    D --> E[🔁 Mistake notebook<br/>auto-collected · re-drill]
+    E --> F[📊 Per-type stats<br/>accuracy · history]
     F --> B
 ```
 
-1. **学**：按六大题型学习对应的解题流程、目标用时与陷阱 checklist
-2. **练**：选题组开始训练，计时器对照时间预算；阅读区可开启信号词高亮
-3. **析**：提交后逐选项解析，错因归入七类陷阱之一，归因比刷量重要
-4. **刷**：错题自动进入错题本，一键重练直到清零
-5. **看**：首页按题型汇总正确率与练习历史，弱项定向补练
+1. **Learn**: study the solution flow, target time and trap checklist for each of the six question types
+2. **Practice**: pick a question set and start; the timer runs against the time budget; signal-word highlighting can be enabled in the reading area
+3. **Analyze**: after submitting, per-option explanations classify each error into one of seven trap categories — attribution matters more than volume
+4. **Drill**: mistakes automatically enter the notebook; re-drill with one click until it is cleared
+5. **Review**: the home page aggregates accuracy by question type and practice history for targeted remediation
 
-## 📚 题库与版权说明
+## 📚 Question Bank & Copyright
 
-> **先说实话**：JLPT 真题只有官方一家，市面口碑题库（新完全マスター等）也全是受版权保护的商业书籍，任何第三方都无权转载。
+> **Honesty first**: JLPT past papers come only from the official source, and every reputable commercial question bank (新完全マスター etc.) is a copyrighted book — no third party may republish them.
 
-- ✅ **内置题库**：9 组 18 问，覆盖全部六大题型，为参照官方「大題的测试目标」（字数、能力点、设问方式）编写的**原创模拟题**，每组明确标注「非真题」
-- 📖 **口碑教材指南**：「题库说明与管理」页整理了新完全マスター／日本語総合攻略／ドリル&ドリル／公式問題集的选书对照表，购书后个人转录导入即可用本页训练
-- 🔗 **官方资料直链**：出题构成、大題测试目标 PDF、得点区分与基准点公告、官方免费样题 PDF
-- 🚫 本项目**不包含、也不分发**任何受版权保护的试题原文
+- ✅ **Built-in question bank**: 9 sets / 18 questions covering all six question types — **original mock questions** written against the official "test goals of each large question" (word count, ability points, question style), with each set clearly labeled "not a past paper"
+- 📖 **Reputable textbook guide**: the "Question Bank Notes & Management" page provides a comparison table for 新完全マスター / 日本語総合攻略 / ドリル&ドリル / the official workbook; transcribe your purchased books and import them to train here
+- 🔗 **Official resource links**: question structure, the large-question test-goals PDF, score-band and scaled-score announcements, official free sample PDFs
+- 🚫 This project **does not contain or distribute** any copyrighted question text
 
-## 📁 项目结构
+## 📁 Project Structure
 
 ```text
 jlpt-n1-Yomitaku/
-├── index.html          # 页面骨架：概览 / 解题技巧 / 专项训练 / 错题本 / 题库管理
+├── index.html          # Page skeleton: overview / techniques / practice / mistake notebook / bank management
 ├── css/
-│   └── style.css       # 和风纸质感主题样式
+│   └── style.css       # Washi paper-texture theme styles
 ├── js/
-│   ├── bank.js         # 内置题库（原创模拟题，可直接编辑追加）
-│   └── app.js          # 训练引擎：计时、判分、解析、错题本、统计、导入导出
+│   ├── bank.js         # Built-in question bank (original mock questions, editable to extend)
+│   └── app.js          # Training engine: timer, scoring, explanations, mistake notebook, stats, import/export
 └── public/
-    └── logo.svg        # Logo 与站点图标（和纸底 · 朱色日轮「読」· 翻开的书）
+    └── logo.svg        # Logo & site icon (washi base · vermilion sun「読」· open book)
 ```
 
-## 🚀 快速开始
+## 🚀 Quick Start
 
 ```bash
 git clone https://github.com/Mocas-12/jlpt-n1-Yomitaku.git
 cd jlpt-n1-Yomitaku
 ```
 
-- **方式一**：直接双击 `index.html`，浏览器打开即用
-- **方式二**（推荐）：
+- **Option 1**: simply double-click `index.html` and it works in your browser
+- **Option 2 (recommended)**:
 
 ```bash
 python -m http.server 8123
-# 访问 http://127.0.0.1:8123
+# Visit http://127.0.0.1:8123
 ```
 
-> 无需安装依赖、无需构建；建议使用 Chrome / Edge 等现代浏览器。
+> No dependencies to install, nothing to build; a modern browser such as Chrome / Edge is recommended.
 
-## 📥 题库 JSON 格式
+## 📥 Question Bank JSON Format
 
-在「题库说明与管理」页粘贴或上传，同 ID 题组自动覆盖：
+Paste or upload on the "Question Bank Notes & Management" page; question sets with the same ID auto-overwrite:
 
 ```json
 [
@@ -137,43 +137,43 @@ python -m http.server 8123
 ]
 ```
 
-`typeKey` 取值：`tanbun` 短文 / `chubun` 中文 / `chobun` 长篇 / `togo` 統合 / `shucho` 主張 / `joho` 情報検索。
+`typeKey` values: `tanbun` (short passage) / `chubun` (medium passage) / `chobun` (long passage) / `togo` (integrated comprehension) / `shucho` (main-idea comprehension) / `joho` (information retrieval).
 
-## ❓ 常见问题
+## ❓ FAQ
 
 <details>
-<summary><b>练习记录存在哪里？换浏览器还在吗？</b></summary>
+<summary><b>Where are practice records stored? Do they survive switching browsers?</b></summary>
 
-记录仅存于当前浏览器的 localStorage。同一浏览器重复打开都在；换浏览器或清除浏览器数据会丢失，重要进度可用「导出」备份题库（练习记录暂不随导出）。
+Records live only in the current browser's localStorage. They persist across sessions in the same browser; switching browsers or clearing browser data loses them. For important progress, use "Export" to back up the question bank (practice records are not exported yet).
 </details>
 
 <details>
-<summary><b>为什么没有真题？</b></summary>
+<summary><b>Why are there no real past papers?</b></summary>
 
-真题版权归日本国際交流基金会／JEES 所有，第三方网页转载属侵权。内置题为明确标注的原创模拟题；官方免费样题 PDF 与口碑教材指南见「题库说明与管理」页。
+Past papers are copyrighted by the Japan Foundation / JEES; republishing them on a third-party web page is infringement. The built-in sets are clearly-labeled original mock questions; see the "Question Bank Notes & Management" page for official free sample PDFs and the reputable-textbook guide.
 </details>
 
 <details>
-<summary><b>导入 JSON 报错？</b></summary>
+<summary><b>JSON import errors?</b></summary>
 
-页面会提示具体位置：根元素必须是数组、`typeKey` 必须是六个取值之一、每组 `options` 恰好 4 项、`answer` 为 0〜3、`explain` 若提供需与 `options` 等长。
+The page reports the exact problem: the root element must be an array, `typeKey` must be one of the six values, each question's `options` must have exactly 4 items, `answer` must be 0–3, and `explain` (if provided) must match the length of `options`.
 </details>
 
 <details>
-<summary><b>双击打开后字体不对？</b></summary>
+<summary><b>Wrong font after opening by double-click?</b></summary>
 
-阅读区使用 Google Fonts 的 Noto Serif JP，离线时自动回退到系统明朝体（Yu Mincho 等），不影响使用。
+The reading area uses Noto Serif JP from Google Fonts; when offline it falls back to a system Mincho typeface (Yu Mincho etc.) without affecting functionality.
 </details>
 
-## 🔒 隐私与安全
+## 🔒 Privacy & Security
 
-- 💾 全部数据仅存本机浏览器，无账号、无后端、无上报
-- 🌐 除 Google Fonts 字体外无任何网络请求，字体加载失败不影响功能
-- 🚫 不包含任何受版权保护试题的电子文本
+- 💾 All data stays in your local browser — no account, no backend, no reporting
+- 🌐 No network requests except Google Fonts; font loading failure does not affect functionality
+- 🚫 Contains no electronic text of any copyrighted exam questions
 
-## 📄 许可证
+## 📄 License
 
-本项目用于学习与演示，未设置开源许可证；如需复用请联系作者。
+This project is for learning and demonstration purposes only; no open-source license is set. Contact the author before reuse.
 
 ---
 
@@ -181,6 +181,6 @@ python -m http.server 8123
 
 **Made with 💙 by Unlimited Box**
 
-🐛 [问题反馈](https://github.com/Mocas-12/jlpt-n1-Yomitaku/issues) · 📧 [a18577y@gmail.com](mailto:a18577y@gmail.com)
+🐛 [Report an Issue](https://github.com/Mocas-12/jlpt-n1-Yomitaku/issues) · 📧 [a18577y@gmail.com](mailto:a18577y@gmail.com)
 
 </div>
