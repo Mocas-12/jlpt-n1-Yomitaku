@@ -29,6 +29,7 @@ body {
   font-family: var(--sans);
   font-size: 16px;
   line-height: 1.75;
+  padding-bottom: 56px; /* 固定页脚的让位 */
   -webkit-font-smoothing: antialiased;
 }
 ::selection { background: var(--pop); }
@@ -67,7 +68,7 @@ nav.tabs a.on {
 }
 
 /* ---------- sections ---------- */
-main { padding: 34px 0 72px; }
+main { padding: 34px 0 96px; }
 section.page { display: none; }
 section.page.on { display: block; animation: fade .25s ease; }
 @keyframes fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
@@ -322,7 +323,16 @@ mark.uline { background: none; color: inherit; border-bottom: 3px solid var(--ac
 .src li { margin: 7px 0; }
 .src .desc { color: var(--muted); font-size: 13.5px; margin-left: 4px; }
 
-footer.site { border-top: 3px solid var(--ink); background: var(--surface); padding: 22px 0 38px; color: var(--muted); font-size: 13px; }
+footer.site {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 40;
+  border-top: 3px solid var(--ink);
+  background: rgba(255, 248, 236, .97); backdrop-filter: blur(6px);
+  padding: 8px 0;
+}
+.foot-line {
+  text-align: center; font-size: 12.5px; font-weight: 600;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
 
 #toast {
   position: fixed; right: 20px; bottom: 20px;
