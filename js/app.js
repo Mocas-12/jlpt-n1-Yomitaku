@@ -550,8 +550,6 @@
       if (!b) return;
       curFilter = b.getAttribute('data-f');
       renderSetList();
-      var cards = document.getElementById('set-cards');
-      if (cards && cards.scrollIntoView) cards.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     });
     initBankUI();
     route();
