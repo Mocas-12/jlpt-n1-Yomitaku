@@ -75,7 +75,7 @@ flowchart LR
 
 > **Honesty first**: JLPT past papers come only from the official source, and every reputable commercial question bank (新完全マスター etc.) is a copyrighted book — no third party may republish them.
 
-- ✅ **Built-in question bank**: 9 sets / 18 questions covering all six question types — **original mock questions** written against the official "test goals of each large question" (word count, ability points, question style), with each set clearly labeled "not a past paper"
+- ✅ **Built-in question bank**: 18 sets / 35 questions covering all six question types — **original mock questions** written against the official "test goals of each large question" (word count, ability points, question style), with each set clearly labeled "not a past paper"
 - 📖 **Reputable textbook guide**: the "Question Bank Notes & Management" page provides a comparison table for 新完全マスター / 日本語総合攻略 / ドリル&ドリル / the official workbook; transcribe your purchased books and import them to train here
 - 🔗 **Official resource links**: question structure, the large-question test-goals PDF, score-band and scaled-score announcements, official free sample PDFs
 - 🚫 This project **does not contain or distribute** any copyrighted question text
