@@ -7,7 +7,7 @@
 <link rel="icon" type="image/svg+xml" href="public/logo.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Noto+Serif+JP:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;800&family=Noto+Serif+JP:wght@400;600&family=ZCOOL+QingKe+HuangYou&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -30,6 +30,8 @@
   <!-- ================= 概览 ================= -->
   <section class="page" id="page-home">
     <div class="hero">
+      <span class="sticker">読解の極意、ここにあり！</span>
+      <span class="sticker sticker-2">毎日10分、メキメキ上がる</span>
       <p class="eyebrow">読解６割を取れば、合格は見えてくる</p>
       <h1>JLPT N1 <em>読解</em> 特訓</h1>
       <p class="lead">按官方六大题型整理快速解题技巧，配「计时训练 → 逐项解析 → 错题重练」的闭环。内置一套按官方出题目标编写的原创模拟题库（明确标注非真题），也支持导入你自己的题库；练习数据只保存在你的浏览器里。</p>
@@ -115,7 +117,7 @@
 
     <h2 style="font-size:20px;margin:26px 0 12px">四、分题型打法（問題7〜12）</h2>
     <div class="grid cols-2">
-      <div class="card typecard">
+      <div class="card typecard" data-label="時間勝負！">
         <h3>問題7 内容理解（短篇）<span class="badge gray">4问 · 每问≤90秒</span></h3>
         <ol class="flow">
           <li>先看设问动词：问「言いたいこと」还是「合っているもの」，读法完全不同。</li>
@@ -125,7 +127,7 @@
         </ol>
         <p class="kv"><b>考点标签：</b>主旨把握 · 内容一致</p>
       </div>
-      <div class="card typecard">
+      <div class="card typecard" data-label="頻出ポイント！">
         <h3>問題8 内容理解（中篇）<span class="badge gray">6问 · 每篇4〜5分</span></h3>
         <ol class="flow">
           <li>先读该篇的两个设问，记住关键词。</li>
@@ -135,7 +137,7 @@
         </ol>
         <p class="kv"><b>考点标签：</b>划线句含义 · 理由说明 · 内容一致</p>
       </div>
-      <div class="card typecard">
+      <div class="card typecard" data-label="削って読む！">
         <h3>問題9 内容理解（长篇）<span class="badge gray">4问 · 每篇8〜10分</span></h3>
         <ol class="flow">
           <li>先把 4 个设问全读一遍并排序：指示语题→划线题→细节题→全文题。</li>
@@ -145,7 +147,7 @@
         </ol>
         <p class="kv"><b>考点标签：</b>指示语 · 划线句 · 内容一致</p>
       </div>
-      <div class="card typecard">
+      <div class="card typecard" data-label="比較せよ！">
         <h3>問題10 統合理解<span class="badge gray">2问 · 每组5〜6分</span></h3>
         <ol class="flow">
           <li>先读设问（通常一问共通点、一问对立点）。</li>
@@ -155,7 +157,7 @@
         </ol>
         <p class="kv"><b>考点标签：</b>共通点 · 相違点</p>
       </div>
-      <div class="card typecard">
+      <div class="card typecard" data-label="主張を見抜け！">
         <h3>問題11 主張理解（长篇）<span class="badge gray">3问 · 每篇8〜10分</span></h3>
         <ol class="flow">
           <li>议论文节奏固定：<b>现象→让步→反驳→主张</b>，反驳处（しかし 后）画竖线。</li>
@@ -165,7 +167,7 @@
         </ol>
         <p class="kv"><b>考点标签：</b>主旨把握 · 理由说明 · 意见一致</p>
       </div>
-      <div class="card typecard">
+      <div class="card typecard" data-label="確実に取れ！">
         <h3>問題12 情報検索<span class="badge gray">2问 · 每问≤2分</span></h3>
         <ol class="flow">
           <li>这是全卷<b>性价比最高</b>的题型：不读全文，先读设问里的条件（身份、时间、可/不可）。</li>
@@ -341,7 +343,7 @@
   <div class="wrap">Yomitaku — 本页面为静态工具，不保存任何试题原文；练习记录仅存于本机浏览器。试题版权归 日本国際交流基金会／日本国際教育支援協会 所有。</div>
 </footer>
 
-<div id="toast" style="position:fixed;right:20px;bottom:20px;background:#fff;border:1.5px solid var(--ok);border-radius:10px;padding:10px 18px;font-size:14px;box-shadow:0 4px 16px rgba(0,0,0,.08);opacity:0;pointer-events:none;transition:opacity .25s;z-index:99"></div>
+<div id="toast"></div>
 
 <script src="js/bank.js"></script>
 <script src="js/app.js"></script>

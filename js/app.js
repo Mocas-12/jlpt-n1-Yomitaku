@@ -153,9 +153,6 @@
       chips += '<button class="fbtn' + (curFilter === k ? ' on' : '') + '" data-f="' + k + '">' + typeInfo(k).label + '（' + n + '）</button>';
     });
     document.getElementById('filterbar').innerHTML = chips;
-    document.querySelectorAll('#filterbar .fbtn').forEach(function (b) {
-      b.onclick = function () { curFilter = b.getAttribute('data-f'); renderSetList(); };
-    });
 
     if (!sets.length) {
       document.getElementById('set-cards').innerHTML =
@@ -546,6 +543,15 @@
     document.getElementById('btn-back-top').onclick = function () { backToList(); };
     document.getElementById('sig-toggle').addEventListener('change', function () {
       if (session) renderSession();
+    });
+    // 筛选按钮：事件委托，innerHTML 重建后依然有效
+    document.getElementById('filterbar').addEventListener('click', function (e) {
+      var b = e.target.closest ? e.target.closest('.fbtn') : null;
+      if (!b) return;
+      curFilter = b.getAttribute('data-f');
+      renderSetList();
+      var cards = document.getElementById('set-cards');
+      if (cards && cards.scrollIntoView) cards.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     });
     initBankUI();
     route();
