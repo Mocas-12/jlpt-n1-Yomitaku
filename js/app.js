@@ -165,6 +165,7 @@
 
     var cards = '';
     sets.forEach(function (s) {
+      if (curFilter !== 'all' && s.typeKey !== curFilter) return;
       var t = typeInfo(s.typeKey);
       var best = '';
       (d.history || []).forEach(function (r) { if (r.setId === s.id) best = '最好成绩 ' + r.c + '/' + r.t; });
