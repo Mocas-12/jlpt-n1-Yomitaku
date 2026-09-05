@@ -6,9 +6,12 @@
 
 **简洁而硬核的 JLPT N1 読解专项训练页 —— 技巧、计时、解析、错题本，一个静态页面全搞定**
 
-![Vanilla JavaScript](https://img.shields.io/badge/JavaScript-Vanilla-F7DF1E?logo=javascript&logoColor=black)
+[![GitHub Pages](https://img.shields.io/badge/GitHub_Pages-Live-222?logo=githubpages&logoColor=white)](https://mocas-12.github.io/jlpt-n1-Yomitaku/)
+[![JavaScript](https://img.shields.io/badge/JavaScript-Vanilla-F7DF1E?logo=javascript&logoColor=black)](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript)
 ![静态站点](https://img.shields.io/badge/部署-纯静态零依赖-39538C)
 ![本地存储](https://img.shields.io/badge/数据-仅存本机浏览器-2E7D5B)
+
+**[🌐 在线体验（GitHub Pages）](https://mocas-12.github.io/jlpt-n1-Yomitaku/)**
 
 *打开页面 → 学技巧 → 计时训练 → 逐项解析 → 错题重练*
 

@@ -6,9 +6,12 @@
 
 **A lean, hardcore JLPT N1 読解 (reading-comprehension) trainer — techniques, timed practice, per-option explanations and a mistake notebook, all in one static page**
 
-![Vanilla JavaScript](https://img.shields.io/badge/JavaScript-Vanilla-F7DF1E?logo=javascript&logoColor=black)
+[![GitHub Pages](https://img.shields.io/badge/GitHub_Pages-Live-222?logo=githubpages&logoColor=white)](https://mocas-12.github.io/jlpt-n1-Yomitaku/)
+[![JavaScript](https://img.shields.io/badge/JavaScript-Vanilla-F7DF1E?logo=javascript&logoColor=black)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
 ![Static Site](https://img.shields.io/badge/Deploy-Pure_static_zero_dependencies-39538C)
 ![Local Storage](https://img.shields.io/badge/Data-Stored_only_in_your_browser-2E7D5B)
+
+**[🌐 Live Preview (GitHub Pages)](https://mocas-12.github.io/jlpt-n1-Yomitaku/)**
 
 *Open the page → learn the techniques → timed practice → per-option explanations → re-drill your mistakes*
 
