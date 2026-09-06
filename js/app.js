@@ -15,12 +15,18 @@
     try { return JSON.parse(localStorage.getItem(LS_KEY)) || {}; }
     catch (e) { return {}; }
   }
-  function save(d) { localStorage.setItem(LS_KEY, JSON.stringify(d)); }
+  function save(d) {
+    try { localStorage.setItem(LS_KEY, JSON.stringify(d)); }
+    catch (e) { toast('保存失败：浏览器本地存储不可用或已满', false); }
+  }
   function customSets() {
     try { return JSON.parse(localStorage.getItem(LS_CUSTOM)) || []; }
     catch (e) { return []; }
   }
-  function saveCustom(list) { localStorage.setItem(LS_CUSTOM, JSON.stringify(list)); }
+  function saveCustom(list) {
+    try { localStorage.setItem(LS_CUSTOM, JSON.stringify(list)); }
+    catch (e) { toast('保存失败：浏览器本地存储不可用或已满', false); }
+  }
 
   /* ---------- helpers ---------- */
   function esc(s) {
@@ -28,8 +34,8 @@
   }
   function typeInfo(key) {
     var m = { tanbun: '内容理解（短文）·問題7', chubun: '内容理解（中文）·問題8', chobun: '内容理解（长篇）·問題9', togo: '統合理解·問題10', shucho: '主張理解（长篇）·問題11', joho: '情報検索·問題12' };
-    var names = { tanbun: '内容理解（短文）', chubun: '内容理解（中文）', chobun: '内容理解（长篇）', togo: '統合理解', shucho: '主張理解（长篇）', joho: '情報検索' };
-    return { key: key, label: names[key] || key, no: (m[key] || '').split('·')[1] || '' };
+    var p = (m[key] || key).split('·');
+    return { key: key, label: p[0], no: p[1] || '' };
   }
   function allSets() {
     var list = (typeof BANK !== 'undefined' && BANK ? BANK.slice() : []).concat(customSets());
@@ -47,8 +53,7 @@
   }
   function fmt(sec) {
     sec = Math.max(0, sec | 0);
-    var m = Math.floor(sec / 60), s = sec % 60;
-    return (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
+    return pad2(Math.floor(sec / 60)) + ':' + pad2(sec % 60);
   }
   function pad2(n) { return (n < 10 ? '0' : '') + n; }
   function fmtDate(ts) {
@@ -163,15 +168,16 @@
       return;
     }
 
+    var customs = customSets();
     var cards = '';
     sets.forEach(function (s) {
       if (curFilter !== 'all' && s.typeKey !== curFilter) return;
       var t = typeInfo(s.typeKey);
-      var best = '';
-      (d.history || []).forEach(function (r) { if (r.setId === s.id) best = '最好成绩 ' + r.c + '/' + r.t; });
+      var best = '', bc = -1;
+      (d.history || []).forEach(function (r) { if (r.setId === s.id && r.c > bc) { bc = r.c; best = '最好成绩 ' + r.c + '/' + r.t; } });
       var wn = 0;
       if (d.wrong) Object.keys(d.wrong).forEach(function (qid) { if (qid.indexOf(s.id + ':') === 0) wn++; });
-      var isCustom = customSets().some(function (c) { return c.id === s.id; });
+      var isCustom = customs.some(function (c) { return c.id === s.id; });
       cards += '<div class="card setcard" data-id="' + esc(s.id) + '">' +
         '<h3>' + esc(s.title) + '</h3>' +
         '<div class="meta"><span class="badge">' + t.label + '</span>' +
@@ -228,12 +234,15 @@
     if (!d.wrong || !Object.keys(d.wrong).length) return;
     var bySet = {};
     Object.keys(d.wrong).forEach(function (qid) {
-      var p = qid.split(':');
-      (bySet[p[0]] = bySet[p[0]] || []).push(parseInt(p[1], 10));
+      var i = qid.lastIndexOf(':');
+      var sid = qid.slice(0, i);
+      (bySet[sid] = bySet[sid] || []).push(parseInt(qid.slice(i + 1), 10));
     });
     var groups = Object.keys(bySet).map(function (sid) {
       var s = setById(sid);
-      return s ? { set: s, qidx: bySet[sid].sort(function (a, b) { return a - b; }) } : null;
+      if (!s) return null;
+      var qidx = bySet[sid].filter(function (qi) { return qi < s.questions.length; });
+      return qidx.length ? { set: s, qidx: qidx.sort(function (a, b) { return a - b; }) } : null;
     }).filter(Boolean);
     if (!groups.length) { toast('错题对应的题组已不存在，建议清空错题本', false); return; }
     stopTimer();
@@ -299,8 +308,9 @@
       });
     });
     document.getElementById('session-body').innerHTML = body;
+    var cur = session.mode === 'wrong' ? null : setById(session.setId);
     document.getElementById('session-head-title').textContent =
-      session.mode === 'wrong' ? '错题重练（' + session.groups.reduce(function (n, g) { return n + g.qidx.length; }, 0) + ' 题）' : setById(session.setId).title;
+      session.mode === 'wrong' ? '错题重练（' + session.groups.reduce(function (n, g) { return n + g.qidx.length; }, 0) + ' 题）' : (cur ? cur.title : session.groups[0].set.title);
 
     if (!session.submitted) {
       document.querySelectorAll('#session-body .opt').forEach(function (el) {
@@ -308,7 +318,7 @@
           if (session.submitted) return;
           var key = el.getAttribute('data-key'), oi = parseInt(el.getAttribute('data-oi'), 10);
           session.answers[key] = oi;
-          Array.prototype.forEach.call(el.parentElement.children, function (c) { c.classList.remove('sel'); });
+          Array.from(el.parentElement.children).forEach(function (c) { c.classList.remove('sel'); });
           el.classList.add('sel');
           updateSubmitCount();
         };

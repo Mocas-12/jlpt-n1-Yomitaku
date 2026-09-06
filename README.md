@@ -53,7 +53,7 @@
 | Reading area | Mincho typeface (Noto Serif JP) with double line height and justified alignment, close to exam-paper typesetting |
 | Type badges | Blue question-type tags + gray big-question numbers + source badges (original/imported at a glance) |
 | Option states | Hover outline → selected indigo → correct green / wrong vermilion; explanation boxes guided by a left vertical rule |
-| Signal-word highlighting | 22 categories of logical signal words (しかし・つまり・一方 etc.) highlighted with one click |
+| Signal-word highlighting | 23 categories of logical signal words (しかし・つまり・一方 etc.) highlighted with one click |
 | Motion | Page fade-in, progress-bar transitions, toast notices; no heavy animation |
 
 ## 🧠 Training Loop

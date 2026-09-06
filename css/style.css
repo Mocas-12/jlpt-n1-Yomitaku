@@ -12,8 +12,6 @@
   --sky-soft: #e7f3ff;
   --ok: #1fae6e;
   --ok-soft: #e2f8ec;
-  --warn: #f08c00;
-  --warn-soft: #fff1d6;
   --serif: "Noto Serif JP", "Yu Mincho", "YuMincho", "Hiragino Mincho ProN", serif;
   --display: "ZCOOL QingKe HuangYou", "M PLUS Rounded 1c", "Microsoft YaHei", "PingFang SC", sans-serif;
   --sans: "M PLUS Rounded 1c", "Segoe UI", "Microsoft YaHei", "PingFang SC", "Noto Sans JP", "Yu Gothic", sans-serif;
@@ -147,7 +145,6 @@ h1, h2, h3 { font-family: var(--serif); line-height: 1.4; }
 .btn.sub { background: #f4efe3; color: var(--ink); }
 .btn.sub:hover { filter: none; }
 .btn.sm { padding: 4px 14px; font-size: 13.5px; border-radius: 9px; border-width: 2.5px; box-shadow: 3px 3px 0 var(--ink); }
-.btn:disabled { opacity: .45; cursor: not-allowed; }
 
 /* ---------- tables ---------- */
 table.tbl { width: 100%; border-collapse: collapse; font-size: 14.5px; }
@@ -185,12 +182,6 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14.5px; }
 .typecard ol.flow li::marker { color: var(--accent); font-weight: 700; }
 .kv { font-size: 13.5px; color: var(--muted); }
 .kv b { color: var(--ink); font-weight: 700; }
-.note {
-  background: var(--pop-soft); border: 2.5px solid var(--ink); border-radius: 12px;
-  box-shadow: 3px 3px 0 var(--ink);
-  padding: 10px 14px; font-size: 13.5px; margin-top: 12px;
-}
-.note b { color: var(--warn); }
 
 /* ---------- practice list ---------- */
 .filterbar { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 22px; }
@@ -280,15 +271,6 @@ mark.uline { background: none; color: inherit; border-bottom: 3px solid var(--ac
 .explain li b { font-family: var(--serif); }
 .explain li .why { color: var(--muted); }
 
-.resultbar {
-  display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
-  background: var(--surface); border: 3px solid var(--ink); border-radius: 12px;
-  box-shadow: 4px 4px 0 var(--ink);
-  padding: 14px 20px; margin: 20px 0;
-}
-.resultbar .big { font-family: var(--display); font-size: 24px; }
-.resultbar .big.good { color: var(--ok); }
-.resultbar .big.bad { color: var(--accent); }
 .big.good { color: var(--ok); }
 .big.bad { color: var(--accent); }
 .actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 24px; }
