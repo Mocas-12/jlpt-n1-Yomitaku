@@ -188,3 +188,107 @@ test('数据养护：history 上限 200 条，失效错题自动清理', async (
   expect(d.history.length).toBe(200);
   expect(d.wrong['no-such-set:0']).toBeUndefined();
 });
+
+test('安全：sourceUrl 仅允许 http(s)，渲染侧兜底旧数据', async ({ page }) => {
+  await page.goto('/#bank');
+  const bad = [{
+    id: 'bad-url', typeKey: 'tanbun', title: '坏链接', minutes: 2, passage: '正文',
+    source: '来源', sourceUrl: 'javascript:alert(1)',
+    questions: [{ q: '设问？', options: ['①', '②', '③', '④'], answer: 0 }],
+  }];
+  await page.fill('#bank-import-text', JSON.stringify(bad));
+  await page.click('#btn-import');
+  await expect(page.locator('#toast')).toContainText('sourceUrl');
+  await expect(page.locator('#bank-count')).toContainText(`${ALL_SETS} 组题`);
+
+  // 渲染侧兜底：绕过校验的遗留数据（如旧版导入）里 javascript: 链接替换为 #bank
+  await page.evaluate(() => {
+    const list = JSON.parse(localStorage.getItem('yt_custom_sets_v1') || '[]');
+    list.push({
+      id: 'legacy-url', typeKey: 'tanbun', title: '旧数据坏链接', minutes: 2, source: '来源', sourceUrl: 'javascript:alert(1)',
+      passage: '正文', questions: [{ q: '设问？', options: ['①', '②', '③', '④'], answer: 0 }],
+    });
+    localStorage.setItem('yt_custom_sets_v1', JSON.stringify(list));
+  });
+  await page.goto('/#practice');
+  const badge = page.locator('#set-cards .setcard', { hasText: '旧数据坏链接' }).locator('a.badge').first();
+  await expect(badge).toHaveAttribute('href', '#bank');
+});
+
+test('错题本闭环：收录 → 重练答对移出 → 单条删除与清空', async ({ page }) => {
+  page.on('dialog', (d) => d.accept());
+
+  // 制造错题：第一组全部选①（正解分布在其他选项，必产生错题）
+  const answerAll = async () => {
+    await page.locator('#set-cards .setcard h3').first().click();
+    await expect(page.locator('#session-view')).toBeVisible();
+    const n = await page.locator('#session-body .qblock').count();
+    for (let i = 0; i < n; i++) {
+      await page.locator('#session-body .qblock').nth(i).locator('.opt').first().click();
+    }
+    await page.click('#btn-submit');
+    await expect(page.locator('#session-result')).toContainText(/\d+\s*\/\s*\d+/);
+  };
+  await page.goto('/#practice');
+  await answerAll();
+  const wrongCount = await page.evaluate(() => Object.keys(JSON.parse(localStorage.getItem('yt_n1_dokkai_v1')).wrong).length);
+  expect(wrongCount).toBeGreaterThan(0);
+
+  // 错题本收录
+  await page.click('nav.tabs a[data-page="review"]');
+  await expect(page.locator('#btn-wrong-session')).toBeVisible();
+  await expect(page.locator('#review-body .wrongitem')).toHaveCount(wrongCount);
+
+  // 重练全部错题：按正解作答（BANK 全局可读到答案）
+  await page.click('#btn-wrong-session');
+  await expect(page.locator('#page-practice.on')).toBeVisible(); // 回归看守：必须从错题本页切到训练页
+  await expect(page.locator('#session-head-title')).toContainText('错题重练');
+  const plan = await page.evaluate(() => {
+    const d = JSON.parse(localStorage.getItem('yt_n1_dokkai_v1'));
+    const bySet = {};
+    Object.keys(d.wrong).forEach((k) => {
+      const i = k.lastIndexOf(':');
+      const sid = k.slice(0, i);
+      (bySet[sid] = bySet[sid] || []).push(parseInt(k.slice(i + 1), 10));
+    });
+    return Object.keys(bySet).flatMap((sid) => {
+      const s = BANK.find((x) => x.id === sid);
+      return bySet[sid].sort((a, b) => a - b).map((qi) => s.questions[qi].answer);
+    });
+  });
+  const qn = await page.locator('#session-body .qblock').count();
+  expect(qn).toBe(plan.length);
+  for (let i = 0; i < qn; i++) {
+    await page.locator('#session-body .qblock').nth(i).locator('.opt').nth(plan[i]).click();
+  }
+  await page.click('#btn-submit');
+  await expect(page.locator('#session-result')).toContainText(/^\d+\/\d+/);
+
+  // 答对自动移出：错题本应为空
+  await page.click('nav.tabs a[data-page="review"]');
+  await expect(page.locator('#review-body .empty')).toBeVisible();
+  await expect(page.locator('#btn-wrong-session')).toBeHidden();
+
+  // 再造错题（前三组全部选①），测单条删除与清空错题本
+  await page.click('nav.tabs a[data-page="practice"]');
+  await page.click('#btn-back'); // 上次提交的会话视图还在，先回到组列表
+  for (const idx of [0, 1, 2]) {
+    await page.locator('#set-cards .setcard h3').nth(idx).click();
+    await expect(page.locator('#session-view')).toBeVisible();
+    const n = await page.locator('#session-body .qblock').count();
+    for (let i = 0; i < n; i++) {
+      await page.locator('#session-body .qblock').nth(i).locator('.opt').first().click();
+    }
+    await page.click('#btn-submit');
+    if (idx < 2) await page.click('#btn-back'); // 回列表再开下一组
+  }
+  const wrongCount2 = await page.evaluate(() => Object.keys(JSON.parse(localStorage.getItem('yt_n1_dokkai_v1')).wrong).length);
+  expect(wrongCount2).toBeGreaterThanOrEqual(2);
+  await page.click('nav.tabs a[data-page="review"]');
+  await expect(page.locator('#review-body .wrongitem')).toHaveCount(wrongCount2); // 自动等待渲染完成
+  await page.locator('#review-body [data-del]').first().click();
+  await expect(page.locator('#review-body .wrongitem')).toHaveCount(wrongCount2 - 1);
+  await expect(page.locator('#btn-clear-wrong')).toBeVisible();
+  await page.click('#btn-clear-wrong');
+  await expect(page.locator('#review-body .empty')).toBeVisible();
+});

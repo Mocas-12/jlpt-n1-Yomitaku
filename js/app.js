@@ -47,6 +47,11 @@
   function esc(s) {
     return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\"/g, '&quot;');
   }
+  /* 渲染侧兜底：来源链接只放行 http(s)，其余回落站内锚点（含旧导入数据里的 javascript: 等） */
+  function safeUrl(u) {
+    var s = String(u == null ? '' : u);
+    return /^https?:\/\//i.test(s) ? esc(s) : '#bank';
+  }
   function typeInfo(key) {
     var m = { tanbun: '内容理解（短文）·問題7', chubun: '内容理解（中文）·問題8', chobun: '内容理解（长篇）·問題9', togo: '統合理解·問題10', shucho: '主張理解（长篇）·問題11', joho: '情報検索·問題12' };
     var p = (m[key] || key).split('·');
@@ -212,7 +217,7 @@
       cards += '<div class="card setcard" data-id="' + esc(s.id) + '">' +
         '<h3>' + esc(s.title) + '</h3>' +
         '<div class="meta"><span class="badge">' + t.label + '</span>' +
-        (s.source ? '<a class="badge gray" ' + (s.sourceUrl ? 'href="' + esc(s.sourceUrl) + '" target="_blank" rel="noopener"' : '') + ' onclick="event.stopPropagation()">来源：' + esc(s.source) + '</a>' : '<span class="badge gray">' + (isCustom ? '自定义导入' : t.no) + '</span>') +
+        (s.source ? '<a class="badge gray" ' + (s.sourceUrl ? 'href="' + safeUrl(s.sourceUrl) + '" target="_blank" rel="noopener"' : '') + ' onclick="event.stopPropagation()">来源：' + esc(s.source) + '</a>' : '<span class="badge gray">' + (isCustom ? '自定义导入' : t.no) + '</span>') +
         '<span class="badge gray">' + s.questions.length + ' 问 · 建议 ' + (s.minutes || 3) + ' 分钟</span>' +
         (wn ? '<span class="badge red">错题 ' + wn + '</span>' : '') +
         '</div>' + (best ? '<div class="best">' + best + '</div>' : '') +
@@ -278,8 +283,13 @@
     if (!groups.length) { toast('错题对应的题组已不存在，建议清空错题本', false); return; }
     stopTimer();
     session = { mode: 'wrong', groups: groups, answers: {}, submitted: false, startTs: Date.now(), budgetSec: 0 };
-    renderSession();
-    showSessionView();
+    /* 会话渲染在训练页容器里：若当前在别的路由（如错题本页），需切到 #practice 才可见 */
+    if (location.hash !== '#practice') {
+      location.hash = '#practice'; // hashchange → route() 渲染
+    } else {
+      renderSession();
+      showSessionView();
+    }
     startTimer();
   }
 
@@ -290,7 +300,7 @@
       var s = g.set, t = typeInfo(s.typeKey);
       body += '<div class="card" style="padding:14px 18px"><h3 style="margin:0;font-size:16px">' + esc(s.title) +
         ' <span class="badge" style="margin-left:8px">' + t.label + '</span>' +
-        (s.source ? ' <a class="badge gray" style="margin-left:6px" href="' + esc(s.sourceUrl || '#bank') + '" target="_blank" rel="noopener">来源：' + esc(s.source) + '</a>' : '') +
+        (s.source ? ' <a class="badge gray" style="margin-left:6px" href="' + safeUrl(s.sourceUrl) + '" target="_blank" rel="noopener">来源：' + esc(s.source) + '</a>' : '') +
         '</h3></div>';
       var phtml = '<div class="passage">';
       if (s.passageA) {
@@ -506,6 +516,7 @@
       if (!s.id) throw new Error(at + '：缺少 id');
       if (TYPE_KEYS.indexOf(s.typeKey) < 0) throw new Error(at + '：typeKey 必须是 ' + TYPE_KEYS.join(' / '));
       if (!s.title) throw new Error(at + '：缺少 title');
+      if (s.sourceUrl && !/^https?:\/\//i.test(s.sourceUrl)) throw new Error(at + '：sourceUrl 必须以 http(s) 开头');
       if (!(s.passage || (s.passageA && s.passageB))) throw new Error(at + '：缺少 passage（统合理解用 passageA/passageB）');
       if (!Array.isArray(s.questions) || !s.questions.length) throw new Error(at + '：questions 不能为空');
       s.questions.forEach(function (q, j) {

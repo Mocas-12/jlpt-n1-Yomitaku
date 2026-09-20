@@ -72,7 +72,7 @@ body {
   font-family: var(--sans);
   font-size: 16px;
   line-height: 1.75;
-  padding-bottom: 56px; /* 固定页脚的让位 */
+  padding-bottom: calc(56px + env(safe-area-inset-bottom)); /* 固定页脚的让位（含 iOS 底部安全区） */
   -webkit-font-smoothing: antialiased;
 }
 ::selection { background: var(--pop); color: var(--on-pop); }
@@ -370,7 +370,7 @@ footer.site {
   position: fixed; left: 0; right: 0; bottom: 0; z-index: 40;
   border-top: 3px solid var(--ink);
   background: var(--bg-glass); backdrop-filter: blur(6px);
-  padding: 8px 0;
+  padding: 8px 0 calc(8px + env(safe-area-inset-bottom));
 }
 .foot-line {
   text-align: center; font-size: 12.5px; font-weight: 600;
@@ -378,7 +378,7 @@ footer.site {
 }
 
 #toast {
-  position: fixed; right: 20px; bottom: 20px;
+  position: fixed; right: 20px; bottom: calc(20px + env(safe-area-inset-bottom));
   background: var(--surface); border: 3px solid var(--ink); border-radius: 12px;
   box-shadow: 5px 5px 0 var(--shadow);
   padding: 10px 18px; font-size: 14px; font-weight: 700;
