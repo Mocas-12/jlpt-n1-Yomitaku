@@ -22,8 +22,27 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  # 冒烟测试：核心链路（筛选/作答/提交/导入校验）通过后才允许部署
+  test:
+    name: Smoke test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install dependencies
+        run: npm ci
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Run smoke tests
+        run: npx playwright test
+
   # Single deploy job since we're just deploying
   deploy:
+    needs: test
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}

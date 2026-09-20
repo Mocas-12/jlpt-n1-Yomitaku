@@ -1,0 +1,12 @@
+{
+  "name": "jlpt-n1-yomitaku",
+  "version": "1.0.0",
+  "private": true,
+  "description": "JLPT N1 読解特訓 · Yomitaku（站点本体零依赖；本文件仅用于开发期冒烟测试）",
+  "scripts": {
+    "test": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.48.0"
+  }
+}

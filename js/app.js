@@ -173,8 +173,12 @@
     sets.forEach(function (s) {
       if (curFilter !== 'all' && s.typeKey !== curFilter) return;
       var t = typeInfo(s.typeKey);
-      var best = '', bc = -1;
-      (d.history || []).forEach(function (r) { if (r.setId === s.id && r.c > bc) { bc = r.c; best = '最好成绩 ' + r.c + '/' + r.t; } });
+      var bestRec = null;
+      (d.history || []).forEach(function (r) {
+        if (r.setId !== s.id || !r.t) return;
+        if (!bestRec || r.c / r.t > bestRec.c / bestRec.t) bestRec = r;
+      });
+      var best = bestRec ? '最好成绩 ' + bestRec.c + '/' + bestRec.t : '';
       var wn = 0;
       if (d.wrong) Object.keys(d.wrong).forEach(function (qid) { if (qid.indexOf(s.id + ':') === 0) wn++; });
       var isCustom = customs.some(function (c) { return c.id === s.id; });
@@ -348,6 +352,8 @@
 
   function submitSession() {
     if (session.submitted) return;
+    var unanswered = session.groups.reduce(function (n, g) { return n + g.qidx.length; }, 0) - Object.keys(session.answers).length;
+    if (unanswered > 0 && !confirm('还有 ' + unanswered + ' 题未作答，未作答的题将按错误记入错题本。确定提交吗？')) return;
     stopTimer();
     session.submitted = true;
     var sec = Math.floor((Date.now() - session.startTs) / 1000);
@@ -472,8 +478,9 @@
       if (!(s.passage || (s.passageA && s.passageB))) throw new Error(at + '：缺少 passage（统合理解用 passageA/passageB）');
       if (!Array.isArray(s.questions) || !s.questions.length) throw new Error(at + '：questions 不能为空');
       s.questions.forEach(function (q, j) {
+        if (!q.q || typeof q.q !== 'string') throw new Error(at + ' 第 ' + (j + 1) + ' 题：缺少 q（设问原文）');
         if (!Array.isArray(q.options) || q.options.length !== 4) throw new Error(at + ' 第 ' + (j + 1) + ' 题：options 必须是 4 个');
-        if (typeof q.answer !== 'number' || q.answer < 0 || q.answer > 3) throw new Error(at + ' 第 ' + (j + 1) + ' 题：answer 必须是 0-3');
+        if (typeof q.answer !== 'number' || q.answer < 0 || q.answer > 3 || q.answer % 1 !== 0) throw new Error(at + ' 第 ' + (j + 1) + ' 题：answer 必须是 0-3 的整数');
         if (q.explain && (!Array.isArray(q.explain) || q.explain.length !== 4)) throw new Error(at + ' 第 ' + (j + 1) + ' 题：explain 需与 options 等长（4 个），或留空');
       });
       if (seen[s.id]) throw new Error('存在重复 id：' + s.id);

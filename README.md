@@ -29,6 +29,7 @@
 - [Question Bank & Copyright](#-question-bank--copyright)
 - [Project Structure](#-project-structure)
 - [Quick Start](#-quick-start)
+- [Development](#-development)
 - [Question Bank JSON Format](#-question-bank-json-format)
 - [FAQ](#-faq)
 - [Privacy & Security](#-privacy--security)
@@ -113,6 +114,16 @@ python -m http.server 8123
 ```
 
 > No dependencies to install, nothing to build; a modern browser such as Chrome / Edge is recommended.
+
+## 🧪 Development
+
+The site itself stays zero-dependency; `package.json` exists only for dev-time smoke tests (Playwright, 4 cases: full filter → answer → submit loop, unanswered-submit confirm, import validation). CI runs them automatically before every deploy.
+
+```bash
+npm install
+npx playwright install chromium
+npm test
+```
 
 ## 📥 Question Bank JSON Format
 
