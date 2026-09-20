@@ -3,8 +3,12 @@
    - 其余同源资源：缓存优先。静态资源在 index.html 里带内容哈希 ?v=，更新后 URL 变化自然穿透缓存
    - 跨域请求（Google Fonts）不拦截，交给浏览器
    本文件逻辑有改动时，把 CACHE 版本号 +1 即可清空旧缓存 */
-var CACHE = 'yomitaku-v1';
-var PRECACHE = ['./', './index.html', './manifest.webmanifest', './public/logo.svg'];
+var CACHE = 'yomitaku-v2';
+/* 预缓存强制与服务器核对（no-cache），避免安装时拿到浏览器 HTTP 缓存里的旧页面。
+   注意用 ./ 相对路径：GitHub Pages 部署在 /jlpt-n1-Yomitaku/ 子路径下 */
+var PRECACHE = ['./', './index.html', './manifest.webmanifest', './public/logo.svg'].map(function (u) {
+  return new Request(u, { cache: 'no-cache' });
+});
 
 self.addEventListener('install', function (e) {
   e.waitUntil(
@@ -32,7 +36,9 @@ self.addEventListener('fetch', function (e) {
 
   if (req.mode === 'navigate' || url.pathname.endsWith('/index.html')) {
     e.respondWith(
-      fetch(req).then(function (res) {
+      /* no-cache：绕过浏览器 HTTP 缓存的新鲜期，联网时每次都与服务器核对，
+         否则 GitHub Pages 10 分钟的 max-age 内会当成"网络结果"返回旧页面 */
+      fetch(req, { cache: 'no-cache' }).then(function (res) {
         var copy = res.clone();
         caches.open(CACHE).then(function (c) { c.put(req, copy); });
         return res;
