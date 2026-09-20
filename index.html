@@ -30,7 +30,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;800&family=Noto+Serif+JP:wght@400;600&family=ZCOOL+QingKe+HuangYou&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=b71d86f6">
+<link rel="stylesheet" href="css/style.css?v=97808ecf">
 </head>
 <body>
 
@@ -223,9 +223,13 @@
   <section class="page" id="page-practice">
     <p class="eyebrow">Practice</p>
     <h1 class="page-title">专项训练</h1>
-    <p class="page-desc">选择一个题组开始：自动计时、逐选项解析、错题自动入本。题组来自内置原创模拟题库，以及你在<a href="#bank">真题·题库</a>页导入的题组。</p>
+    <p class="page-desc">选择一个题组开始：自动计时、逐选项解析、错题自动入本。题组来自内置原创模拟题库，以及你在<a href="#bank">真题·题库</a>页导入的题组；也可以随机混合抽题，或按官方大题构成一键组一套模拟卷。</p>
 
     <div id="set-list">
+      <div class="mixbar">
+        <button class="btn" id="btn-mix10">🎲 随机混合 10 问</button>
+        <button class="btn ghost" id="btn-mock">📝 模拟卷（官方構成 · 全局计时）</button>
+      </div>
       <div class="filterbar" id="filterbar"></div>
       <div class="grid cols-2" id="set-cards"></div>
     </div>
@@ -382,7 +386,7 @@
 <div id="toast"></div>
 
 <script src="js/bank.js?v=7694a7e7"></script>
-<script src="js/app.js?v=f3d3c764"></script>
+<script src="js/app.js?v=bea1f6aa"></script>
 <script>
 /* PWA：注册 Service Worker（file:// 直接打开时自动跳过） */
 if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === '127.0.0.1' || location.hostname === 'localhost')) {

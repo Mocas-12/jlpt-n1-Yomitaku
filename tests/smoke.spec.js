@@ -292,3 +292,66 @@ test('错题本闭环：收录 → 重练答对移出 → 单条删除与清空'
   await page.click('#btn-clear-wrong');
   await expect(page.locator('#review-body .empty')).toBeVisible();
 });
+
+test('随机混合 10 问：抽题计时、用时展示、旧分数不残留', async ({ page }) => {
+  await page.goto('/#practice');
+  await page.click('#btn-mix10');
+  await expect(page.locator('#session-view')).toBeVisible();
+  await expect(page.locator('#session-head-title')).toContainText('随机混合 10 问');
+  await expect(page.locator('#session-body .qblock')).toHaveCount(10);
+  await expect(page.locator('#timer')).toContainText('目标 15:00');
+
+  for (let i = 0; i < 10; i++) {
+    await page.locator('#session-body .qblock').nth(i).locator('.opt').nth(2).click();
+  }
+  await page.click('#btn-submit');
+  await expect(page.locator('#session-result')).toContainText(/\d+\s*\/\s*\d+/);
+  await expect(page.locator('#session-body .explain').first()).toContainText(/用时 \d+ 秒/);
+
+  // mix 与 set 同等对待：统计与历史都入账
+  const stats = await page.evaluate(() => JSON.parse(localStorage.getItem('yt_n1_dokkai_v1')).stats);
+  expect(Object.keys(stats).length).toBeGreaterThan(0);
+  await page.click('nav.tabs a[data-page="home"]');
+  await expect(page.locator('#home-stats')).toContainText('随机混合 10 问');
+
+  // 旧分数不残留：回列表再开一组，头部应为空
+  await page.click('nav.tabs a[data-page="practice"]');
+  await page.click('#btn-back');
+  await page.locator('#set-cards .setcard h3').first().click();
+  await expect(page.locator('#session-result')).toHaveText('');
+});
+
+test('模拟卷：官方構成组卷、全局计时、满分交卷', async ({ page }) => {
+  await page.goto('/#practice');
+  await page.click('#btn-mock');
+  await expect(page.locator('#session-head-title')).toContainText('模拟卷');
+  const qn = await page.locator('#session-body .qblock').count();
+  expect(qn).toBeGreaterThanOrEqual(18); // 蓝图抽题后 18~19 问（chobun 组 3 或 4 问）
+  expect(qn).toBeLessThanOrEqual(19);
+  await expect(page.locator('#timer')).toContainText('目标');
+
+  // 按 BANK 正解逐题作答
+  for (let i = 0; i < qn; i++) {
+    const key = await page.locator('#session-body .qblock').nth(i).locator('.opt').first().getAttribute('data-key');
+    const ans = await page.evaluate((k) => {
+      const c = k.lastIndexOf(':');
+      const sid = k.slice(0, c), qi = +k.slice(c + 1);
+      return BANK.find((s) => s.id === sid).questions[qi].answer;
+    }, key);
+    await page.locator('#session-body .qblock').nth(i).locator('.opt').nth(ans).click();
+  }
+  await page.click('#btn-submit');
+  await expect(page.locator('#session-result')).toContainText('（100%');
+  expect(await page.evaluate(() => Object.keys(JSON.parse(localStorage.getItem('yt_n1_dokkai_v1')).wrong).length)).toBe(0);
+});
+
+test('连续打卡：有练习记录后首页显示 streak', async ({ page }) => {
+  await page.goto('/#practice');
+  await page.click('#btn-mix10');
+  for (let i = 0; i < 10; i++) {
+    await page.locator('#session-body .qblock').nth(i).locator('.opt').first().click();
+  }
+  await page.click('#btn-submit');
+  await page.click('nav.tabs a[data-page="home"]');
+  await expect(page.locator('.streakline')).toContainText('连续打卡 1 天');
+});

@@ -44,6 +44,8 @@
 - 🔍 **Per-option explanations**: after submitting, the correct answer and your choice are marked, and every option gets a text location plus a trap classification — not just an answer key
 - 🔁 **Mistake-notebook loop**: wrong answers are collected automatically; "re-drill all mistakes" is supported and a correct answer removes the item; before the exam, drill only your mistakes
 - 📊 **Per-type stats**: accuracy progress bars per question type + practice history — weak points at a glance
+- 🎲 **Mixed drill & mock exam**: one tap to shuffle 10 random questions across all types, or assemble a full mock following the official 問題7〜12 blueprint with a global timer; per-question timing shows up in the explanations
+- 🔥 **Daily streak**: consecutive practice days derived from your history, shown on the overview
 - 📥 **Extensible question bank**: paste JSON / upload a file to import your own question sets (same ID auto-overwrites); export backup supported
 - 📴 **Installable & offline (PWA)**: web manifest + a minimal service worker — add to home screen and keep drilling with no network; SEO / Open-Graph social meta tags included
 - 🌓 **Dark mode**: follows the system preference with a one-click header toggle — the manga washi theme re-tuned for night reading
@@ -137,7 +139,7 @@ python -m http.server 8123
 
 ## 🧪 Development
 
-The site itself stays zero-dependency; `package.json` exists only for dev-time smoke tests (Playwright, 11 cases covering the full practice loop, unanswered-submit confirm, import validation, dark mode, keyboard answering, record backup, mistake-notebook re-drill, offline PWA and data housekeeping). CI runs them automatically before every deploy.
+The site itself stays zero-dependency; `package.json` exists only for dev-time smoke tests (Playwright, covering the full practice loop, mixed drill and mock exam, unanswered-submit confirm, import validation, dark mode, keyboard answering, record backup, mistake-notebook re-drill, offline PWA and data housekeeping). CI runs them automatically before every deploy.
 
 ```bash
 npm install

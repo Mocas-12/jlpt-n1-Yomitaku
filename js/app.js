@@ -10,6 +10,10 @@
   var SIG_RE = new RegExp('(' + SIG_WORDS.join('|') + ')', 'g');
   var LABELS = ['①', '②', '③', '④'];
   var TYPE_KEYS = ['tanbun', 'chubun', 'chobun', 'togo', 'shucho', 'joho'];
+  var MOCK_BLUEPRINT = [ // 模拟卷蓝图：按官方大题构成抽取题组（不足则全取）
+    { key: 'tanbun', sets: 4 }, { key: 'chubun', sets: 2 }, { key: 'chobun', sets: 1 },
+    { key: 'togo', sets: 1 }, { key: 'shucho', sets: 1 }, { key: 'joho', sets: 1 }
+  ];
 
   /* ---------- storage ---------- */
   function load() {
@@ -76,6 +80,27 @@
     return pad2(Math.floor(sec / 60)) + ':' + pad2(sec % 60);
   }
   function pad2(n) { return (n < 10 ? '0' : '') + n; }
+  function shuffle(arr) {
+    for (var i = arr.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var t = arr[i]; arr[i] = arr[j]; arr[j] = t;
+    }
+    return arr;
+  }
+  function calcStreak(history) { // 连续打卡天数：从练习历史推导，今天没练则从昨天起算
+    var days = {};
+    (history || []).forEach(function (r) { days[new Date(r.ts).toDateString()] = 1; });
+    var n = 0, d = new Date();
+    if (!days[d.toDateString()]) d.setDate(d.getDate() - 1);
+    while (days[d.toDateString()]) { n++; d.setDate(d.getDate() - 1); }
+    return n;
+  }
+  function markTime(key) { // 每题用时：与上一题作答时刻的间隔（首题从开考起算）
+    if (!session || session.qtimes[key] != null) return;
+    var now = Date.now();
+    session.qtimes[key] = Math.max(1, Math.round((now - (session.lastMark || session.startTs)) / 1000));
+    session.lastMark = now;
+  }
   function fmtDate(ts) {
     var d = new Date(ts);
     return d.getFullYear() + '/' + pad2(d.getMonth() + 1) + '/' + pad2(d.getDate()) + ' ' + pad2(d.getHours()) + ':' + pad2(d.getMinutes());
@@ -158,11 +183,13 @@
     }).join('');
     var wrongN = d.wrong ? Object.keys(d.wrong).length : 0;
     var bankN = allSets().length;
+    var streak = calcStreak(d.history);
     box.innerHTML =
       '<div class="grid cols-2">' +
       '<div class="card"><h3>按题型正确率</h3>' + rows +
       '<p style="margin-top:12px;font-size:13.5px;color:var(--muted)">当前题库：' + bankN + ' 组题（<a href="#bank">真题·题库</a>导入/管理）</p></div>' +
       '<div class="card"><h3>最近练习</h3>' +
+      (streak ? '<p class="streakline">🔥 连续打卡 <b>' + streak + '</b> 天</p>' : '') +
       (hist || '<div class="empty">还没有练习记录。内置题库已就绪，去<a href="#practice">专项训练</a>开始第一组吧。</div>') +
       (wrongN ? '<p style="margin-top:10px">错题本待消灭：<b style="color:var(--accent)">' + wrongN + '</b> 题 · <a href="#review">去看错题</a></p>' : '') +
       '</div></div>';
@@ -255,9 +282,9 @@
     if (!s) { toast('该题组不存在，可能已被删除', false); return; }
     stopTimer();
     session = {
-      mode: 'set', setId: setId,
+      mode: 'set', setId: setId, title: s.title, regen: null,
       groups: [{ set: s, qidx: s.questions.map(function (_, i) { return i; }) }],
-      answers: {}, submitted: false, startTs: Date.now(),
+      answers: {}, qtimes: {}, submitted: false, startTs: Date.now(),
       budgetSec: (s.minutes || 3) * 60
     };
     renderSession();
@@ -282,7 +309,8 @@
     }).filter(Boolean);
     if (!groups.length) { toast('错题对应的题组已不存在，建议清空错题本', false); return; }
     stopTimer();
-    session = { mode: 'wrong', groups: groups, answers: {}, submitted: false, startTs: Date.now(), budgetSec: 0 };
+    var totalW = groups.reduce(function (n, g) { return n + g.qidx.length; }, 0);
+    session = { mode: 'wrong', title: '错题重练（' + totalW + ' 题）', regen: null, groups: groups, answers: {}, qtimes: {}, submitted: false, startTs: Date.now(), budgetSec: 0 };
     /* 会话渲染在训练页容器里：若当前在别的路由（如错题本页），需切到 #practice 才可见 */
     if (location.hash !== '#practice') {
       location.hash = '#practice'; // hashchange → route() 渲染
@@ -293,9 +321,75 @@
     startTimer();
   }
 
+  /* 随机混合：从全部题组抽 N 问（同题组的题归并渲染，文章只出现一次） */
+  function startMixSession(count) {
+    var pool = [];
+    allSets().forEach(function (s) {
+      s.questions.forEach(function (_, qi) { pool.push({ set: s, qi: qi }); });
+    });
+    if (!pool.length) { toast('题库为空，无法抽题', false); return; }
+    shuffle(pool);
+    pool = pool.slice(0, Math.min(count || 10, pool.length));
+    var groups = [];
+    pool.forEach(function (p) {
+      var g = null;
+      for (var i = 0; i < groups.length; i++) if (groups[i].set.id === p.set.id) { g = groups[i]; break; }
+      if (g) g.qidx.push(p.qi); else groups.push({ set: p.set, qidx: [p.qi] });
+    });
+    stopTimer();
+    session = {
+      mode: 'mix', title: '随机混合 ' + pool.length + ' 问', regen: { kind: 'mix', count: count || 10 },
+      groups: groups, answers: {}, qtimes: {}, submitted: false, startTs: Date.now(),
+      budgetSec: pool.length * 90
+    };
+    renderSession();
+    showSessionView();
+    startTimer();
+  }
+
+  /* 模拟卷：按官方大题构成（問題7〜12）抽题组卷，全局计时 */
+  function startMockSession() {
+    var groups = [], budget = 0, total = 0;
+    MOCK_BLUEPRINT.forEach(function (bp) {
+      var pool = allSets().filter(function (s) { return s.typeKey === bp.key; });
+      shuffle(pool);
+      pool.slice(0, bp.sets).forEach(function (s) {
+        groups.push({ set: s, qidx: s.questions.map(function (_, i) { return i; }) });
+        budget += (s.minutes || 3) * 60;
+        total += s.questions.length;
+      });
+    });
+    if (!groups.length) { toast('题库为空，无法组卷', false); return; }
+    stopTimer();
+    session = {
+      mode: 'mock', title: '模拟卷 · ' + total + ' 问', regen: { kind: 'mock' },
+      groups: groups, answers: {}, qtimes: {}, submitted: false, startTs: Date.now(),
+      budgetSec: budget
+    };
+    renderSession();
+    showSessionView();
+    startTimer();
+  }
+
+  function redoSession() {
+    if (session.regen) {
+      session.regen.kind === 'mock' ? startMockSession() : startMixSession(session.regen.count);
+    } else if (session.mode === 'wrong') {
+      startWrongSession();
+    } else {
+      startSet(session.setId);
+    }
+  }
+
   function renderSession() {
+    if (!session.submitted) { // 新开/重做会话时清掉上一组的分数显示
+      var rb = document.getElementById('session-result');
+      rb.innerHTML = '';
+      rb.className = 'big';
+    }
     var sigOn = document.getElementById('sig-toggle').checked;
     var body = '';
+    var qnNo = 0; // 混合/模拟卷模式下按顺序重新编号
     session.groups.forEach(function (g) {
       var s = g.set, t = typeInfo(s.typeKey);
       body += '<div class="card" style="padding:14px 18px"><h3 style="margin:0;font-size:16px">' + esc(s.title) +
@@ -314,6 +408,7 @@
       g.qidx.forEach(function (qi) {
         var q = s.questions[qi];
         var key = s.id + ':' + qi;
+        var num = (session.mode === 'mix' || session.mode === 'mock') ? (++qnNo) : (qi + 1);
         var chosen = session.answers[key];
         var opts = '';
         q.options.forEach(function (op, oi) {
@@ -331,7 +426,8 @@
         if (session.submitted) {
           var ok = chosen === q.answer;
           var headTxt = ok ? '✓ 回答正确' : (chosen == null ? '－ 未作答' : '✗ 回答错误');
-          exp = '<div class="explain"><div class="head ' + (ok ? 'ok' : 'ng') + '">' + headTxt + (q.label ? '　<span class="badge gray">' + esc(q.label) + '</span>' : '') + '</div>';
+          var qt = session.qtimes ? session.qtimes[key] : null;
+          exp = '<div class="explain"><div class="head ' + (ok ? 'ok' : 'ng') + '">' + headTxt + (qt != null ? '<span class="qtime">用时 ' + qt + ' 秒</span>' : '') + (q.label ? '　<span class="badge gray">' + esc(q.label) + '</span>' : '') + '</div>';
           if (q.explain && q.explain.length) {
             exp += '<ul>' + q.explain.map(function (e, i) {
               var mark = i === q.answer ? '<b style="color:var(--ok)">［正解 ' + LABELS[i] + '］</b>' : '<b>［' + LABELS[i] + '］</b>';
@@ -344,14 +440,12 @@
           exp += '</div>';
         }
         body += '<div class="qblock">' +
-          '<p class="qstem"><span class="qnum">問' + (qi + 1) + '</span>' + esc(q.q) + '</p>' +
+          '<p class="qstem"><span class="qnum">問' + num + '</span>' + esc(q.q) + '</p>' +
           '<div class="opts">' + opts + '</div>' + exp + '</div>';
       });
     });
     document.getElementById('session-body').innerHTML = body;
-    var cur = session.mode === 'wrong' ? null : setById(session.setId);
-    document.getElementById('session-head-title').textContent =
-      session.mode === 'wrong' ? '错题重练（' + session.groups.reduce(function (n, g) { return n + g.qidx.length; }, 0) + ' 题）' : (cur ? cur.title : session.groups[0].set.title);
+    document.getElementById('session-head-title').textContent = session.title;
 
     if (!session.submitted) {
       document.querySelectorAll('#session-body .opt').forEach(function (el) {
@@ -359,6 +453,7 @@
           if (session.submitted) return;
           var key = el.getAttribute('data-key'), oi = parseInt(el.getAttribute('data-oi'), 10);
           session.answers[key] = oi;
+          markTime(key);
           Array.from(el.parentElement.children).forEach(function (c) { c.classList.remove('sel'); });
           el.classList.add('sel');
           updateSubmitCount();
@@ -376,9 +471,10 @@
       document.getElementById('btn-back').onclick = backToList;
       updateSubmitCount();
     } else {
-      acts.innerHTML = '<button class="btn" id="btn-redo">' + (session.mode === 'wrong' ? '再练一遍错题' : '重做这一组') + '</button>' +
+      var redoLabel = session.regen ? (session.regen.kind === 'mock' ? '再考一次（重新组卷）' : '再抽一组') : (session.mode === 'wrong' ? '再练一遍错题' : '重做这一组');
+      acts.innerHTML = '<button class="btn" id="btn-redo">' + redoLabel + '</button>' +
         '<button class="btn sub" id="btn-back">返回列表</button>';
-      document.getElementById('btn-redo').onclick = function () { session.mode === 'wrong' ? startWrongSession() : startSet(session.setId); };
+      document.getElementById('btn-redo').onclick = redoSession;
       document.getElementById('btn-back').onclick = backToList;
     }
     if (!session.submitted) markCurQ(false);
@@ -401,16 +497,17 @@
     d.stats = d.stats || {}; d.history = d.history || []; d.wrong = d.wrong || {};
 
     var totalQ = 0, c = 0;
+    var counted = session.mode !== 'wrong'; // set/mix/mock 都计入统计与历史，wrong 只记账错题
     session.groups.forEach(function (g) {
       var s = g.set, t = typeInfo(s.typeKey);
-      if (session.mode === 'set') d.stats[t.key] = d.stats[t.key] || { c: 0, t: 0 };
+      if (counted) d.stats[t.key] = d.stats[t.key] || { c: 0, t: 0 };
       g.qidx.forEach(function (qi) {
         var key = s.id + ':' + qi, q = s.questions[qi];
         var chosen = session.answers[key];
         var ok = chosen === q.answer;
         totalQ++;
         if (ok) c++;
-        if (session.mode === 'set') {
+        if (counted) {
           d.stats[t.key].t++;
           if (ok) d.stats[t.key].c++;
         }
@@ -418,8 +515,8 @@
         else d.wrong[key] = { setId: s.id, chosen: chosen, ts: Date.now() };
       });
     });
-    if (session.mode === 'set') {
-      d.history.unshift({ ts: Date.now(), setId: session.setId, title: session.groups[0].set.title, c: c, t: totalQ, seconds: sec });
+    if (counted) {
+      d.history.unshift({ ts: Date.now(), setId: session.setId || session.mode, title: session.title, c: c, t: totalQ, seconds: sec });
       d.history = d.history.slice(0, HISTORY_MAX);
     }
     save(d);
@@ -685,7 +782,9 @@
     if (idx < 0) return; // 全部答完，数字键不动作（可改选：点击该题后仍可用数字键重选）
     var flat = flatQuestions();
     var f = flat[idx];
-    session.answers[f.set.id + ':' + f.qi] = n - 1;
+    var key = f.set.id + ':' + f.qi;
+    session.answers[key] = n - 1;
+    markTime(key);
     var blocks = document.querySelectorAll('#session-body .qblock');
     Array.prototype.forEach.call(blocks[idx].querySelectorAll('.opt'), function (el, i) {
       el.classList.toggle('sel', i === n - 1);
@@ -700,6 +799,9 @@
   document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('btn-wrong-session').onclick = function () { startWrongSession(); };
     document.getElementById('btn-back-top').onclick = function () { backToList(); };
+    // 随机混合 / 模拟卷入口
+    document.getElementById('btn-mix10').onclick = function () { startMixSession(10); };
+    document.getElementById('btn-mock').onclick = function () { startMockSession(); };
     // 深色模式：头部按钮点击切换（初始 data-theme 已由 head 内联脚本定好）
     document.getElementById('theme-toggle').onclick = function () {
       var next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';

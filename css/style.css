@@ -240,6 +240,10 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14.5px; }
 .kv b { color: var(--ink); font-weight: 700; }
 
 /* ---------- practice list ---------- */
+.mixbar { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 20px; }
+.streakline { margin: 0 0 12px; font-size: 15px; font-weight: 700; }
+.streakline b { color: var(--accent); font-size: 19px; }
+.qtime { margin-left: 10px; font-size: 12px; font-weight: 600; color: var(--muted); }
 .filterbar { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 22px; }
 .fbtn {
   border: 2.5px solid var(--ink); background: var(--surface); color: var(--ink);
