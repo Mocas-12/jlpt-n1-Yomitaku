@@ -137,7 +137,7 @@ python -m http.server 8123
 
 ## 🧪 Development
 
-The site itself stays zero-dependency; `package.json` exists only for dev-time smoke tests (Playwright, 5 cases: full filter → answer → submit loop, unanswered-submit confirm, import validation, offline PWA access). CI runs them automatically before every deploy.
+The site itself stays zero-dependency; `package.json` exists only for dev-time smoke tests (Playwright, 11 cases covering the full practice loop, unanswered-submit confirm, import validation, dark mode, keyboard answering, record backup, mistake-notebook re-drill, offline PWA and data housekeeping). CI runs them automatically before every deploy.
 
 ```bash
 npm install
@@ -190,7 +190,7 @@ Past papers are copyrighted by the Japan Foundation / JEES; republishing them on
 <details>
 <summary><b>JSON import errors?</b></summary>
 
-The page reports the exact problem: the root element must be an array, `typeKey` must be one of the six values, each question's `options` must have exactly 4 items, `answer` must be 0–3, and `explain` (if provided) must match the length of `options`.
+The page reports the exact problem: the root element must be an array, `typeKey` must be one of the six values, `sourceUrl` (if provided) must start with http(s), every question needs a `q` stem, `options` must have exactly 4 items, `answer` must be an integer 0–3, and `explain` (if provided) must match the length of `options`.
 </details>
 
 <details>

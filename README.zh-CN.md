@@ -137,7 +137,7 @@ python -m http.server 8123
 
 ## 🧪 开发与测试
 
-站点本体保持零依赖；`package.json` 仅用于开发期冒烟测试（Playwright，5 条用例：筛选→作答→提交完整链路、未答完提交确认、导入校验正反例、PWA 离线访问）。CI 会在每次部署前自动跑一遍。
+站点本体保持零依赖；`package.json` 仅用于开发期冒烟测试（Playwright，11 条用例：训练完整链路、未答完提交确认、导入校验正反例、深色模式、键盘作答、记录备份、错题重练闭环、PWA 离线与数据养护）。CI 会在每次部署前自动跑一遍。
 
 ```bash
 npm install
@@ -190,7 +190,7 @@ npm test
 <details>
 <summary><b>导入 JSON 报错？</b></summary>
 
-页面会提示具体位置：根元素必须是数组、`typeKey` 必须是六个取值之一、每组 `options` 恰好 4 项、`answer` 为 0〜3、`explain` 若提供需与 `options` 等长。
+页面会提示具体位置：根元素必须是数组、`typeKey` 必须是六个取值之一、`sourceUrl` 若提供须以 http(s) 开头、每题必须有 `q`（设问原文）、`options` 恰好 4 项、`answer` 为 0〜3 的整数、`explain` 若提供需与 `options` 等长。
 </details>
 
 <details>
