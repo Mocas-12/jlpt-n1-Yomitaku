@@ -4,7 +4,9 @@
   "private": true,
   "description": "JLPT N1 読解特訓 · Yomitaku（站点本体零依赖；本文件仅用于开发期冒烟测试）",
   "scripts": {
-    "test": "playwright test"
+    "test": "playwright test",
+    "hash": "node scripts/version.mjs",
+    "assets": "node scripts/make-assets.mjs"
   },
   "devDependencies": {
     "@playwright/test": "^1.48.0"

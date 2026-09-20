@@ -50,6 +50,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Rewrite asset version params from content hash
+        run: node scripts/version.mjs
       - name: Setup Pages
         uses: actions/configure-pages@v5
       - name: Upload artifact

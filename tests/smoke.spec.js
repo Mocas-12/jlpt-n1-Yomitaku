@@ -4,6 +4,12 @@ import { test, expect } from '@playwright/test';
 const ALL_SETS = 18;   // bank.js 内置题组数
 const TANBUN = 6;      // 其中内容理解（短文）题组数
 
+test.beforeEach(async ({ context }) => {
+  // 拦截 Google Fonts：测试不验证排版，但 headless 下大体积 CJK 字体子集
+  // 可能触发重复加载死循环卡住 load 事件；站点本身有系统字体回退，不受影响
+  await context.route(/fonts\.(googleapis|gstatic)\.com/, (route) => route.abort());
+});
+
 test('完整链路：筛选 → 作答 → 提交出分 → 列表显示最好成绩', async ({ page }) => {
   await page.goto('/');
   await expect(page.locator('.hero h1')).toContainText('読解');
@@ -88,4 +94,20 @@ test('导入校验：合法题组正常入库', async ({ page }) => {
   await page.click('#btn-import');
   await expect(page.locator('#toast')).toContainText('导入成功');
   await expect(page.locator('#bank-count')).toContainText(`${ALL_SETS + 1} 组题`);
+});
+
+test('PWA：Service Worker 接管后可完全离线访问', async ({ page, context }) => {
+  await page.goto('/');
+  await page.evaluate(() => navigator.serviceWorker.ready); // 等 SW 激活并 claim 页面
+  await page.reload(); // 受 SW 接管的这次加载会把 css/js 写入运行时缓存
+  await expect(page.locator('.hero h1')).toContainText('読解');
+
+  await context.setOffline(true);
+  await page.reload();
+  await expect(page.locator('.hero h1')).toContainText('読解');
+
+  // 离线状态下完整功能可用（js 从缓存加载）
+  await page.click('nav.tabs a[data-page="practice"]');
+  await expect(page.locator('#page-practice.on')).toBeVisible();
+  await expect(page.locator('#set-cards .setcard')).toHaveCount(ALL_SETS);
 });

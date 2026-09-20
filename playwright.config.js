@@ -6,6 +6,7 @@ export default defineConfig({
   testDir: 'tests',
   timeout: 30_000,
   fullyParallel: true,
+  workers: 2, // 多个 headless 同时起会放大资源竞争，2 个并发足够且更稳
   use: {
     baseURL: process.env.YOMITAKU_BASE_URL || 'http://127.0.0.1:8123/',
   },

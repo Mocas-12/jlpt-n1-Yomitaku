@@ -5,10 +5,23 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Yomitaku · JLPT N1 読解特訓</title>
 <link rel="icon" type="image/svg+xml" href="public/logo.svg">
+<link rel="apple-touch-icon" href="public/icon-192.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="description" content="按官方六大题型整理 JLPT N1 読解解题技巧：计时训练、逐选项解析、错题重练闭环。内置 18 组原创模拟题（非真题），练习数据只保存在你的浏览器里。">
+<meta name="theme-color" content="#e8433a">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Yomitaku">
+<meta property="og:title" content="Yomitaku · JLPT N1 読解特訓">
+<meta property="og:description" content="六大题型解题技巧 ＋ 计时训练 ＋ 逐选项解析 ＋ 错题重练闭环；内置 18 组原创模拟题，数据只存本地浏览器。">
+<meta property="og:url" content="https://mocas-12.github.io/jlpt-n1-Yomitaku/">
+<meta property="og:image" content="https://mocas-12.github.io/jlpt-n1-Yomitaku/public/og-banner.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;800&family=Noto+Serif+JP:wght@400;600&family=ZCOOL+QingKe+HuangYou&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=20260905d">
+<link rel="stylesheet" href="css/style.css?v=b216039a">
 </head>
 <body>
 
@@ -345,7 +358,15 @@
 
 <div id="toast"></div>
 
-<script src="js/bank.js?v=20260920a"></script>
-<script src="js/app.js?v=20260920a"></script>
+<script src="js/bank.js?v=7694a7e7"></script>
+<script src="js/app.js?v=053bc4ff"></script>
+<script>
+/* PWA：注册 Service Worker（file:// 直接打开时自动跳过） */
+if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === '127.0.0.1' || location.hostname === 'localhost')) {
+  addEventListener('load', function () {
+    navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).catch(function () {});
+  });
+}
+</script>
 </body>
 </html>

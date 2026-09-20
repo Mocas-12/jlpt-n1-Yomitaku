@@ -44,6 +44,7 @@
 - 🔁 **Mistake-notebook loop**: wrong answers are collected automatically; "re-drill all mistakes" is supported and a correct answer removes the item; before the exam, drill only your mistakes
 - 📊 **Per-type stats**: accuracy progress bars per question type + practice history — weak points at a glance
 - 📥 **Extensible question bank**: paste JSON / upload a file to import your own question sets (same ID auto-overwrites); export backup supported
+- 📴 **Installable & offline (PWA)**: web manifest + a minimal service worker — add to home screen and keep drilling with no network; SEO / Open-Graph social meta tags included
 - 💾 **Zero backend**: all data lives only in your browser's localStorage — double-click and it works
 
 ## 🎨 UI Design
@@ -88,14 +89,18 @@ flowchart LR
 
 ```text
 jlpt-n1-Yomitaku/
-├── index.html          # Page skeleton: overview / techniques / practice / mistake notebook / bank management
+├── index.html            # Page skeleton: overview / techniques / practice / mistake notebook / bank management
+├── manifest.webmanifest  # PWA manifest (installable to home screen)
+├── sw.js                 # Service Worker: offline cache (network-first docs / cache-first assets)
 ├── css/
-│   └── style.css       # Washi paper-texture theme styles
+│   └── style.css         # Washi paper-texture theme styles
 ├── js/
-│   ├── bank.js         # Built-in question bank (original mock questions, editable to extend)
-│   └── app.js          # Training engine: timer, scoring, explanations, mistake notebook, stats, import/export
-└── public/
-    └── logo.svg        # Logo & site icon (washi base · vermilion sun「読」· open book)
+│   ├── bank.js           # Built-in question bank (original mock questions, editable to extend)
+│   └── app.js            # Training engine: timer, scoring, explanations, mistake notebook, stats, import/export
+├── public/               # logo.svg · icon-192/512.png · og-banner.png
+└── scripts/
+    ├── version.mjs       # Rewrites ?v= params from content hashes before deploy (zero-dep, idempotent)
+    └── make-assets.mjs   # Renders the OG banner & PWA icons via Playwright
 ```
 
 ## 🚀 Quick Start
@@ -117,7 +122,7 @@ python -m http.server 8123
 
 ## 🧪 Development
 
-The site itself stays zero-dependency; `package.json` exists only for dev-time smoke tests (Playwright, 4 cases: full filter → answer → submit loop, unanswered-submit confirm, import validation). CI runs them automatically before every deploy.
+The site itself stays zero-dependency; `package.json` exists only for dev-time smoke tests (Playwright, 5 cases: full filter → answer → submit loop, unanswered-submit confirm, import validation, offline PWA access). CI runs them automatically before every deploy.
 
 ```bash
 npm install

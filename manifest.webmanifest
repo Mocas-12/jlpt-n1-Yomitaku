@@ -1,0 +1,17 @@
+{
+  "name": "Yomitaku · JLPT N1 読解特訓",
+  "short_name": "Yomitaku",
+  "description": "按官方六大题型整理 JLPT N1 読解解题技巧：计时训练、逐选项解析、错题重练闭环；练习数据只保存在本地浏览器。",
+  "lang": "zh-CN",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#fff8ec",
+  "theme_color": "#e8433a",
+  "icons": [
+    { "src": "public/logo.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "public/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "public/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "public/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

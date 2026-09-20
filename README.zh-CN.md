@@ -44,6 +44,7 @@
 - 🔁 **错题本闭环**：做错自动收录，支持「重练全部错题」，答对自动移出；考前只刷错题
 - 📊 **按题型统计**：各题型正确率进度条 + 练习历史，弱项一目了然
 - 📥 **题库可扩展**：粘贴 JSON / 上传文件即可导入自己的题组（同 ID 自动覆盖），支持导出备份
+- 📴 **PWA 离线可用**：Web App Manifest + 极简 Service Worker，添加到主屏幕后无网络也能刷题；已配 SEO / Open Graph 社交分享标签
 - 💾 **零后端**：所有数据仅存本机浏览器 localStorage，双击即用
 
 ## 🎨 界面设计
@@ -88,14 +89,18 @@ flowchart LR
 
 ```text
 jlpt-n1-Yomitaku/
-├── index.html          # 页面骨架：概览 / 解题技巧 / 专项训练 / 错题本 / 题库管理
+├── index.html            # 页面骨架：概览 / 解题技巧 / 专项训练 / 错题本 / 题库管理
+├── manifest.webmanifest  # PWA 清单（可安装到主屏幕）
+├── sw.js                 # Service Worker：离线缓存（页面网络优先 / 资源缓存优先）
 ├── css/
-│   └── style.css       # 和风纸质感主题样式
+│   └── style.css         # 和风纸质感主题样式
 ├── js/
-│   ├── bank.js         # 内置题库（原创模拟题，可直接编辑追加）
-│   └── app.js          # 训练引擎：计时、判分、解析、错题本、统计、导入导出
-└── public/
-    └── logo.svg        # Logo 与站点图标（和纸底 · 朱色日轮「読」· 翻开的书）
+│   ├── bank.js           # 内置题库（原创模拟题，可直接编辑追加）
+│   └── app.js            # 训练引擎：计时、判分、解析、错题本、统计、导入导出
+├── public/               # logo.svg · icon-192/512.png · og-banner.png
+└── scripts/
+    ├── version.mjs       # 部署前按内容哈希自动改写 ?v= 版本号（零依赖，幂等）
+    └── make-assets.mjs   # 用 Playwright 渲染生成 OG 横幅与 PWA 图标
 ```
 
 ## 🚀 快速开始
@@ -117,7 +122,7 @@ python -m http.server 8123
 
 ## 🧪 开发与测试
 
-站点本体保持零依赖；`package.json` 仅用于开发期冒烟测试（Playwright，含 4 条用例：筛选→作答→提交完整链路、未答完提交确认、导入校验正反例）。CI 会在每次部署前自动跑一遍。
+站点本体保持零依赖；`package.json` 仅用于开发期冒烟测试（Playwright，5 条用例：筛选→作答→提交完整链路、未答完提交确认、导入校验正反例、PWA 离线访问）。CI 会在每次部署前自动跑一遍。
 
 ```bash
 npm install
