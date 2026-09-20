@@ -24,6 +24,7 @@
 ## 📖 Table of Contents
 
 - [Features](#-features)
+- [Screenshots](#-screenshots)
 - [UI Design](#-ui-design)
 - [Training Loop](#-training-loop)
 - [Question Bank & Copyright](#-question-bank--copyright)
@@ -45,7 +46,20 @@
 - 📊 **Per-type stats**: accuracy progress bars per question type + practice history — weak points at a glance
 - 📥 **Extensible question bank**: paste JSON / upload a file to import your own question sets (same ID auto-overwrites); export backup supported
 - 📴 **Installable & offline (PWA)**: web manifest + a minimal service worker — add to home screen and keep drilling with no network; SEO / Open-Graph social meta tags included
+- 🌓 **Dark mode**: follows the system preference with a one-click header toggle — the manga washi theme re-tuned for night reading
+- ⌨️ **Keyboard answering**: press 1–4 to pick options for the current question, Enter to submit — desktop drilling at full speed
+- 🧳 **Record backup**: export/import accuracy stats, history and the mistake notebook as JSON and restore them on any browser (next to the question-bank tools)
 - 💾 **Zero backend**: all data lives only in your browser's localStorage — double-click and it works
+
+## 🖼️ Screenshots
+
+| Overview | Practice (signal-word highlight) |
+| --- | --- |
+| ![Overview](docs/shot-home.png) | ![Practice](docs/shot-practice.png) |
+
+| Per-option explanations | Dark mode (夜の和紙) |
+| --- | --- |
+| ![Explanations](docs/shot-explain.png) | ![Dark mode](docs/shot-dark.png) |
 
 ## 🎨 UI Design
 
@@ -57,6 +71,7 @@
 | Option states | Hover outline → selected indigo → correct green / wrong vermilion; explanation boxes guided by a left vertical rule |
 | Signal-word highlighting | 23 categories of logical signal words (しかし・つまり・一方 etc.) highlighted with one click |
 | Motion | Page fade-in, progress-bar transitions, toast notices; no heavy animation |
+| Dark mode | "Night washi": indigo-ink base + washi-white text, hard shadows stay pure-black silhouettes; follows the system, toggle in the header |
 
 ## 🧠 Training Loop
 
