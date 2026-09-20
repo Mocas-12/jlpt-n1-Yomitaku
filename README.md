@@ -55,9 +55,13 @@
 
 ## 🖼️ Screenshots
 
-| Overview | Practice (signal-word highlight) |
+| Overview | Practice entries (mixed drill & mock exam) |
 | --- | --- |
-| ![Overview](docs/shot-home.png) | ![Practice](docs/shot-practice.png) |
+| ![Overview](docs/shot-home.png) | ![Practice entries](docs/shot-list.png) |
+
+| Practice (signal-word highlight) | Mock exam (global timer) |
+| --- | --- |
+| ![Practice](docs/shot-practice.png) | ![Mock exam](docs/shot-mock.png) |
 
 | Per-option explanations | Dark mode (夜の和紙) |
 | --- | --- |
@@ -80,7 +84,7 @@
 ```mermaid
 flowchart LR
     A[📚 Official question structure<br/>問題7〜12] --> B[🧭 Per-type techniques<br/>question-oriented · signal words · elimination]
-    B --> C[⏱️ Timed practice<br/>built-in original mock sets / imported sets]
+    B --> C[⏱️ Timed practice<br/>single sets · mixed 10 · mock exam]
     C --> D[🔍 Per-option explanations<br/>location + trap classification]
     D --> E[🔁 Mistake notebook<br/>auto-collected · re-drill]
     E --> F[📊 Per-type stats<br/>accuracy · history]
@@ -88,7 +92,7 @@ flowchart LR
 ```
 
 1. **Learn**: study the solution flow, target time and trap checklist for each of the six question types
-2. **Practice**: pick a question set and start; the timer runs against the time budget; signal-word highlighting can be enabled in the reading area
+2. **Practice**: pick a question set, shuffle 10 random questions across all types, or assemble a mock exam; the timer runs against the time budget (a global clock for mixed/mock modes); signal-word highlighting can be enabled in the reading area
 3. **Analyze**: after submitting, per-option explanations classify each error into one of seven trap categories — attribution matters more than volume
 4. **Drill**: mistakes automatically enter the notebook; re-drill with one click until it is cleared
 5. **Review**: the home page aggregates accuracy by question type and practice history for targeted remediation

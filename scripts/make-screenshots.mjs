@@ -22,7 +22,18 @@ async function newPage(theme) {
   console.log('[shots] docs/shot-home.png');
 }
 
-/* 2. 专项训练中（浅色，信号词高亮开启） */
+/* 2. 专项训练入口（题组列表 + 混合/模拟卷按钮） */
+{
+  const page = await newPage('light');
+  await page.click('nav.tabs a[data-page="practice"]');
+  await page.locator('#set-cards .setcard').first().waitFor();
+  await page.waitForTimeout(300);
+  await page.screenshot({ path: 'docs/shot-list.png', clip: { x: 0, y: 0, width: 1200, height: 780 } });
+  await page.close();
+  console.log('[shots] docs/shot-list.png');
+}
+
+/* 3. 专项训练中（浅色，信号词高亮开启） */
 {
   const page = await newPage('light');
   await page.click('nav.tabs a[data-page="practice"]');
@@ -35,7 +46,19 @@ async function newPage(theme) {
   console.log('[shots] docs/shot-practice.png');
 }
 
-/* 3. 提交后逐选项解析（浅色） */
+/* 4. 模拟卷（官方構成组卷 · 全局计时） */
+{
+  const page = await newPage('light');
+  await page.click('nav.tabs a[data-page="practice"]');
+  await page.click('#btn-mock');
+  await page.locator('#session-body .qblock').first().waitFor();
+  await page.waitForTimeout(400);
+  await page.screenshot({ path: 'docs/shot-mock.png' });
+  await page.close();
+  console.log('[shots] docs/shot-mock.png');
+}
+
+/* 5. 提交后逐选项解析（浅色） */
 {
   const page = await newPage('light');
   await page.click('nav.tabs a[data-page="practice"]');
