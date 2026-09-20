@@ -111,3 +111,64 @@ test('PWA：Service Worker 接管后可完全离线访问', async ({ page, conte
   await expect(page.locator('#page-practice.on')).toBeVisible();
   await expect(page.locator('#set-cards .setcard')).toHaveCount(ALL_SETS);
 });
+
+test('深色模式：切换、记忆、theme-color 同步', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'light'); // Playwright 默认 colorScheme=light
+  await page.click('#theme-toggle');
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+  await expect(page.locator('#theme-toggle')).toHaveText('☀️');
+  await expect(page.locator('meta[name="theme-color"]')).toHaveAttribute('content', '#171521');
+
+  await page.reload(); // localStorage 记忆后仍为深色
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+  await page.click('#theme-toggle');
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
+});
+
+test('键盘作答：1-4 选择当前题，Enter 提交', async ({ page }) => {
+  await page.goto('/#practice');
+  await page.locator('#set-cards .setcard h3').first().click();
+  await expect(page.locator('#session-view')).toBeVisible();
+  await expect(page.locator('#session-body .qblock.cur')).toHaveCount(1); // 当前题高亮
+  await expect(page.locator('.kbd-hint')).toBeVisible();
+
+  const qn = await page.locator('#session-body .qblock').count();
+  for (let i = 0; i < qn; i++) {
+    await page.keyboard.press('1'); // 每次按 1 选当前题的选项①，当前题自动推进
+  }
+  for (let i = 0; i < qn; i++) {
+    await expect(page.locator('#session-body .qblock').nth(i).locator('.opt').first()).toHaveClass(/sel/);
+  }
+  await expect(page.locator('#session-body .qblock.cur')).toHaveCount(0); // 全部答完取消高亮
+
+  await page.keyboard.press('Enter');
+  await expect(page.locator('#session-result')).toContainText(/\d+\s*\/\s*\d+/);
+});
+
+test('练习记录备份：导入覆盖生效、非法 kind 拒绝、可导出', async ({ page }) => {
+  page.on('dialog', (d) => d.accept()); // 覆盖确认框自动接受
+  const rec = {
+    kind: 'yomitaku-records', version: 1, exportedAt: '2026-09-20T00:00:00.000Z',
+    data: {
+      stats: { tanbun: { c: 5, t: 6 } },
+      history: [{ ts: Date.now(), setId: 'sim-tan1', title: '导入的历史记录', c: 5, t: 6, seconds: 95 }],
+      wrong: {},
+    },
+  };
+
+  await page.goto('/#bank');
+  await page.fill('#rec-text', JSON.stringify(rec));
+  await page.click('#btn-rec-import');
+  await expect(page.locator('#toast')).toContainText('练习记录已导入');
+  await page.click('nav.tabs a[data-page="home"]');
+  await expect(page.locator('#home-stats')).toContainText('5/6');
+
+  await page.goto('/#bank');
+  await page.fill('#rec-text', JSON.stringify({ kind: 'wrong-kind', data: {} }));
+  await page.click('#btn-rec-import');
+  await expect(page.locator('#toast')).toContainText('导入失败');
+
+  await page.click('#btn-rec-export');
+  await expect(page.locator('#rec-text')).toHaveValue(/yomitaku-records/);
+});

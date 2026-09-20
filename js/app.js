@@ -5,6 +5,7 @@
 
   var LS_KEY = 'yt_n1_dokkai_v1';        // 练习记录/错题/统计
   var LS_CUSTOM = 'yt_custom_sets_v1';   // 页面导入的自定义题组
+  var LS_THEME = 'yt_theme';             // 深色模式偏好（缺省跟随系统）
   var SIG_WORDS = ['にもかかわらず', 'とはいえ', 'これに対して', '言い換えれば', 'したがって', 'けれども', 'しかし', 'なぜなら', 'ところが', 'それでも', 'もっとも', 'たしかに', 'もちろん', 'すなわち', 'そのため', 'それゆえ', '要するに', 'つまり', '確かに', 'たしか', '一方', 'だが', 'ただし'];
   var SIG_RE = new RegExp('(' + SIG_WORDS.join('|') + ')', 'g');
   var LABELS = ['①', '②', '③', '④'];
@@ -67,6 +68,18 @@
     el.classList.add('show');
     clearTimeout(el._t);
     el._t = setTimeout(function () { el.classList.remove('show'); }, 2600);
+  }
+
+  /* ---------- theme ---------- */
+  function applyTheme(t) {
+    document.documentElement.setAttribute('data-theme', t);
+    var m = document.querySelector('meta[name="theme-color"]');
+    if (m) m.setAttribute('content', t === 'dark' ? '#171521' : '#e8433a');
+    var b = document.getElementById('theme-toggle');
+    if (b) {
+      b.textContent = t === 'dark' ? '☀️' : '🌙';
+      b.setAttribute('aria-label', t === 'dark' ? '切换浅色模式' : '切换深色模式');
+    }
   }
 
   /* ---------- passage rendering ---------- */
@@ -325,6 +338,7 @@
           Array.from(el.parentElement.children).forEach(function (c) { c.classList.remove('sel'); });
           el.classList.add('sel');
           updateSubmitCount();
+          markCurQ(false);
         };
       });
     }
@@ -332,7 +346,8 @@
     var acts = document.getElementById('session-actions');
     if (!session.submitted) {
       acts.innerHTML = '<button class="btn" id="btn-submit">提交答案（0/0）</button>' +
-        '<button class="btn sub" id="btn-back">返回列表</button>';
+        '<button class="btn sub" id="btn-back">返回列表</button>' +
+        '<span class="kbd-hint">键盘 1〜4 选择 · Enter 提交</span>';
       document.getElementById('btn-submit').onclick = submitSession;
       document.getElementById('btn-back').onclick = backToList;
       updateSubmitCount();
@@ -342,6 +357,7 @@
       document.getElementById('btn-redo').onclick = function () { session.mode === 'wrong' ? startWrongSession() : startSet(session.setId); };
       document.getElementById('btn-back').onclick = backToList;
     }
+    if (!session.submitted) markCurQ(false);
   }
 
   function updateSubmitCount() {
@@ -490,6 +506,17 @@
     return arr;
   }
 
+  function validateRecords(obj) {
+    if (!obj || typeof obj !== 'object' || Array.isArray(obj)) throw new Error('根元素必须是对象 { kind, version, data }');
+    if (obj.kind !== 'yomitaku-records') throw new Error('kind 必须是 "yomitaku-records"');
+    if (!obj.data || typeof obj.data !== 'object' || Array.isArray(obj.data)) throw new Error('缺少 data 字段（练习记录对象）');
+    var d = obj.data;
+    if (d.stats !== undefined && (typeof d.stats !== 'object' || d.stats === null)) throw new Error('data.stats 必须是对象');
+    if (d.history !== undefined && !Array.isArray(d.history)) throw new Error('data.history 必须是数组');
+    if (d.wrong !== undefined && (typeof d.wrong !== 'object' || d.wrong === null)) throw new Error('data.wrong 必须是对象');
+    return d;
+  }
+
   function initBankUI() {
     var ta = document.getElementById('bank-import-text');
     var file = document.getElementById('bank-file');
@@ -551,6 +578,94 @@
         }]
       }], null, 2);
     };
+
+    /* 练习记录备份（导出 / 下载 / 覆盖导入） */
+    var recTa = document.getElementById('rec-text');
+    var recFile = document.getElementById('rec-file');
+    document.getElementById('btn-rec-export').onclick = function () {
+      recTa.value = JSON.stringify({ kind: 'yomitaku-records', version: 1, exportedAt: new Date().toISOString(), data: load() }, null, 2);
+      toast('已导出练习记录到文本框');
+    };
+    document.getElementById('btn-rec-download').onclick = function () {
+      var blob = new Blob([JSON.stringify({ kind: 'yomitaku-records', version: 1, exportedAt: new Date().toISOString(), data: load() }, null, 2)], { type: 'application/json' });
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'yomitaku-records.json';
+      a.click();
+      URL.revokeObjectURL(a.href);
+    };
+    document.getElementById('btn-rec-import').onclick = function () {
+      var go = function (text) {
+        try {
+          var d = validateRecords(JSON.parse(text));
+          if (!confirm('导入将整体覆盖当前的练习记录、错题本和统计，确定继续吗？')) return;
+          save(d);
+          recTa.value = '';
+          if (recFile.value) recFile.value = '';
+          renderHome();
+          toast('练习记录已导入（覆盖）');
+        } catch (e) {
+          toast('导入失败：' + e.message, false);
+        }
+      };
+      if (recFile.files && recFile.files[0]) {
+        var fr = new FileReader();
+        fr.onload = function () { go(fr.result); };
+        fr.readAsText(recFile.files[0]);
+      } else if (recTa.value.trim()) {
+        go(recTa.value);
+      } else {
+        toast('请先粘贴记录 JSON 或选择文件', false);
+      }
+    };
+  }
+
+  /* ---------- keyboard（1〜4 选择 · Enter 提交） ---------- */
+  function flatQuestions() {
+    var flat = [];
+    session.groups.forEach(function (g) {
+      g.qidx.forEach(function (qi) { flat.push({ set: g.set, qi: qi }); });
+    });
+    return flat;
+  }
+  function firstUnanswered() {
+    var flat = flatQuestions();
+    for (var i = 0; i < flat.length; i++) {
+      if (session.answers[flat[i].set.id + ':' + flat[i].qi] === undefined) return i;
+    }
+    return -1;
+  }
+  function markCurQ(scroll) {
+    var blocks = document.querySelectorAll('#session-body .qblock');
+    Array.prototype.forEach.call(blocks, function (b) { b.classList.remove('cur'); });
+    var idx = firstUnanswered();
+    if (idx >= 0 && blocks[idx]) {
+      blocks[idx].classList.add('cur');
+      if (scroll) blocks[idx].scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    }
+  }
+  function onKeydown(e) {
+    if (!session || session.submitted) return;
+    var tag = e.target && e.target.tagName;
+    if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+    if (e.key === 'Enter') {
+      var btn = document.getElementById('btn-submit');
+      if (btn) { e.preventDefault(); btn.click(); }
+      return;
+    }
+    var n = parseInt(e.key, 10);
+    if (!(n >= 1 && n <= 4)) return;
+    var idx = firstUnanswered();
+    if (idx < 0) return; // 全部答完，数字键不动作（可改选：点击该题后仍可用数字键重选）
+    var flat = flatQuestions();
+    var f = flat[idx];
+    session.answers[f.set.id + ':' + f.qi] = n - 1;
+    var blocks = document.querySelectorAll('#session-body .qblock');
+    Array.prototype.forEach.call(blocks[idx].querySelectorAll('.opt'), function (el, i) {
+      el.classList.toggle('sel', i === n - 1);
+    });
+    updateSubmitCount();
+    markCurQ(true);
   }
 
   /* =========================================================
@@ -559,6 +674,15 @@
   document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('btn-wrong-session').onclick = function () { startWrongSession(); };
     document.getElementById('btn-back-top').onclick = function () { backToList(); };
+    // 深色模式：头部按钮点击切换（初始 data-theme 已由 head 内联脚本定好）
+    document.getElementById('theme-toggle').onclick = function () {
+      var next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      try { localStorage.setItem(LS_THEME, next); } catch (e) {}
+      applyTheme(next);
+    };
+    applyTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light');
+    // 键盘作答：1〜4 选择、Enter 提交
+    document.addEventListener('keydown', onKeydown);
     document.getElementById('sig-toggle').addEventListener('change', function () {
       if (session) renderSession();
     });

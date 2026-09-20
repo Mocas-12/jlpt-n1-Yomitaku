@@ -4,6 +4,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Yomitaku · JLPT N1 読解特訓</title>
+<script>
+/* 主题初始化：在样式表解析前定下 data-theme，避免暗色用户看到闪白 */
+(function () {
+  var t = null;
+  try { t = localStorage.getItem('yt_theme'); } catch (e) {}
+  if (t !== 'dark' && t !== 'light') t = window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  document.documentElement.setAttribute('data-theme', t);
+})();
+</script>
 <link rel="icon" type="image/svg+xml" href="public/logo.svg">
 <link rel="apple-touch-icon" href="public/icon-192.png">
 <link rel="manifest" href="manifest.webmanifest">
@@ -21,7 +30,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;800&family=Noto+Serif+JP:wght@400;600&family=ZCOOL+QingKe+HuangYou&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=b216039a">
+<link rel="stylesheet" href="css/style.css?v=0e6719a4">
 </head>
 <body>
 
@@ -34,6 +43,7 @@
       <a href="#practice" data-page="practice">专项训练</a>
       <a href="#review" data-page="review">错题本</a>
       <a href="#bank" data-page="bank">真题·题库</a>
+      <button type="button" class="theme-btn" id="theme-toggle" aria-label="切换深色模式" title="切换深色 / 浅色">🌙</button>
     </nav>
   </div>
 </header>
@@ -308,8 +318,21 @@
       </p>
     </div>
     <div class="card">
+      <h3>练习记录备份（正确率 · 历史 · 错题本）</h3>
+      <p style="font-size:13.5px;color:var(--muted)">换浏览器或清缓存前先导出；导入为<b>整体覆盖</b>（需确认），不影响已导入的题库。</p>
+      <textarea id="rec-text" rows="6" style="width:100%;font-family:Consolas,monospace;font-size:13px;border:1px solid var(--border);border-radius:10px;padding:12px;background:var(--paper);color:var(--ink)" placeholder="导出的练习记录会显示在这里；导入时也可粘贴 JSON 或选择文件"></textarea>
+      <p style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+        <button class="btn sub" id="btn-rec-export">导出记录到文本框</button>
+        <button class="btn sub" id="btn-rec-download">下载记录 JSON</button>
+      </p>
+      <p style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+        <input type="file" id="rec-file" accept=".json,application/json" style="font-size:13px">
+        <button class="btn" id="btn-rec-import">导入记录（覆盖当前）</button>
+      </p>
+    </div>
+    <div class="card">
       <h3>JSON 格式速览</h3>
-      <pre style="background:#f0eee8;border-radius:10px;padding:14px;font-size:12.5px;overflow-x:auto"><code>[
+      <pre style="background:var(--pre-bg);border-radius:10px;padding:14px;font-size:12.5px;overflow-x:auto"><code>[
   {
     "id": "wb2012-q7-1",              // 唯一 ID，重复导入即更新
     "typeKey": "tanbun",              // tanbun|chubun|chobun|togo|shucho|joho
@@ -359,7 +382,7 @@
 <div id="toast"></div>
 
 <script src="js/bank.js?v=7694a7e7"></script>
-<script src="js/app.js?v=053bc4ff"></script>
+<script src="js/app.js?v=12671e52"></script>
 <script>
 /* PWA：注册 Service Worker（file:// 直接打开时自动跳过） */
 if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === '127.0.0.1' || location.hostname === 'localhost')) {
