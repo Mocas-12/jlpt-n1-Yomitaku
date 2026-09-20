@@ -172,3 +172,19 @@ test('练习记录备份：导入覆盖生效、非法 kind 拒绝、可导出',
   await page.click('#btn-rec-export');
   await expect(page.locator('#rec-text')).toHaveValue(/yomitaku-records/);
 });
+
+test('数据养护：history 上限 200 条，失效错题自动清理', async ({ page }) => {
+  await page.goto('/');
+  await page.evaluate(() => {
+    const hist = [];
+    for (let i = 0; i < 260; i++) hist.push({ ts: 1e12 + i, setId: 'sim-tan1', title: 'h' + i, c: 1, t: 2, seconds: 1 });
+    localStorage.setItem('yt_n1_dokkai_v1', JSON.stringify({
+      stats: {}, history: hist,
+      wrong: { 'no-such-set:0': { setId: 'no-such-set', chosen: 0, ts: 1 } },
+    }));
+  });
+  await page.reload(); // pruneData 在页面初始化时执行
+  const d = await page.evaluate(() => JSON.parse(localStorage.getItem('yt_n1_dokkai_v1')));
+  expect(d.history.length).toBe(200);
+  expect(d.wrong['no-such-set:0']).toBeUndefined();
+});

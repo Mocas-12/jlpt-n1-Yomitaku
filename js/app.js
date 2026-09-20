@@ -29,6 +29,20 @@
     catch (e) { toast('保存失败：浏览器本地存储不可用或已满', false); }
   }
 
+  /* ---------- 数据养护：history 上限 + 失效错题清理 ---------- */
+  var HISTORY_MAX = 200;
+  function pruneData() {
+    var d = load();
+    var changed = false;
+    if (d.history && d.history.length > HISTORY_MAX) { d.history = d.history.slice(0, HISTORY_MAX); changed = true; }
+    if (d.wrong) {
+      Object.keys(d.wrong).forEach(function (qid) {
+        if (!setById(d.wrong[qid].setId)) { delete d.wrong[qid]; changed = true; }
+      });
+    }
+    if (changed) save(d);
+  }
+
   /* ---------- helpers ---------- */
   function esc(s) {
     return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\"/g, '&quot;');
@@ -396,6 +410,7 @@
     });
     if (session.mode === 'set') {
       d.history.unshift({ ts: Date.now(), setId: session.setId, title: session.groups[0].set.title, c: c, t: totalQ, seconds: sec });
+      d.history = d.history.slice(0, HISTORY_MAX);
     }
     save(d);
 
@@ -694,6 +709,7 @@
       renderSetList();
     });
     initBankUI();
+    pruneData();
     route();
   });
 })();

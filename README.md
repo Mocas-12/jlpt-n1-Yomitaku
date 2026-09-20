@@ -114,7 +114,7 @@ jlpt-n1-Yomitaku/
 │   └── app.js            # Training engine: timer, scoring, explanations, mistake notebook, stats, import/export
 ├── public/               # logo.svg · icon-192/512.png · og-banner.png
 └── scripts/
-    ├── version.mjs       # Rewrites ?v= params from content hashes before deploy (zero-dep, idempotent)
+    ├── version.mjs       # Rewrites ?v= params and the sw.js cache name from content hashes (zero-dep, idempotent)
     └── make-assets.mjs   # Renders the OG banner & PWA icons via Playwright
 ```
 
@@ -178,7 +178,7 @@ Paste or upload on the "Question Bank Notes & Management" page; question sets wi
 <details>
 <summary><b>Where are practice records stored? Do they survive switching browsers?</b></summary>
 
-Records live only in the current browser's localStorage. They persist across sessions in the same browser; switching browsers or clearing browser data loses them. For important progress, use "Export" to back up the question bank (practice records are not exported yet).
+Records live only in the current browser's localStorage. They persist across sessions in the same browser; switching browsers or clearing browser data loses them. For important progress, export a backup from the Question Bank page — both the question bank and your practice records (stats, history, mistake notebook) can be exported as JSON and restored on any browser.
 </details>
 
 <details>

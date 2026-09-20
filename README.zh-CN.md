@@ -114,7 +114,7 @@ jlpt-n1-Yomitaku/
 │   └── app.js            # 训练引擎：计时、判分、解析、错题本、统计、导入导出
 ├── public/               # logo.svg · icon-192/512.png · og-banner.png
 └── scripts/
-    ├── version.mjs       # 部署前按内容哈希自动改写 ?v= 版本号（零依赖，幂等）
+    ├── version.mjs       # 按内容哈希改写 ?v= 版本号与 sw.js 缓存名（零依赖，幂等）
     └── make-assets.mjs   # 用 Playwright 渲染生成 OG 横幅与 PWA 图标
 ```
 
@@ -178,7 +178,7 @@ npm test
 <details>
 <summary><b>练习记录存在哪里？换浏览器还在吗？</b></summary>
 
-记录仅存于当前浏览器的 localStorage。同一浏览器重复打开都在；换浏览器或清除浏览器数据会丢失，重要进度可用「导出」备份题库（练习记录暂不随导出）。
+记录仅存于当前浏览器的 localStorage。同一浏览器重复打开都在；换浏览器或清除浏览器数据会丢失。重要进度请在「真题·题库」页备份——题库与练习记录（正确率/历史/错题本）都支持导出 JSON，换浏览器可整体恢复。
 </details>
 
 <details>
