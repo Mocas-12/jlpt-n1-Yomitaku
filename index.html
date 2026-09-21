@@ -304,13 +304,40 @@
 
     <h2 style="font-size:20px;margin:26px 0 12px">四、题库管理（导入 / 导出 / 移除）</h2>
     <div class="card">
-      <h3>如何导入自己的题目（三步走）</h3>
+      <h3>如何导入自己的题目（两种做法）</h3>
       <p>想用官方样题或手头教材训练？本站不提供任何受版权保护的题目电子文本，但<b>自己转录、自己导入练习</b>完全支持（个人使用范畴）：</p>
       <ol class="flow">
-        <li><b>准备题目</b>：官方免费样题 PDF 是最好的起点（<a href="https://www.jlpt.jp/samples/sample2012/pdf/N1R.pdf" target="_blank" rel="noopener">N1 読解样题</a>・<a href="https://www.jlpt.jp/samples/sample2012/pdf/N1answer.pdf" target="_blank" rel="noopener">正答表</a>），也可从你购入的『公式問題集』『新完全マスター読解』等选题；</li>
-        <li><b>改示例</b>：点下方「填入示例题组」，会填入一道可直接导入的完整示例题（含逐选项解析），把字段内容替换成你的题目即可；</li>
-        <li><b>导入开练</b>：粘贴进文本框点「导入」，报错会精确到第几组第几题；成功后回「专项训练」即见。首次建议只录一道短文题（约 5 分钟跑通全流程），并用「导出/下载」随时备份。</li>
+        <li><b>AI 代转录（推荐）</b>：把题目原文和下方「AI 转录提示词」一起发给任意 AI（ChatGPT / Claude / 豆包等），即可生成格式合规的题库 JSON——文章、选项、正解、逐选项解析全部对应。核对正解后粘贴到下方「导入」即可；</li>
+        <li><b>手动改示例</b>：点下方「填入示例题组」，会填入一道可直接导入的完整示例题，把字段内容（含每题的 options / answer / explain，解析可整段删除）替换成你的题目即可；</li>
+        <li><b>导入开练</b>：报错会精确到第几组第几题；成功后回「专项训练」即见。录入后用「导出/下载」随时备份。</li>
       </ol>
+      <details style="margin-top:10px">
+        <summary style="cursor:pointer;font-weight:700">📋 AI 转录提示词（点开复制）</summary>
+        <div style="margin-top:8px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+          <button class="btn sm sub" id="btn-copy-prompt">复制提示词</button>
+          <span style="font-size:12.5px;color:var(--muted)">粘贴给任意 AI，再附上你的题目原文即可；导入前请核对正解</span>
+        </div>
+        <pre id="ai-prompt-text" style="background:var(--pre-bg);border-radius:10px;padding:14px;font-size:12.5px;line-height:1.7;overflow-x:auto;white-space:pre-wrap;margin-top:8px">你是 JLPT N1 読解题库转录助手。我会给你题目原文（文章、设问、选项、正确答案，可能带解析），请转换成可导入刷题网站的 JSON 数组。只输出 JSON 本身，不要任何解释、注释或代码块标记。
+
+字段要求：
+- id：题组唯一标识（小写英文+数字，如 "wb2022-q7-1"），同 id 重复导入会覆盖旧题组
+- typeKey：六选一——短文 "tanbun" / 中文 "chubun" / 长篇 "chobun" / 統合理解 "togo" / 主張理解 "shucho" / 情報検索 "joho"
+- title：题组标题，注明出处，如 "公式問題集 Vol.1 問題7（一）"
+- source / sourceUrl：来源名称与链接（没有可省略）
+- minutes：建议用时（分钟）：短文 2、中文 5、长篇 10、統合 6、主張 10、情報検索 2，可按题量调整
+- passage：文章正文原文，分段用 \n；統合理解改用 passageA / passageB 两个字段
+- questions：每题包含：
+  · q：设问原文（日文原样）
+  · label：考点标签，从「主旨把握 / 内容一致 / 指示语 / 划线句含义 / 理由说明 / 意见一致 / 条件筛选」中选
+  · options：恰好 4 个选项，保持原文顺序
+  · answer：正确答案下标（0=①，1=②，2=③，3=④）。必须与我提供的正解一致，不得自行改判！
+  · explain：与 options 等长的 4 条解析，逐条说明该选项为何对/错（引用原文定位，标注陷阱类型：本文未提及/部分曲解/范围扩大/张冠李戴/因果倒置/过度推断/答非所问）。我提供了解析就依据它整理，没提供就由你根据原文写出
+
+生成后自查：JSON 可被解析；无注释、无尾逗号；每个题组 options 恰好 4 项；answer 为 0-3 的整数；explain 恰好 4 条且与选项一一对应。
+
+我的题目原文如下：
+（把文章、设问、选项、正解粘贴在这里）</pre>
+      </details>
     </div>
     <div class="card">
       <h3>当前题库：<span id="bank-count"></span></h3>
@@ -395,7 +422,7 @@
 <div id="toast"></div>
 
 <script src="js/bank.js?v=7694a7e7"></script>
-<script src="js/app.js?v=58b0ae8a"></script>
+<script src="js/app.js?v=e4217e2c"></script>
 <script>
 /* PWA：注册 Service Worker（file:// 直接打开时自动跳过） */
 if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === '127.0.0.1' || location.hostname === 'localhost')) {

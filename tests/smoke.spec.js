@@ -356,14 +356,21 @@ test('连续打卡：有练习记录后首页显示 streak', async ({ page }) =>
   await expect(page.locator('.streakline')).toContainText('连续打卡 1 天');
 });
 
-test('导入引导：三步走卡片可见，示例题组可直接入库', async ({ page }) => {
+test('导入引导：两种做法卡片可见，示例题组可直接入库，AI 提示词可复制', async ({ page }) => {
   await page.goto('/#bank');
   await expect(page.locator('#page-bank')).toContainText('如何导入自己的题目');
-  await expect(page.locator('#page-bank')).toContainText('三步走');
+  await expect(page.locator('#page-bank')).toContainText('两种做法');
 
   await page.click('#btn-example');
   await expect(page.locator('#bank-import-text')).toHaveValue(/示例题组 · 叱らない上司/);
   await page.click('#btn-import');
   await expect(page.locator('#toast')).toContainText('导入成功');
   await expect(page.locator('#bank-count')).toContainText(`${ALL_SETS + 1} 组题`);
+
+  // AI 转录提示词：展开可见、复制有反馈
+  await page.click('#page-bank details summary');
+  await expect(page.locator('#ai-prompt-text')).toContainText('typeKey');
+  await expect(page.locator('#ai-prompt-text')).toContainText('不得自行改判');
+  await page.click('#btn-copy-prompt');
+  await expect(page.locator('#toast')).toContainText('提示词已复制');
 });

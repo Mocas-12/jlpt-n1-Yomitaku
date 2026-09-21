@@ -716,6 +716,29 @@
       toast('已填入示例题组：可直接导入体验，或把字段内容替换成你的题目');
     };
 
+    /* AI 转录提示词复制（clipboard API 不可用时回退 execCommand） */
+    var copyBtn = document.getElementById('btn-copy-prompt');
+    if (copyBtn) copyBtn.onclick = function () {
+      var text = document.getElementById('ai-prompt-text').textContent;
+      var fallback = function () {
+        var t = document.createElement('textarea');
+        t.value = text;
+        t.style.position = 'fixed';
+        t.style.opacity = '0';
+        document.body.appendChild(t);
+        t.select();
+        try { document.execCommand('copy'); } catch (e) {}
+        document.body.removeChild(t);
+      };
+      var done = function () { toast('提示词已复制，粘贴给任意 AI 并附上题目原文即可'); };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(done, function () { fallback(); done(); });
+      } else {
+        fallback();
+        done();
+      }
+    };
+
     /* 练习记录备份（导出 / 下载 / 覆盖导入） */
     var recTa = document.getElementById('rec-text');
     var recFile = document.getElementById('rec-file');

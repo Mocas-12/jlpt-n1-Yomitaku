@@ -196,7 +196,11 @@ Past papers are copyrighted by the Japan Foundation / JEES; republishing them on
 <details>
 <summary><b>How do I import my own questions (e.g., from books I own)?</b></summary>
 
-Transcribing questions yourself and importing them for personal use is fully supported. ① Pick a source: the [official free sample PDF](https://www.jlpt.jp/samples/sample2012/pdf/N1R.pdf) (with [answer sheet](https://www.jlpt.jp/samples/sample2012/pdf/N1answer.pdf)) or a book you own. ② On the Question Bank page click 「填入示例题组」 to load a complete, importable example set (with per-option explanations). ③ Replace the fields with your own content and click 导入 — validation errors point to the exact set and question; imported sets appear under 专项训练 right away. Tip: transcribe one short-passage question first (~5 minutes for the whole flow), and back up your bank with 导出/下载 anytime.
+Transcribing questions yourself and importing them for personal use is fully supported — two ways to do it:
+- **AI-assisted (recommended)**: send the question text together with the 「AI 转录提示词」 prompt provided on the Question Bank page to any AI chat (ChatGPT / Claude / etc.); it returns schema-compliant JSON whose per-option explanations match your questions. **Double-check the answer indices before importing** (AI occasionally mis-judges).
+- **Manual**: click 「填入示例题组」 to load a complete example set, then replace the fields (including per-question options / answer / explain; the explanations can be deleted entirely) with your own content and click 导入.
+
+Validation errors point to the exact set and question; imported sets appear under 专项训练 right away, and 导出/下载 backs up your bank anytime.
 </details>
 
 <details>
