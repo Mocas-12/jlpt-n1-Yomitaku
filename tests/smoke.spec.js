@@ -146,6 +146,28 @@ test('键盘作答：1-4 选择当前题，Enter 提交', async ({ page }) => {
   await expect(page.locator('#session-result')).toContainText(/\d+\s*\/\s*\d+/);
 });
 
+test('键盘作用域：会话进行中切到其他页，数字/Enter 不暗中作答或交卷', async ({ page }) => {
+  let dialogs = 0;
+  page.on('dialog', async (d) => { dialogs++; await d.dismiss(); });
+
+  await page.goto('/#practice');
+  await page.locator('#set-cards .setcard h3').first().click();
+  await expect(page.locator('#session-view')).toBeVisible();
+  await page.locator('#session-body .qblock').first().locator('.opt').first().click(); // 只答第 1 题
+
+  // 切到概览页（session 仍在后台存活）：按数字与 Enter 都不应影响它
+  await page.click('nav.tabs a[data-page="home"]');
+  await page.keyboard.press('2');
+  await page.keyboard.press('Enter');
+  expect(dialogs).toBe(0); // 没有从后台触发提交确认
+
+  // 回到训练页：会话原样保留，作答数仍是 1（数字键没有暗中写入第 2 题）
+  await page.click('nav.tabs a[data-page="practice"]');
+  await expect(page.locator('#session-view')).toBeVisible();
+  const qn = await page.locator('#session-body .qblock').count();
+  await expect(page.locator('#btn-submit')).toContainText(`（1/${qn}）`);
+});
+
 test('练习记录备份：导入覆盖生效、非法 kind 拒绝、可导出', async ({ page }) => {
   page.on('dialog', (d) => d.accept()); // 覆盖确认框自动接受
   const rec = {

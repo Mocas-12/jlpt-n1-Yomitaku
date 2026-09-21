@@ -806,6 +806,10 @@
   }
   function onKeydown(e) {
     if (!session || session.submitted) return;
+    /* 只在训练页为当前路由时响应：会话进行中切到其他页（session 仍存活），
+       数字键/Enter 不得暗中修改后台会话的作答或触发交卷。
+       判断 hash 而非 .on class：hashchange 事件落地前 class 仍是旧页，hash 已是新值 */
+    if ((location.hash || '#home').replace('#', '') !== 'practice') return;
     var tag = e.target && e.target.tagName;
     if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
     if (e.key === 'Enter') {
