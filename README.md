@@ -50,6 +50,7 @@
 - 📴 **Installable & offline (PWA)**: web manifest + a minimal service worker — add to home screen and keep drilling with no network; SEO / Open-Graph social meta tags included
 - 🌓 **Dark mode**: follows the system preference with a one-click header toggle — the manga washi theme re-tuned for night reading
 - ⌨️ **Keyboard answering**: press 1–4 to pick options for the current question, Enter to submit — desktop drilling at full speed
+- 📝 **Session draft**: unsubmitted progress is saved with every answer — accidentally refreshing or closing the tab resumes the session right where you stopped, timer still running
 - 🧳 **Record backup**: export/import accuracy stats, history and the mistake notebook as JSON and restore them on any browser (next to the question-bank tools)
 - 💾 **Zero backend**: all data lives only in your browser's localStorage — double-click and it works
 
@@ -143,7 +144,7 @@ python -m http.server 8123
 
 ## 🧪 Development
 
-The site itself stays zero-dependency; `package.json` exists only for dev-time smoke tests (Playwright, covering the full practice loop, mixed drill and mock exam, unanswered-submit confirm, import validation, dark mode, keyboard answering, record backup, mistake-notebook re-drill, offline PWA and data housekeeping). CI runs them automatically before every deploy.
+The site itself stays zero-dependency; `package.json` exists only for dev-time smoke tests (Playwright, covering the full practice loop, mixed drill and mock exam, unanswered-submit confirm, import validation, dark mode, keyboard answering and its page scope, record backup, mistake-notebook re-drill, session draft restore, file:// double-click mode, offline PWA and data housekeeping). CI runs them automatically before every deploy.
 
 ```bash
 npm install

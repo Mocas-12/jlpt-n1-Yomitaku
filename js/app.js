@@ -6,6 +6,7 @@
   var LS_KEY = 'yt_n1_dokkai_v1';        // 练习记录/错题/统计
   var LS_CUSTOM = 'yt_custom_sets_v1';   // 页面导入的自定义题组
   var LS_THEME = 'yt_theme';             // 深色模式偏好（缺省跟随系统）
+  var LS_DRAFT = 'yt_session_draft_v1';  // 未提交会话草稿（刷新/意外关闭后恢复进度）
   var SIG_WORDS = ['にもかかわらず', 'とはいえ', 'これに対して', '言い換えれば', 'したがって', 'けれども', 'しかし', 'なぜなら', 'ところが', 'それでも', 'もっとも', 'たしかに', 'もちろん', 'すなわち', 'そのため', 'それゆえ', '要するに', 'つまり', '確かに', 'たしか', '一方', 'だが', 'ただし'];
   var SIG_RE = new RegExp('(' + SIG_WORDS.join('|') + ')', 'g');
   var LABELS = ['①', '②', '③', '④'];
@@ -45,6 +46,45 @@
       });
     }
     if (changed) save(d);
+  }
+
+  /* ---------- 会话草稿：未提交会话的进度持久化 ----------
+     每次作答即写入；提交或返回列表时清除。题组只存 id，恢复时重新解析，
+     解析不到（题组已删）整份丢弃，避免恢复出残缺会话。 */
+  function saveDraft() {
+    if (!session || session.submitted) return;
+    try {
+      localStorage.setItem(LS_DRAFT, JSON.stringify({
+        mode: session.mode, setId: session.setId, regen: session.regen, title: session.title,
+        groups: session.groups.map(function (g) { return { setId: g.set.id, qidx: g.qidx }; }),
+        answers: session.answers, qtimes: session.qtimes,
+        startTs: session.startTs, budgetSec: session.budgetSec
+      }));
+    } catch (e) {}
+  }
+  function loadDraft() {
+    try {
+      var d = JSON.parse(localStorage.getItem(LS_DRAFT));
+      if (!d || !d.mode || !Array.isArray(d.groups)) return false;
+      var groups = d.groups.map(function (g) {
+        var s = setById(g.setId);
+        return (s && Array.isArray(g.qidx) && g.qidx.length) ? { set: s, qidx: g.qidx } : null;
+      });
+      if (groups.some(function (g) { return !g; })) throw new Error('题组已不存在');
+      session = {
+        mode: d.mode, setId: d.setId || null, regen: d.regen || null, title: d.title || '',
+        groups: groups, answers: d.answers || {}, qtimes: d.qtimes || {},
+        submitted: false, startTs: d.startTs || Date.now(), budgetSec: d.budgetSec || 0,
+        lastMark: Date.now() // 刷新期间的空档不计入下一题的用时
+      };
+      return true;
+    } catch (e) {
+      try { localStorage.removeItem(LS_DRAFT); } catch (e2) {}
+      return false;
+    }
+  }
+  function clearDraft() {
+    try { localStorage.removeItem(LS_DRAFT); } catch (e) {}
   }
 
   /* ---------- helpers ---------- */
@@ -153,7 +193,10 @@
       if (tab) tab.classList.toggle('on', p === h);
     });
     if (h === 'home') renderHome();
-    if (h === 'practice') { if (session) { renderSession(); showSessionView(); } else { session = null; renderSetList(); showSetList(); } }
+    if (h === 'practice') {
+      if (session) { renderSession(); showSessionView(); if (!session.submitted) startTimer(); }
+      else { session = null; renderSetList(); showSetList(); }
+    }
     if (h === 'review') renderReview();
     if (h === 'bank') renderBankPage();
     window.scrollTo(0, 0);
@@ -263,6 +306,7 @@
     if (session && session.timerId) { clearInterval(session.timerId); session.timerId = null; }
   }
   function startTimer() {
+    if (session.timerId) return; // 已在计时（路由重入时防止叠加 interval）
     var tEl = document.getElementById('timer');
     tEl.style.display = '';
     session.timerId = setInterval(function () {
@@ -290,6 +334,7 @@
     renderSession();
     showSessionView();
     startTimer();
+    saveDraft();
   }
 
   function startWrongSession() {
@@ -319,6 +364,7 @@
       showSessionView();
     }
     startTimer();
+    saveDraft();
   }
 
   /* 随机混合：从全部题组抽 N 问（同题组的题归并渲染，文章只出现一次） */
@@ -345,6 +391,7 @@
     renderSession();
     showSessionView();
     startTimer();
+    saveDraft();
   }
 
   /* 模拟卷：按官方大题构成（問題7〜12）抽题组卷，全局计时 */
@@ -369,6 +416,7 @@
     renderSession();
     showSessionView();
     startTimer();
+    saveDraft();
   }
 
   function redoSession() {
@@ -454,6 +502,7 @@
           var key = el.getAttribute('data-key'), oi = parseInt(el.getAttribute('data-oi'), 10);
           session.answers[key] = oi;
           markTime(key);
+          saveDraft();
           Array.from(el.parentElement.children).forEach(function (c) { c.classList.remove('sel'); });
           el.classList.add('sel');
           updateSubmitCount();
@@ -520,6 +569,7 @@
       d.history = d.history.slice(0, HISTORY_MAX);
     }
     save(d);
+    clearDraft();
 
     var rb = document.getElementById('session-result');
     rb.innerHTML = c + '/' + totalQ + ' <span style="font-size:13px;color:var(--muted)">（' + Math.round(c / totalQ * 100) + '% · 用时 ' + fmt(sec) + '）</span>';
@@ -529,6 +579,7 @@
 
   function backToList() {
     stopTimer();
+    clearDraft();
     session = null;
     renderSetList();
     showSetList();
@@ -795,13 +846,16 @@
     }
     return -1;
   }
+  function motionOK() { // 系统"减少动态效果"时不做平滑滚动（CSS 侧另有全局降级）
+    return !(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+  }
   function markCurQ(scroll) {
     var blocks = document.querySelectorAll('#session-body .qblock');
     Array.prototype.forEach.call(blocks, function (b) { b.classList.remove('cur'); });
     var idx = firstUnanswered();
     if (idx >= 0 && blocks[idx]) {
       blocks[idx].classList.add('cur');
-      if (scroll) blocks[idx].scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      if (scroll) blocks[idx].scrollIntoView({ block: 'nearest', behavior: motionOK() ? 'smooth' : 'auto' });
     }
   }
   function onKeydown(e) {
@@ -826,6 +880,7 @@
     var key = f.set.id + ':' + f.qi;
     session.answers[key] = n - 1;
     markTime(key);
+    saveDraft();
     var blocks = document.querySelectorAll('#session-body .qblock');
     Array.prototype.forEach.call(blocks[idx].querySelectorAll('.opt'), function (el, i) {
       el.classList.toggle('sel', i === n - 1);
@@ -864,6 +919,7 @@
     });
     initBankUI();
     pruneData();
+    if (loadDraft()) toast('已恢复上次未完成的练习，计时继续', true);
     route();
   });
 })();

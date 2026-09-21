@@ -407,3 +407,12 @@ footer.site {
   .hero h1 { font-size: 33px; }
   .card, .fact { box-shadow: 3px 3px 0 var(--shadow); }
 }
+
+/* ---------- 减少动态效果（系统偏好） ---------- */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}

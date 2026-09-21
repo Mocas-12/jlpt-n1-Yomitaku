@@ -168,6 +168,32 @@ test('键盘作用域：会话进行中切到其他页，数字/Enter 不暗中�
   await expect(page.locator('#btn-submit')).toContainText(`（1/${qn}）`);
 });
 
+test('会话草稿：刷新后恢复未提交会话，提交后清除', async ({ page }) => {
+  await page.goto('/#practice');
+  await page.locator('#set-cards .setcard h3').first().click();
+  await expect(page.locator('#session-view')).toBeVisible();
+  await page.locator('#session-body .qblock').first().locator('.opt').first().click(); // 答第 1 题
+
+  await page.reload(); // 模拟误刷新：草稿恢复
+  await expect(page.locator('#session-view')).toBeVisible();
+  await expect(page.locator('#toast')).toContainText('已恢复');
+  const qn = await page.locator('#session-body .qblock').count();
+  await expect(page.locator('#btn-submit')).toContainText(`（1/${qn}）`); // 已答进度保留
+  await expect(page.locator('#timer')).toBeVisible(); // 计时恢复
+
+  // 继续答完并提交 → 草稿清除
+  for (let i = 1; i < qn; i++) {
+    await page.locator('#session-body .qblock').nth(i).locator('.opt').first().click();
+  }
+  await page.click('#btn-submit');
+  await expect(page.locator('#session-result')).toContainText(/\d+\s*\/\s*\d+/);
+  expect(await page.evaluate(() => localStorage.getItem('yt_session_draft_v1'))).toBeNull();
+
+  // 提交后刷新：不再恢复，显示组列表
+  await page.reload();
+  await expect(page.locator('#set-list')).toBeVisible();
+});
+
 test('练习记录备份：导入覆盖生效、非法 kind 拒绝、可导出', async ({ page }) => {
   page.on('dialog', (d) => d.accept()); // 覆盖确认框自动接受
   const rec = {
