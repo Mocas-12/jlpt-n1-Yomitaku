@@ -68,12 +68,33 @@
       if (!d || !d.mode || !Array.isArray(d.groups)) return false;
       var groups = d.groups.map(function (g) {
         var s = setById(g.setId);
-        return (s && Array.isArray(g.qidx) && g.qidx.length) ? { set: s, qidx: g.qidx } : null;
+        if (!s || !Array.isArray(g.qidx)) return null;
+        /* 兜底被篡改/损坏的草稿：下标须为范围内的整数并去重，
+           否则 renderSession 取 s.questions[qi] 得 undefined 直接崩，
+           且草稿不清除、每次进训练页都会反复崩 */
+        var seen = {}, qidx = [];
+        g.qidx.forEach(function (qi) {
+          if (typeof qi === 'number' && qi % 1 === 0 && qi >= 0 && qi < s.questions.length && !seen[qi]) {
+            seen[qi] = 1;
+            qidx.push(qi);
+          }
+        });
+        return qidx.length ? { set: s, qidx: qidx } : null;
       });
       if (groups.some(function (g) { return !g; })) throw new Error('题组已不存在');
+      /* 答案值夹到 0〜3（否则错题本渲染 LABELS[越界] = undefined）；
+         只保留当前会话内的题（防止 updateSubmitCount 计数虚高绕过未答确认） */
+      var validKeys = {};
+      groups.forEach(function (g) {
+        g.qidx.forEach(function (qi) { validKeys[g.set.id + ':' + qi] = 1; });
+      });
+      var answers = {}, src = d.answers || {};
+      Object.keys(src).forEach(function (k) {
+        if (validKeys[k] && typeof src[k] === 'number' && src[k] % 1 === 0 && src[k] >= 0 && src[k] <= 3) answers[k] = src[k];
+      });
       session = {
         mode: d.mode, setId: d.setId || null, regen: d.regen || null, title: d.title || '',
-        groups: groups, answers: d.answers || {}, qtimes: d.qtimes || {},
+        groups: groups, answers: answers, qtimes: d.qtimes || {},
         submitted: false, startTs: d.startTs || Date.now(), budgetSec: d.budgetSec || 0,
         lastMark: Date.now() // 刷新期间的空档不计入下一题的用时
       };

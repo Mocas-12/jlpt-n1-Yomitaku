@@ -194,6 +194,39 @@ test('会话草稿：刷新后恢复未提交会话，提交后清除', async ({
   await expect(page.locator('#set-list')).toBeVisible();
 });
 
+test('会话草稿加固：篡改的下标/答案被兜底，全非法时整份丢弃', async ({ page }) => {
+  const errors = [];
+  page.on('pageerror', (e) => errors.push(e.message));
+
+  // 部分非法：越界/重复/非整数下标 + 越界答案值 → 过滤后恢复且不崩
+  await page.goto('/#practice');
+  await page.evaluate(() => {
+    localStorage.setItem('yt_session_draft_v1', JSON.stringify({
+      mode: 'set', setId: 'sim-tan1', title: '被篡改的草稿', regen: null,
+      groups: [{ setId: 'sim-tan1', qidx: [0, 99, 'x', 0] }],
+      answers: { 'sim-tan1:0': 7, 'sim-tan1:1': 2 },
+      qtimes: {}, startTs: Date.now(), budgetSec: 120,
+    }));
+  });
+  await page.reload();
+  await expect(page.locator('#session-view')).toBeVisible();
+  await expect(page.locator('#session-body .qblock')).toHaveCount(1); // 只剩合法下标
+  await expect(page.locator('#btn-submit')).toContainText('（0/1）'); // 非法答案值与会话外的键都被剔除
+
+  // 全非法：qidx 全部越界 → 整份草稿丢弃，回到组列表且草稿已清除
+  await page.evaluate(() => {
+    localStorage.setItem('yt_session_draft_v1', JSON.stringify({
+      mode: 'set', setId: 'sim-tan1', title: '全非法', regen: null,
+      groups: [{ setId: 'sim-tan1', qidx: [50] }],
+      answers: {}, qtimes: {}, startTs: Date.now(), budgetSec: 120,
+    }));
+  });
+  await page.reload();
+  await expect(page.locator('#set-list')).toBeVisible();
+  expect(await page.evaluate(() => localStorage.getItem('yt_session_draft_v1'))).toBeNull();
+  expect(errors).toEqual([]);
+});
+
 test('练习记录备份：导入覆盖生效、非法 kind 拒绝、可导出', async ({ page }) => {
   page.on('dialog', (d) => d.accept()); // 覆盖确认框自动接受
   const rec = {
