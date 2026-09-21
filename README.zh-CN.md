@@ -194,6 +194,12 @@ npm test
 </details>
 
 <details>
+<summary><b>如何导入我自己的题目（如手头教材/真题书）？</b></summary>
+
+自己转录、自己导入练习完全支持（个人使用范畴）。① 选题：[官方免费样题 PDF](https://www.jlpt.jp/samples/sample2012/pdf/N1R.pdf)（附[正答表](https://www.jlpt.jp/samples/sample2012/pdf/N1answer.pdf)），或你购入的公式問題集/新完全マスター等；② 在「真题·题库」页点「填入示例题组」，会填入一道可直接导入的完整示例题（含逐选项解析）；③ 把字段内容替换成你的题目后点「导入」——报错会精确到第几组第几题，成功后「专项训练」页立即可练。建议第一次只录一道短文题（约 5 分钟跑通全流程），并用「导出/下载」随时备份。
+</details>
+
+<details>
 <summary><b>导入 JSON 报错？</b></summary>
 
 页面会提示具体位置：根元素必须是数组、`typeKey` 必须是六个取值之一、`sourceUrl` 若提供须以 http(s) 开头、每题必须有 `q`（设问原文）、`options` 恰好 4 项、`answer` 为 0〜3 的整数、`explain` 若提供需与 `options` 等长。

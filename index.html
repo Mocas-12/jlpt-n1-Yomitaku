@@ -30,7 +30,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;800&family=Noto+Serif+JP:wght@400;600&family=ZCOOL+QingKe+HuangYou&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=97808ecf">
+<link rel="stylesheet" href="css/style.css?v=1655f7d9">
 </head>
 <body>
 
@@ -304,16 +304,25 @@
 
     <h2 style="font-size:20px;margin:26px 0 12px">四、题库管理（导入 / 导出 / 移除）</h2>
     <div class="card">
+      <h3>如何导入自己的题目（三步走）</h3>
+      <p>想用官方样题或手头教材训练？本站不提供任何受版权保护的题目电子文本，但<b>自己转录、自己导入练习</b>完全支持（个人使用范畴）：</p>
+      <ol class="flow">
+        <li><b>准备题目</b>：官方免费样题 PDF 是最好的起点（<a href="https://www.jlpt.jp/samples/sample2012/pdf/N1R.pdf" target="_blank" rel="noopener">N1 読解样题</a>・<a href="https://www.jlpt.jp/samples/sample2012/pdf/N1answer.pdf" target="_blank" rel="noopener">正答表</a>），也可从你购入的『公式問題集』『新完全マスター読解』等选题；</li>
+        <li><b>改示例</b>：点下方「填入示例题组」，会填入一道可直接导入的完整示例题（含逐选项解析），把字段内容替换成你的题目即可；</li>
+        <li><b>导入开练</b>：粘贴进文本框点「导入」，报错会精确到第几组第几题；成功后回「专项训练」即见。首次建议只录一道短文题（约 5 分钟跑通全流程），并用「导出/下载」随时备份。</li>
+      </ol>
+    </div>
+    <div class="card">
       <h3>当前题库：<span id="bank-count"></span></h3>
       <div id="bank-list" style="margin-top:8px"></div>
     </div>
     <div class="card">
       <h3>导入题组</h3>
       <p style="font-size:13.5px;color:var(--muted)">支持粘贴 JSON 或选择 .json 文件；同 id 题组会被覆盖更新。字段校验失败会提示具体位置。</p>
-      <textarea id="bank-import-text" rows="8" style="width:100%;font-family:Consolas,monospace;font-size:13px;border:1px solid var(--border);border-radius:10px;padding:12px" placeholder='在此粘贴题库 JSON（数组），或点击「填入格式模板」'></textarea>
+      <textarea id="bank-import-text" rows="8" style="width:100%;font-family:Consolas,monospace;font-size:13px;border:1px solid var(--border);border-radius:10px;padding:12px" placeholder='在此粘贴题库 JSON（数组），或点击「填入示例题组」'></textarea>
       <p style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap;align-items:center">
         <button class="btn" id="btn-import">导入</button>
-        <button class="btn sub" id="btn-example">填入格式模板</button>
+        <button class="btn sub" id="btn-example">填入示例题组</button>
         <input type="file" id="bank-file" accept=".json,application/json" style="font-size:13px">
       </p>
       <p style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap">
@@ -386,7 +395,7 @@
 <div id="toast"></div>
 
 <script src="js/bank.js?v=7694a7e7"></script>
-<script src="js/app.js?v=bea1f6aa"></script>
+<script src="js/app.js?v=58b0ae8a"></script>
 <script>
 /* PWA：注册 Service Worker（file:// 直接打开时自动跳过） */
 if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === '127.0.0.1' || location.hostname === 'localhost')) {
