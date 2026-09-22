@@ -227,6 +227,21 @@ test('会话草稿加固：篡改的下标/答案被兜底，全非法时整份�
   expect(errors).toEqual([]);
 });
 
+test('信号词高亮开关：默认素卷，勾选后衬底高亮，取消后消失', async ({ page }) => {
+  await page.goto('/#practice');
+  await page.locator('#set-cards .setcard h3').first().click();
+  await expect(page.locator('#session-view')).toBeVisible();
+
+  // 默认未勾选：正文无信号词衬底（首组正文含「しかし」，回归看守：曾恒高亮）
+  await expect(page.locator('#session-body mark.sig')).toHaveCount(0);
+
+  await page.check('#sig-toggle');
+  await expect(page.locator('#session-body mark.sig').first()).toContainText('しかし');
+
+  await page.uncheck('#sig-toggle');
+  await expect(page.locator('#session-body mark.sig')).toHaveCount(0);
+});
+
 test('练习记录备份：导入覆盖生效、非法 kind 拒绝、可导出', async ({ page }) => {
   page.on('dialog', (d) => d.accept()); // 覆盖确认框自动接受
   const rec = {

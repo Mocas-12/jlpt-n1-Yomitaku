@@ -196,11 +196,13 @@
   }
 
   /* ---------- passage rendering ---------- */
-  function passageHTML(text) {
+  /* sigOn：信号词衬底高亮由开关控制（默认关，还原考场素卷）；
+     ⟪…⟫ 划线句标记属于题面内容（划线句含义题依赖），不受开关影响 */
+  function passageHTML(text, sigOn) {
     return String(text).split('\n').map(function (para) {
       var h = esc(para);
       h = h.replace(/⟪(.+?)⟫/g, '<mark class="uline">$1</mark>');
-      h = h.replace(SIG_RE, '<mark class="sig">$1</mark>');
+      if (sigOn) h = h.replace(SIG_RE, '<mark class="sig">$1</mark>');
       return '<p>' + h + '</p>';
     }).join('');
   }
@@ -464,6 +466,7 @@
       rb.innerHTML = '';
       rb.className = 'big';
     }
+    var sigOn = document.getElementById('sig-toggle').checked; // 开关状态：喂给 passageHTML（曾因"从未读取"被误删）
     var body = '';
     var qnNo = 0; // 混合/模拟卷模式下按顺序重新编号
     session.groups.forEach(function (g) {
@@ -474,10 +477,10 @@
         '</h3></div>';
       var phtml = '<div class="passage">';
       if (s.passageA) {
-        phtml += '<p><span class="labelA">文A</span></p>' + passageHTML(s.passageA);
-        phtml += '<p><span class="labelA">文B</span></p>' + passageHTML(s.passageB);
+        phtml += '<p><span class="labelA">文A</span></p>' + passageHTML(s.passageA, sigOn);
+        phtml += '<p><span class="labelA">文B</span></p>' + passageHTML(s.passageB, sigOn);
       } else {
-        phtml += passageHTML(s.passage);
+        phtml += passageHTML(s.passage, sigOn);
       }
       phtml += '</div>';
       body += phtml;
