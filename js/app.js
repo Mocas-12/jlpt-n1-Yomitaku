@@ -871,7 +871,7 @@
   }
   function markCurQ(scroll) {
     var blocks = document.querySelectorAll('#session-body .qblock');
-    Array.prototype.forEach.call(blocks, function (b) { b.classList.remove('cur'); });
+    blocks.forEach(function (b) { b.classList.remove('cur'); });
     var idx = firstUnanswered();
     if (idx >= 0 && blocks[idx]) {
       blocks[idx].classList.add('cur');
@@ -902,7 +902,7 @@
     markTime(key);
     saveDraft();
     var blocks = document.querySelectorAll('#session-body .qblock');
-    Array.prototype.forEach.call(blocks[idx].querySelectorAll('.opt'), function (el, i) {
+    blocks[idx].querySelectorAll('.opt').forEach(function (el, i) {
       el.classList.toggle('sel', i === n - 1);
     });
     updateSubmitCount();
