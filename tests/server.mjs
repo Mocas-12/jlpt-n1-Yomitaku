@@ -1,11 +1,11 @@
 /* 冒烟测试用的极简静态服务器（Node 内置模块，无第三方依赖）
-   用法：node tests/server.mjs [端口=8123] */
+   用法：node tests/server.mjs [端口=8321] */
 import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { extname, join, normalize, sep } from 'node:path';
 
 const ROOT = process.cwd();
-const PORT = Number(process.argv[2]) || 8123;
+const PORT = Number(process.argv[2]) || 8321;
 const MIME = {
   '.html': 'text/html; charset=utf-8',
   '.css': 'text/css; charset=utf-8',
