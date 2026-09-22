@@ -233,11 +233,9 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14.5px; }
   box-shadow: 3px 3px 0 var(--shadow); transform: rotate(-2deg);
 }
 .typecard h3 { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-.typecard ol.flow { margin: 10px 0; padding-left: 22px; }
-.typecard ol.flow li { margin: 5px 0; }
-.typecard ol.flow li::marker { color: var(--accent); font-weight: 700; }
 .kv { font-size: 13.5px; color: var(--muted); }
 .kv b { color: var(--ink); font-weight: 700; }
+/* typecard 的 ol.flow 样式由下方 .card ol.flow 覆盖（typecard 均带 card 类） */
 .card ol.flow { margin: 10px 0; padding-left: 22px; }
 .card ol.flow li { margin: 5px 0; }
 .card ol.flow li::marker { color: var(--accent); font-weight: 700; }

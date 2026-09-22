@@ -140,7 +140,7 @@
     sec = Math.max(0, sec | 0);
     return pad2(Math.floor(sec / 60)) + ':' + pad2(sec % 60);
   }
-  function pad2(n) { return (n < 10 ? '0' : '') + n; }
+  function pad2(n) { return String(n).padStart(2, '0'); }
   function shuffle(arr) {
     for (var i = arr.length - 1; i > 0; i--) {
       var j = Math.floor(Math.random() * (i + 1));
@@ -173,6 +173,14 @@
     el.classList.add('show');
     clearTimeout(el._t);
     el._t = setTimeout(function () { el.classList.remove('show'); }, 2600);
+  }
+  function downloadJSON(text, name) { // 触发浏览器下载一段 JSON 文本
+    var blob = new Blob([text], { type: 'application/json' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = name;
+    a.click();
+    URL.revokeObjectURL(a.href);
   }
 
   /* ---------- theme ---------- */
@@ -216,7 +224,7 @@
     if (h === 'home') renderHome();
     if (h === 'practice') {
       if (session) { renderSession(); showSessionView(); if (!session.submitted) startTimer(); }
-      else { session = null; renderSetList(); showSetList(); }
+      else { renderSetList(); showSetList(); }
     }
     if (h === 'review') renderReview();
     if (h === 'bank') renderBankPage();
@@ -456,7 +464,6 @@
       rb.innerHTML = '';
       rb.className = 'big';
     }
-    var sigOn = document.getElementById('sig-toggle').checked;
     var body = '';
     var qnNo = 0; // 混合/模拟卷模式下按顺序重新编号
     session.groups.forEach(function (g) {
@@ -495,7 +502,7 @@
         if (session.submitted) {
           var ok = chosen === q.answer;
           var headTxt = ok ? '✓ 回答正确' : (chosen == null ? '－ 未作答' : '✗ 回答错误');
-          var qt = session.qtimes ? session.qtimes[key] : null;
+          var qt = session.qtimes[key];
           exp = '<div class="explain"><div class="head ' + (ok ? 'ok' : 'ng') + '">' + headTxt + (qt != null ? '<span class="qtime">用时 ' + qt + ' 秒</span>' : '') + (q.label ? '　<span class="badge gray">' + esc(q.label) + '</span>' : '') + '</div>';
           if (q.explain && q.explain.length) {
             exp += '<ul>' + q.explain.map(function (e, i) {
@@ -569,8 +576,8 @@
     var totalQ = 0, c = 0;
     var counted = session.mode !== 'wrong'; // set/mix/mock 都计入统计与历史，wrong 只记账错题
     session.groups.forEach(function (g) {
-      var s = g.set, t = typeInfo(s.typeKey);
-      if (counted) d.stats[t.key] = d.stats[t.key] || { c: 0, t: 0 };
+      var s = g.set;
+      if (counted) d.stats[s.typeKey] = d.stats[s.typeKey] || { c: 0, t: 0 };
       g.qidx.forEach(function (qi) {
         var key = s.id + ':' + qi, q = s.questions[qi];
         var chosen = session.answers[key];
@@ -578,8 +585,8 @@
         totalQ++;
         if (ok) c++;
         if (counted) {
-          d.stats[t.key].t++;
-          if (ok) d.stats[t.key].c++;
+          d.stats[s.typeKey].t++;
+          if (ok) d.stats[s.typeKey].c++;
         }
         if (ok) delete d.wrong[key];
         else d.wrong[key] = { setId: s.id, chosen: chosen, ts: Date.now() };
@@ -716,7 +723,6 @@
     var ta = document.getElementById('bank-import-text');
     var file = document.getElementById('bank-file');
     document.getElementById('btn-import').onclick = function () {
-      var raw = (file.files && file.files[0]) ? null : ta.value;
       var go = function (text) {
         try {
           var arr = validateSets(JSON.parse(text));
@@ -739,8 +745,8 @@
         var fr = new FileReader();
         fr.onload = function () { go(fr.result); };
         fr.readAsText(file.files[0]);
-      } else if (raw && raw.trim()) {
-        go(raw);
+      } else if (ta.value.trim()) {
+        go(ta.value);
       } else {
         toast('请先粘贴 JSON 或选择文件', false);
       }
@@ -751,12 +757,7 @@
       toast('已导出到下方文本框，可全选复制或下载');
     };
     document.getElementById('btn-download').onclick = function () {
-      var blob = new Blob([JSON.stringify(allSets(), null, 2)], { type: 'application/json' });
-      var a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = 'yomitaku-bank.json';
-      a.click();
-      URL.revokeObjectURL(a.href);
+      downloadJSON(JSON.stringify(allSets(), null, 2), 'yomitaku-bank.json');
     };
     var ex = document.getElementById('btn-example');
     if (ex) ex.onclick = function () {
@@ -819,12 +820,7 @@
       toast('已导出练习记录到文本框');
     };
     document.getElementById('btn-rec-download').onclick = function () {
-      var blob = new Blob([JSON.stringify({ kind: 'yomitaku-records', version: 1, exportedAt: new Date().toISOString(), data: load() }, null, 2)], { type: 'application/json' });
-      var a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = 'yomitaku-records.json';
-      a.click();
-      URL.revokeObjectURL(a.href);
+      downloadJSON(JSON.stringify({ kind: 'yomitaku-records', version: 1, exportedAt: new Date().toISOString(), data: load() }, null, 2), 'yomitaku-records.json');
     };
     document.getElementById('btn-rec-import').onclick = function () {
       var go = function (text) {
@@ -895,7 +891,7 @@
     var n = parseInt(e.key, 10);
     if (!(n >= 1 && n <= 4)) return;
     var idx = firstUnanswered();
-    if (idx < 0) return; // 全部答完，数字键不动作（可改选：点击该题后仍可用数字键重选）
+    if (idx < 0) return; // 全部答完，数字键不动作（改选请直接点击选项）
     var flat = flatQuestions();
     var f = flat[idx];
     var key = f.set.id + ':' + f.qi;

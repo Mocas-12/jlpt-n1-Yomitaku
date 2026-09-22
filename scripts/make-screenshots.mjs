@@ -74,7 +74,7 @@ async function newPage(theme) {
   console.log('[shots] docs/shot-explain.png');
 }
 
-/* 4. 专项训练中（深色，展示夜の和紙主题） */
+/* 6. 专项训练中（深色，展示夜の和紙主题） */
 {
   const page = await newPage('dark');
   await page.click('nav.tabs a[data-page="practice"]');
