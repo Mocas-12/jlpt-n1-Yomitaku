@@ -30,7 +30,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;800&family=Noto+Serif+JP:wght@400;600&family=ZCOOL+QingKe+HuangYou&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=232dcfe4">
+<link rel="stylesheet" href="css/style.css?v=cdbfd8c8">
 </head>
 <body>
 
@@ -311,7 +311,7 @@
         <li><b>手动改示例</b>：点下方「填入示例题组」，会填入一道可直接导入的完整示例题，把字段内容（含每题的 options / answer / explain，解析可整段删除）替换成你的题目即可；</li>
         <li><b>导入开练</b>：报错会精确到第几组第几题；成功后回「专项训练」即见。录入后用「导出/下载」随时备份。</li>
       </ol>
-      <details style="margin-top:10px">
+      <details id="ai-prompt-details" style="margin-top:10px">
         <summary style="cursor:pointer;font-weight:700">📋 AI 转录提示词（点开复制）</summary>
         <div style="margin-top:8px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">
           <button class="btn sm sub" id="btn-copy-prompt">复制提示词</button>
@@ -422,7 +422,7 @@
 <div id="toast"></div>
 
 <script src="js/bank.js?v=c4dc140c"></script>
-<script src="js/app.js?v=8d4b044a"></script>
+<script src="js/app.js?v=b491aa7f"></script>
 <script>
 /* PWA：注册 Service Worker（file:// 直接打开时自动跳过） */
 if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === '127.0.0.1' || location.hostname === 'localhost')) {

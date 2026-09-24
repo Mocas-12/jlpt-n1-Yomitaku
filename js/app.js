@@ -7,6 +7,7 @@
   var LS_CUSTOM = 'yt_custom_sets_v1';   // 页面导入的自定义题组
   var LS_THEME = 'yt_theme';             // 深色模式偏好（缺省跟随系统）
   var LS_DRAFT = 'yt_session_draft_v1';  // 未提交会话草稿（刷新/意外关闭后恢复进度）
+  var LS_GROUP = 'yt_group_open_v1';     // 题组列表按题型折叠分组的展开状态（训练页/题库页共用）
   var SIG_WORDS = ['にもかかわらず', 'とはいえ', 'これに対して', '言い換えれば', 'したがって', 'けれども', 'しかし', 'なぜなら', 'ところが', 'それでも', 'もっとも', 'たしかに', 'もちろん', 'すなわち', 'そのため', 'それゆえ', '要するに', 'つまり', '確かに', 'たしか', '一方', 'だが', 'ただし'];
   var SIG_RE = new RegExp('(' + SIG_WORDS.join('|') + ')', 'g');
   var LABELS = ['①', '②', '③', '④'];
@@ -282,6 +283,53 @@
   }
 
   var curFilter = 'all';
+
+  function setCardHTML(s, d, customs) {
+    var t = typeInfo(s.typeKey);
+    var bestRec = null;
+    (d.history || []).forEach(function (r) {
+      if (r.setId !== s.id || !r.t) return;
+      if (!bestRec || r.c / r.t > bestRec.c / r.t) bestRec = r;
+    });
+    var best = bestRec ? '最好成绩 ' + bestRec.c + '/' + bestRec.t : '';
+    var wn = 0;
+    if (d.wrong) Object.keys(d.wrong).forEach(function (qid) { if (qid.indexOf(s.id + ':') === 0) wn++; });
+    var isCustom = customs.some(function (c) { return c.id === s.id; });
+    return '<div class="card setcard" data-id="' + esc(s.id) + '">' +
+      '<h3>' + esc(s.title) + '</h3>' +
+      '<div class="meta"><span class="badge">' + t.label + '</span>' +
+      (s.source ? '<a class="badge gray" ' + (s.sourceUrl ? 'href="' + safeUrl(s.sourceUrl) + '" target="_blank" rel="noopener"' : '') + ' onclick="event.stopPropagation()">来源：' + esc(s.source) + '</a>' : '<span class="badge gray">' + (isCustom ? '自定义导入' : t.no) + '</span>') +
+      '<span class="badge gray">' + s.questions.length + ' 问 · 建议 ' + (s.minutes || 3) + ' 分钟</span>' +
+      (wn ? '<span class="badge red">错题 ' + wn + '</span>' : '') +
+      '</div>' + (best ? '<div class="best">' + best + '</div>' : '') +
+      '</div>';
+  }
+
+  /* 折叠分组：原生 details/summary（零依赖、file:// 可用、自带键盘操作）。
+     「全部」视图按题型收纳成长列表；筛选到单一题型时保持平铺。 */
+  function groupOpenMap() {
+    try { return JSON.parse(localStorage.getItem(LS_GROUP)) || {}; }
+    catch (e) { return {}; }
+  }
+  function groupedTypeHTML(byType) {
+    var open = groupOpenMap();
+    return TYPE_KEYS.filter(function (k) { return byType[k].length; }).map(function (k) {
+      return '<details class="typegroup" data-type="' + k + '"' + (open[k] ? ' open' : '') + '>' +
+        '<summary><span class="tg-label">' + typeInfo(k).label + '</span>' +
+        '<span class="tg-count">' + byType[k].length + ' 组</span></summary>' +
+        '<div class="tg-body">' + byType[k].join('') + '</div></details>';
+    }).join('');
+  }
+  function wireTypeGroups(containerId) {
+    document.querySelectorAll('#' + containerId + ' details.typegroup').forEach(function (det) {
+      det.addEventListener('toggle', function () {
+        var m = groupOpenMap();
+        m[det.getAttribute('data-type')] = det.open;
+        try { localStorage.setItem(LS_GROUP, JSON.stringify(m)); } catch (e) {}
+      });
+    });
+  }
+
   function renderSetList() {
     var d = load();
     var sets = allSets();
@@ -302,29 +350,16 @@
     }
 
     var customs = customSets();
-    var cards = '';
+    var byType = {};
+    TYPE_KEYS.forEach(function (k) { byType[k] = []; });
     sets.forEach(function (s) {
       if (curFilter !== 'all' && s.typeKey !== curFilter) return;
-      var t = typeInfo(s.typeKey);
-      var bestRec = null;
-      (d.history || []).forEach(function (r) {
-        if (r.setId !== s.id || !r.t) return;
-        if (!bestRec || r.c / r.t > bestRec.c / bestRec.t) bestRec = r;
-      });
-      var best = bestRec ? '最好成绩 ' + bestRec.c + '/' + bestRec.t : '';
-      var wn = 0;
-      if (d.wrong) Object.keys(d.wrong).forEach(function (qid) { if (qid.indexOf(s.id + ':') === 0) wn++; });
-      var isCustom = customs.some(function (c) { return c.id === s.id; });
-      cards += '<div class="card setcard" data-id="' + esc(s.id) + '">' +
-        '<h3>' + esc(s.title) + '</h3>' +
-        '<div class="meta"><span class="badge">' + t.label + '</span>' +
-        (s.source ? '<a class="badge gray" ' + (s.sourceUrl ? 'href="' + safeUrl(s.sourceUrl) + '" target="_blank" rel="noopener"' : '') + ' onclick="event.stopPropagation()">来源：' + esc(s.source) + '</a>' : '<span class="badge gray">' + (isCustom ? '自定义导入' : t.no) + '</span>') +
-        '<span class="badge gray">' + s.questions.length + ' 问 · 建议 ' + (s.minutes || 3) + ' 分钟</span>' +
-        (wn ? '<span class="badge red">错题 ' + wn + '</span>' : '') +
-        '</div>' + (best ? '<div class="best">' + best + '</div>' : '') +
-        '</div>';
+      byType[s.typeKey].push(setCardHTML(s, d, customs));
     });
-    document.getElementById('set-cards').innerHTML = cards;
+    document.getElementById('set-cards').innerHTML =
+      curFilter === 'all' ? groupedTypeHTML(byType) : byType[curFilter].join('');
+    document.getElementById('set-cards').classList.toggle('grouped', curFilter === 'all');
+    wireTypeGroups('set-cards');
     document.querySelectorAll('#set-cards .setcard').forEach(function (c) {
       c.onclick = function () { startSet(c.getAttribute('data-id')); };
     });
@@ -667,17 +702,20 @@
     var sets = allSets();
     var customs = customSets();
     document.getElementById('bank-count').textContent = sets.length + ' 组题（其中 ' + customs.length + ' 组来自页面导入，' + (sets.length - customs.length) + ' 组来自 js/bank.js 文件）';
-    var rows = sets.map(function (s) {
+    var byType = {};
+    TYPE_KEYS.forEach(function (k) { byType[k] = []; });
+    sets.forEach(function (s) {
       var t = typeInfo(s.typeKey);
       var isCustom = customs.some(function (c) { return c.id === s.id; });
-      return '<div class="wrongitem">' +
+      byType[s.typeKey].push('<div class="wrongitem">' +
         '<span class="badge">' + t.label + '</span>' +
         '<span class="qt"><b>' + esc(s.title) + '</b>　' + s.questions.length + ' 问' +
         (s.source ? '　<span class="badge gray">来源：' + esc(s.source) + '</span>' : '') + '</span>' +
         (isCustom ? '<button class="btn sm ghost" data-rm="' + esc(s.id) + '">移除</button>' : '<span class="badge gray">bank.js</span>') +
-        '</div>';
-    }).join('');
-    document.getElementById('bank-list').innerHTML = rows || '<div class="empty">暂无题组</div>';
+        '</div>');
+    });
+    document.getElementById('bank-list').innerHTML = sets.length ? groupedTypeHTML(byType) : '<div class="empty">暂无题组</div>';
+    wireTypeGroups('bank-list');
     document.querySelectorAll('#bank-list [data-rm]').forEach(function (b) {
       b.onclick = function () {
         var list = customSets().filter(function (c) { return c.id !== b.getAttribute('data-rm'); });

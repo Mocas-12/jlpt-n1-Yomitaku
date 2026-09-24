@@ -261,6 +261,37 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14.5px; }
 .setcard h3 { font-family: var(--display); font-weight: 400; font-size: 19px; letter-spacing: .5px; }
 .setcard .meta { display: flex; gap: 8px; flex-wrap: wrap; margin: 8px 0 0; }
 .setcard .best { color: var(--ok); font-size: 13px; font-weight: 700; }
+/* 题组折叠分组（details/summary 原生元素，训练页/题库页共用） */
+.typegroup { margin-bottom: 14px; }
+.typegroup summary {
+  list-style: none; cursor: pointer; user-select: none;
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 18px; background: var(--surface);
+  border: 3px solid var(--ink); border-radius: 14px;
+  box-shadow: 4px 4px 0 var(--shadow);
+  font-family: var(--display); font-size: 16.5px; font-weight: 700; letter-spacing: .5px;
+  transition: transform .12s, box-shadow .12s;
+}
+.typegroup summary::-webkit-details-marker { display: none; }
+.typegroup summary:hover { transform: translate(-1px, -1px); box-shadow: 5px 5px 0 var(--shadow); }
+.typegroup summary:focus-visible { outline: 3px solid var(--sky); outline-offset: 3px; }
+.typegroup summary::before {
+  content: '▸'; color: var(--accent); font-size: 17px; flex: none;
+  transition: transform .15s;
+}
+.typegroup[open] summary::before { transform: rotate(90deg); }
+.typegroup .tg-count {
+  margin-left: auto; padding: 0 10px; font-size: 12.5px;
+  color: var(--muted); background: var(--soft-gray);
+  border: 2px solid var(--ink); border-radius: 999px;
+}
+.typegroup .tg-body { padding: 16px 2px 0; }
+/* 分组模式下容器改为单列（组条不与展开内容同行挤占），组内卡片保持两列网格 */
+#set-cards.grouped { display: block; }
+#set-cards.grouped .tg-body {
+  display: grid; gap: 18px;
+  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+}
 
 /* ---------- session / passage ---------- */
 .session-head {
