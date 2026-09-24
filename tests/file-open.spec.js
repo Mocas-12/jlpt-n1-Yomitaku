@@ -18,6 +18,10 @@ test('file:// 直开：作答链路、键盘、混合模式、本地持久化', 
   await expect(page.locator('#page-practice.on')).toBeVisible();
   await expect(page.locator('#set-cards .setcard')).toHaveCount(80);
 
+  // 题组列表按题型折叠（默认收起）：先展开再点卡片
+  await page.evaluate(() =>
+    document.querySelectorAll('#set-cards details.typegroup').forEach((d) => { d.open = true; }));
+
   // 键盘作答（验证 hash 路由 guard 在 file:// 下不误伤）
   await page.locator('#set-cards .setcard h3').first().click();
   await expect(page.locator('#session-view')).toBeVisible();

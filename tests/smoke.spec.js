@@ -4,6 +4,10 @@ import { test, expect } from '@playwright/test';
 const ALL_SETS = 80;   // bank.js 内置题组数
 const TANBUN = 26;     // 其中内容理解（短文）题组数
 
+// 「全部」视图的题组列表按题型折叠（默认收起）：点击卡片前先展开各组
+const openGroups = (page) => page.evaluate(() =>
+  document.querySelectorAll('#set-cards details.typegroup').forEach((d) => { d.open = true; }));
+
 test.beforeEach(async ({ context }) => {
   // 拦截 Google Fonts：测试不验证排版，但 headless 下大体积 CJK 字体子集
   // 可能触发重复加载死循环卡住 load 事件；站点本身有系统字体回退，不受影响
@@ -29,6 +33,7 @@ test('完整链路：筛选 → 作答 → 提交出分 → 列表显示最好�
   }
 
   await page.click('#filterbar .fbtn[data-f="all"]');
+  await openGroups(page);
   await page.locator('#set-cards .setcard h3').first().click();
   await expect(page.locator('#session-view')).toBeVisible();
   await expect(page.locator('#timer')).toBeVisible();
@@ -53,6 +58,7 @@ test('未答完提交先确认，取消后不判分', async ({ page }) => {
   page.on('dialog', async (d) => { dialogMsg = d.message(); await d.dismiss(); });
 
   await page.goto('/#practice');
+  await openGroups(page);
   await page.locator('#set-cards .setcard h3').first().click();
   await expect(page.locator('#session-view')).toBeVisible();
 
@@ -128,6 +134,7 @@ test('深色模式：切换、记忆、theme-color 同步', async ({ page }) => 
 
 test('键盘作答：1-4 选择当前题，Enter 提交', async ({ page }) => {
   await page.goto('/#practice');
+  await openGroups(page);
   await page.locator('#set-cards .setcard h3').first().click();
   await expect(page.locator('#session-view')).toBeVisible();
   await expect(page.locator('#session-body .qblock.cur')).toHaveCount(1); // 当前题高亮
@@ -151,6 +158,7 @@ test('键盘作用域：会话进行中切到其他页，数字/Enter 不暗中�
   page.on('dialog', async (d) => { dialogs++; await d.dismiss(); });
 
   await page.goto('/#practice');
+  await openGroups(page);
   await page.locator('#set-cards .setcard h3').first().click();
   await expect(page.locator('#session-view')).toBeVisible();
   await page.locator('#session-body .qblock').first().locator('.opt').first().click(); // 只答第 1 题
@@ -170,6 +178,7 @@ test('键盘作用域：会话进行中切到其他页，数字/Enter 不暗中�
 
 test('会话草稿：刷新后恢复未提交会话，提交后清除', async ({ page }) => {
   await page.goto('/#practice');
+  await openGroups(page);
   await page.locator('#set-cards .setcard h3').first().click();
   await expect(page.locator('#session-view')).toBeVisible();
   await page.locator('#session-body .qblock').first().locator('.opt').first().click(); // 答第 1 题
@@ -229,6 +238,7 @@ test('会话草稿加固：篡改的下标/答案被兜底，全非法时整份�
 
 test('信号词高亮开关：默认素卷，勾选后衬底高亮，取消后消失', async ({ page }) => {
   await page.goto('/#practice');
+  await openGroups(page);
   await page.locator('#set-cards .setcard h3').first().click();
   await expect(page.locator('#session-view')).toBeVisible();
 
@@ -316,6 +326,7 @@ test('错题本闭环：收录 → 重练答对移出 → 单条删除与清空'
 
   // 制造错题：第一组全部选①（正解分布在其他选项，必产生错题）
   const answerAll = async () => {
+    await openGroups(page);
     await page.locator('#set-cards .setcard h3').first().click();
     await expect(page.locator('#session-view')).toBeVisible();
     const n = await page.locator('#session-body .qblock').count();
@@ -368,6 +379,7 @@ test('错题本闭环：收录 → 重练答对移出 → 单条删除与清空'
   // 再造错题（前三组全部选①），测单条删除与清空错题本
   await page.click('nav.tabs a[data-page="practice"]');
   await page.click('#btn-back'); // 上次提交的会话视图还在，先回到组列表
+  await openGroups(page);
   for (const idx of [0, 1, 2]) {
     await page.locator('#set-cards .setcard h3').nth(idx).click();
     await expect(page.locator('#session-view')).toBeVisible();
@@ -413,6 +425,7 @@ test('随机混合 10 问：抽题计时、用时展示、旧分数不残留', a
   // 旧分数不残留：回列表再开一组，头部应为空
   await page.click('nav.tabs a[data-page="practice"]');
   await page.click('#btn-back');
+  await openGroups(page);
   await page.locator('#set-cards .setcard h3').first().click();
   await expect(page.locator('#session-result')).toHaveText('');
 });
@@ -464,9 +477,36 @@ test('导入引导：两种做法卡片可见，示例题组可直接入库，AI
   await expect(page.locator('#bank-count')).toContainText(`${ALL_SETS + 1} 组题`);
 
   // AI 转录提示词：展开可见、复制有反馈
-  await page.click('#page-bank details summary');
+  await page.click('#ai-prompt-details summary');
   await expect(page.locator('#ai-prompt-text')).toContainText('typeKey');
   await expect(page.locator('#ai-prompt-text')).toContainText('不得自行改判');
   await page.click('#btn-copy-prompt');
   await expect(page.locator('#toast')).toContainText('提示词已复制');
+});
+
+test('题组列表折叠：默认收起、按题型分组、展开状态记忆', async ({ page }) => {
+  await page.goto('/#practice');
+  const groups = page.locator('#set-cards details.typegroup');
+  await expect(groups).toHaveCount(6);
+  // 收起只是折叠：卡片仍在 DOM，计数断言不受影响
+  await expect(page.locator('#set-cards .setcard')).toHaveCount(ALL_SETS);
+  expect(await page.evaluate(() =>
+    [...document.querySelectorAll('#set-cards details.typegroup')].every((d) => !d.open))).toBe(true);
+
+  // 展开第一组（短文）：组内卡片可见，其余组仍收起
+  await groups.first().locator('summary').click();
+  await expect(groups.first().locator('.setcard').first()).toBeVisible();
+  expect(await page.evaluate(() =>
+    document.querySelectorAll('#set-cards details.typegroup:not([open])').length)).toBe(5);
+
+  // 展开状态记忆：刷新后 tanbun 仍展开，其余仍收起
+  await page.reload();
+  expect(await page.evaluate(() =>
+    document.querySelector('#set-cards details.typegroup[data-type="tanbun"]').open)).toBe(true);
+  expect(await page.evaluate(() =>
+    document.querySelectorAll('#set-cards details.typegroup:not([open])').length)).toBe(5);
+
+  // 题库管理页共用同一套分组
+  await page.goto('/#bank');
+  await expect(page.locator('#bank-list details.typegroup')).toHaveCount(6);
 });
