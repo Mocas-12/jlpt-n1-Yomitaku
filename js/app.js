@@ -977,6 +977,12 @@
     });
     initBankUI();
     pruneData();
+    // 首屏/说明页的题库规模文案随 bank.js 自动对齐（data-bank-stat 钩子，防止静态数字过期）
+    var bankAll = (typeof BANK !== 'undefined' && BANK) ? BANK : [];
+    var bankQ = bankAll.reduce(function (a, s) { return a + s.questions.length; }, 0);
+    document.querySelectorAll('[data-bank-stat]').forEach(function (el) {
+      el.textContent = el.getAttribute('data-bank-stat') === 'sets' ? bankAll.length : bankQ;
+    });
     if (loadDraft()) toast('已恢复上次未完成的练习，计时继续', true);
     route();
   });
