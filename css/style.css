@@ -13,7 +13,7 @@
   --ok: #1fae6e;
   --ok-soft: #e2f8ec;
   --serif: "Noto Serif JP", "Yu Mincho", "YuMincho", "Hiragino Mincho ProN", serif;
-  --display: "ZCOOL QingKe HuangYou", "M PLUS Rounded 1c", "Microsoft YaHei", "PingFang SC", sans-serif;
+  --display: "M PLUS Rounded 1c", "Microsoft YaHei", "PingFang SC", "Noto Sans JP", "Yu Gothic", sans-serif;
   --sans: "M PLUS Rounded 1c", "Segoe UI", "Microsoft YaHei", "PingFang SC", "Noto Sans JP", "Yu Gothic", sans-serif;
   /* 主题衍生色：由基础色派生，深色模式整块覆写 */
   --paper: #fffdf7;            /* 阅读区纸面 */
@@ -92,7 +92,7 @@ header.site {
   display: flex; align-items: center; gap: 24px; height: 62px;
 }
 .brand {
-  font-family: var(--display); font-weight: 400; font-size: 22px;
+  font-family: var(--display); font-weight: 800; font-size: 22px;
   color: var(--ink); display: flex; align-items: baseline; gap: 8px; white-space: nowrap;
   letter-spacing: 1px;
 }
@@ -102,7 +102,7 @@ nav.tabs { display: flex; gap: 6px; margin-left: auto; overflow-x: auto; padding
 nav.tabs a {
   padding: 4px 14px; border-radius: 999px; color: var(--muted);
   font-size: 15px; white-space: nowrap; transition: all .12s;
-  border: 2.5px solid transparent; font-family: var(--display); letter-spacing: .5px;
+  border: 2.5px solid transparent; font-family: var(--display); font-weight: 700; letter-spacing: .5px;
 }
 nav.tabs a:hover { color: var(--ink); text-decoration: none; background: var(--surface); border-color: var(--ink); }
 nav.tabs a.on {
@@ -128,7 +128,7 @@ section.page.on { display: block; animation: fade .25s ease; }
 @keyframes fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 
 h1, h2, h3 { font-family: var(--serif); line-height: 1.4; }
-.page-title { font-family: var(--display); font-size: 30px; margin: 6px 0 4px; letter-spacing: 1px; }
+.page-title { font-family: var(--display); font-size: 30px; font-weight: 800; margin: 6px 0 4px; letter-spacing: 1px; }
 .page-desc { color: var(--muted); margin: 0 0 26px; font-size: 14.5px; }
 .eyebrow {
   font-family: var(--display); font-size: 14px; letter-spacing: .14em;
@@ -162,7 +162,7 @@ h1, h2, h3 { font-family: var(--serif); line-height: 1.4; }
   background: repeating-linear-gradient(-55deg, var(--stripe) 0 10px, transparent 10px 26px);
   border-radius: 30px; z-index: -1;
 }
-.hero h1 { font-family: var(--display); font-size: 44px; margin: 8px 0 10px; letter-spacing: 2px; text-shadow: 3px 3px 0 var(--pop); }
+.hero h1 { font-family: var(--display); font-size: 44px; font-weight: 800; margin: 8px 0 10px; letter-spacing: 2px; text-shadow: 3px 3px 0 var(--pop); }
 .hero h1 em {
   font-style: normal; color: var(--accent);
   background: linear-gradient(transparent 62%, var(--hl) 62%);
@@ -174,11 +174,11 @@ h1, h2, h3 { font-family: var(--serif); line-height: 1.4; }
   background: var(--surface); border: 3px solid var(--ink); border-radius: 14px;
   padding: 12px 18px; min-width: 150px; box-shadow: 4px 4px 0 var(--shadow);
 }
-.fact .num { font-family: var(--display); font-size: 26px; font-weight: 400; color: var(--accent); letter-spacing: 1px; }
+.fact .num { font-family: var(--display); font-size: 26px; font-weight: 700; color: var(--accent); letter-spacing: 1px; }
 .fact .lbl { font-size: 12.5px; color: var(--muted); font-weight: 700; }
 .sticker {
   position: absolute; top: 2px; right: 6px; z-index: 1;
-  font-family: var(--display); font-size: 16px; letter-spacing: 1px;
+  font-family: var(--display); font-size: 16px; font-weight: 700; letter-spacing: 1px;
   background: var(--pop); color: var(--on-pop);
   border: 3px solid var(--ink); border-radius: 12px;
   padding: 3px 14px; box-shadow: 4px 4px 0 var(--shadow);
@@ -190,7 +190,7 @@ h1, h2, h3 { font-family: var(--serif); line-height: 1.4; }
 }
 .btn {
   display: inline-block; cursor: pointer; font-family: var(--display);
-  background: var(--accent); color: #fff; font-size: 16px; font-weight: 400;
+  background: var(--accent); color: #fff; font-size: 16px; font-weight: 700;
   padding: 10px 26px; border-radius: 12px; letter-spacing: 1.5px;
   border: 3px solid var(--ink); box-shadow: 4px 4px 0 var(--shadow);
   transition: transform .1s, box-shadow .1s, filter .15s;
@@ -228,7 +228,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14.5px; }
   content: attr(data-label);
   position: absolute; top: -17px; left: 12px;
   background: var(--accent); color: #fff;
-  font-family: var(--display); font-size: 13px; letter-spacing: 1px;
+  font-family: var(--display); font-size: 13px; font-weight: 700; letter-spacing: 1px;
   padding: 2px 12px; border: 2.5px solid var(--ink); border-radius: 9px;
   box-shadow: 3px 3px 0 var(--shadow); transform: rotate(-2deg);
 }
@@ -258,7 +258,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14.5px; }
 .fbtn.on { background: var(--pop); color: var(--on-pop); font-weight: 700; }
 .setcard { cursor: pointer; transition: transform .12s, box-shadow .12s, border-color .12s; }
 .setcard:hover { transform: translate(-2px, -2px); box-shadow: 8px 8px 0 var(--shadow); border-color: var(--accent); }
-.setcard h3 { font-family: var(--display); font-weight: 400; font-size: 19px; letter-spacing: .5px; }
+.setcard h3 { font-family: var(--display); font-weight: 700; font-size: 19px; letter-spacing: .5px; }
 .setcard .meta { display: flex; gap: 8px; flex-wrap: wrap; margin: 8px 0 0; }
 .setcard .best { color: var(--ok); font-size: 13px; font-weight: 700; }
 /* 题组折叠分组（details/summary 原生元素，训练页/题库页共用） */
@@ -324,7 +324,7 @@ mark.uline { background: none; color: inherit; border-bottom: 3px solid var(--ac
 /* ---------- questions ---------- */
 .qblock { margin-bottom: 28px; }
 .qstem { font-family: var(--serif); font-size: 16.5px; margin: 0 0 12px; }
-.qnum { color: var(--accent); font-family: var(--display); font-weight: 400; margin-right: 6px; letter-spacing: 1px; }
+.qnum { color: var(--accent); font-family: var(--display); font-weight: 700; margin-right: 6px; letter-spacing: 1px; }
 .qblock.cur .qnum {
   background: var(--accent); color: #fff;
   padding: 0 8px; border-radius: 8px;
