@@ -1,8 +1,8 @@
 /* 冒烟测试：守护核心链路与历史 bug（筛选丢行 f953f7e、未答完提交、导入校验） */
 import { test, expect } from '@playwright/test';
 
-const ALL_SETS = 142;  // bank.js 内置题组数
-const TANBUN = 46;     // 其中内容理解（短文）题组数
+const ALL_SETS = 204;  // bank.js 内置题组数
+const TANBUN = 66;     // 其中内容理解（短文）题组数
 
 // 「全部」视图的题组列表按题型折叠（默认收起）：点击卡片前先展开各组
 const openGroups = (page) => page.evaluate(() =>

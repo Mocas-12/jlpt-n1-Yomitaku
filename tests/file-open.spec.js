@@ -16,7 +16,7 @@ test('file:// 直开：作答链路、键盘、混合模式、本地持久化', 
 
   await page.goto(FILE_URL + '#practice');
   await expect(page.locator('#page-practice.on')).toBeVisible();
-  await expect(page.locator('#set-cards .setcard')).toHaveCount(142);
+  await expect(page.locator('#set-cards .setcard')).toHaveCount(204);
 
   // 题组列表按题型折叠（默认收起）：先展开再点卡片
   await page.evaluate(() =>
