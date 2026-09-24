@@ -224,7 +224,7 @@ The reading area uses Noto Serif JP from Google Fonts; when offline it falls bac
 
 ## 📄 License
 
-This project is for learning and demonstration purposes only; no open-source license is set. Contact the author before reuse.
+This project is for learning and demonstration purposes, licensed under the [MIT License](./LICENSE); feel free to reuse it.
 
 ---
 
