@@ -16,7 +16,7 @@ test('file:// 直开：作答链路、键盘、混合模式、本地持久化', 
 
   await page.goto(FILE_URL + '#practice');
   await expect(page.locator('#page-practice.on')).toBeVisible();
-  await expect(page.locator('#set-cards .setcard')).toHaveCount(18);
+  await expect(page.locator('#set-cards .setcard')).toHaveCount(80);
 
   // 键盘作答（验证 hash 路由 guard 在 file:// 下不误伤）
   await page.locator('#set-cards .setcard h3').first().click();

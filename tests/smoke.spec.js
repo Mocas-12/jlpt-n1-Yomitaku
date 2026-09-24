@@ -1,8 +1,8 @@
 /* 冒烟测试：守护核心链路与历史 bug（筛选丢行 f953f7e、未答完提交、导入校验） */
 import { test, expect } from '@playwright/test';
 
-const ALL_SETS = 18;   // bank.js 内置题组数
-const TANBUN = 6;      // 其中内容理解（短文）题组数
+const ALL_SETS = 80;   // bank.js 内置题组数
+const TANBUN = 26;     // 其中内容理解（短文）题组数
 
 test.beforeEach(async ({ context }) => {
   // 拦截 Google Fonts：测试不验证排版，但 headless 下大体积 CJK 字体子集
