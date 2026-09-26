@@ -265,7 +265,7 @@
     <h2 style="font-size:20px;margin:18px 0 12px">一、内置题库（原创模拟 · 非真题）</h2>
     <div class="card">
       <h3>这是什么、不是什么</h3>
-      <p>内置 <span data-bank-stat="sets">80</span> 组共 <span data-bank-stat="q">155</span> 问，覆盖問題7〜12 全部六大题型，每道题附<b>逐选项解析</b>（错项属于哪类陷阱、正解定位在哪）。文章长度与设问方式对照官方「大題的测试目标」编写（短篇约200字、中篇约500字、长篇约1000字等）。</p>
+      <p>内置 <span data-bank-stat="sets">80</span> 组共 <span data-bank-stat="q">155</span> 问，覆盖問題7〜12 全部六大题型，每道题附<b>逐选项解析</b>（错项属于哪类陷阱、正解定位在哪）。设问方式与考点对照官方「大題的测试目标」编写；篇幅上短文对照官方约 200 字，中篇以上为适配网页限时训练的精简篇幅（多为 350〜1,200 字），设问结构与官方一致。</p>
       <p>它<b>能</b>帮你：训练设问导向阅读、时间预算、消去法 checklist、错题归因——即解题流程本身。<br>它<b>不能</b>替代：官方真题与成熟教材的打磨深度。题目标注「本站原创模拟（非真题）」，不会冒充真题误导你。</p>
     </div>
 
@@ -328,7 +328,7 @@
 - passage：文章正文原文，分段用 \n；統合理解改用 passageA / passageB 两个字段
 - questions：每题包含：
   · q：设问原文（日文原样）
-  · label：考点标签，从「主旨把握 / 内容一致 / 指示语 / 划线句含义 / 理由说明 / 意见一致 / 条件筛选」中选
+  · label：考点标签，从「主旨把握 / 内容一致 / 指示语 / 划线句含义 / 理由说明 / 意见一致 / 共通点 / 相違点 / 条件筛选 / 注意事项」中选
   · options：恰好 4 个选项，保持原文顺序
   · answer：正确答案下标（0=①，1=②，2=③，3=④）。必须与我提供的正解一致，不得自行改判！
   · explain：与 options 等长的 4 条解析，逐条说明该选项为何对/错（引用原文定位，标注陷阱类型：本文未提及/部分曲解/范围扩大/张冠李戴/因果倒置/过度推断/答非所问）。我提供了解析就依据它整理，没提供就由你根据原文写出
@@ -421,8 +421,8 @@
 
 <div id="toast"></div>
 
-<script src="js/bank.js?v=5d1d3cfd"></script>
-<script src="js/app.js?v=82296fbf"></script>
+<script src="js/bank.js?v=4c0455cb"></script>
+<script src="js/app.js?v=a2154a32"></script>
 <script>
 /* PWA：注册 Service Worker（file:// 直接打开时自动跳过） */
 if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === '127.0.0.1' || location.hostname === 'localhost')) {
