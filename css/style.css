@@ -62,7 +62,7 @@
   --on-pop: #1b1b26;
 }
 * { box-sizing: border-box; }
-html { scroll-behavior: smooth; }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
 body {
   margin: 0;
   background-color: var(--bg);
@@ -77,7 +77,11 @@ body {
 }
 ::selection { background: var(--pop); color: var(--on-pop); }
 a { color: var(--sky); font-weight: 600; text-decoration: none; }
-a:hover { text-decoration: underline; }
+/* 触屏基础：去 tap 高亮、消除点击延迟（hover 态集中在底部 media 块统一管理） */
+a, button, .opt, .fbtn, .theme-btn, summary {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
 .wrap { max-width: 1080px; margin: 0 auto; padding: 0 20px; }
 
 /* ---------- header ---------- */
@@ -104,7 +108,6 @@ nav.tabs a {
   font-size: 15px; white-space: nowrap; transition: all .12s;
   border: 2.5px solid transparent; font-family: var(--display); font-weight: 700; letter-spacing: .5px;
 }
-nav.tabs a:hover { color: var(--ink); text-decoration: none; background: var(--surface); border-color: var(--ink); }
 nav.tabs a.on {
   color: var(--on-pop); background: var(--pop); border-color: var(--ink);
   box-shadow: 3px 3px 0 var(--shadow); font-weight: 700;
@@ -118,7 +121,6 @@ nav.tabs a.on {
   box-shadow: 2.5px 2.5px 0 var(--shadow);
   transition: transform .1s, box-shadow .1s;
 }
-.theme-btn:hover { transform: translate(-1px, -1px); box-shadow: 3.5px 3.5px 0 var(--shadow); }
 .theme-btn:active { transform: translate(1.5px, 1.5px); box-shadow: 1px 1px 0 var(--shadow); }
 
 /* ---------- sections ---------- */
@@ -142,8 +144,10 @@ h1, h2, h3 { font-family: var(--serif); line-height: 1.4; }
   box-shadow: 5px 5px 0 var(--shadow);
 }
 .grid { display: grid; gap: 18px; }
-.grid.cols-3 { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
-.grid.cols-2 { grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); }
+/* min() 防轨道最小值大于容器（380px 轨道在 390px 视口下曾把页面撑到 400 横向溢出）；
+   旧浏览器不识别 min() 时回退到上一行 */
+.grid.cols-3 { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr)); }
+.grid.cols-2 { grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); grid-template-columns: repeat(auto-fill, minmax(min(380px, 100%), 1fr)); }
 .card h3 { margin: 0 0 8px; font-size: 17.5px; }
 .card p { margin: 6px 0; }
 
@@ -195,11 +199,9 @@ h1, h2, h3 { font-family: var(--serif); line-height: 1.4; }
   border: 3px solid var(--ink); box-shadow: 4px 4px 0 var(--shadow);
   transition: transform .1s, box-shadow .1s, filter .15s;
 }
-.btn:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(--shadow); text-decoration: none; filter: brightness(1.05); }
 .btn:active { transform: translate(3px, 3px); box-shadow: 1px 1px 0 var(--shadow); }
 .btn.ghost { background: var(--surface); color: var(--accent); }
 .btn.sub { background: var(--sub-bg); color: var(--ink); }
-.btn.sub:hover { filter: none; }
 .btn.sm { padding: 4px 14px; font-size: 13.5px; border-radius: 9px; border-width: 2.5px; box-shadow: 3px 3px 0 var(--shadow); }
 
 /* ---------- tables ---------- */
@@ -253,11 +255,9 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14.5px; }
   box-shadow: 3px 3px 0 var(--shadow);
   transition: transform .1s, box-shadow .1s, background .12s;
 }
-.fbtn:hover { transform: translate(-1px, -1px); box-shadow: 4px 4px 0 var(--shadow); }
 .fbtn:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--shadow); }
 .fbtn.on { background: var(--pop); color: var(--on-pop); font-weight: 700; }
 .setcard { cursor: pointer; transition: transform .12s, box-shadow .12s, border-color .12s; }
-.setcard:hover { transform: translate(-2px, -2px); box-shadow: 8px 8px 0 var(--shadow); border-color: var(--accent); }
 .setcard h3 { font-family: var(--display); font-weight: 700; font-size: 19px; letter-spacing: .5px; }
 .setcard .meta { display: flex; gap: 8px; flex-wrap: wrap; margin: 8px 0 0; }
 .setcard .best { color: var(--ok); font-size: 13px; font-weight: 700; }
@@ -273,7 +273,6 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14.5px; }
   transition: transform .12s, box-shadow .12s;
 }
 .typegroup summary::-webkit-details-marker { display: none; }
-.typegroup summary:hover { transform: translate(-1px, -1px); box-shadow: 5px 5px 0 var(--shadow); }
 .typegroup summary:focus-visible { outline: 3px solid var(--sky); outline-offset: 3px; }
 .typegroup summary::before {
   content: '▸'; color: var(--accent); font-size: 17px; flex: none;
@@ -291,6 +290,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14.5px; }
 #set-cards.grouped .tg-body {
   display: grid; gap: 18px;
   grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(380px, 100%), 1fr));
 }
 
 /* ---------- session / passage ---------- */
@@ -336,7 +336,6 @@ mark.uline { background: none; color: inherit; border-bottom: 3px solid var(--ac
   background: var(--surface); transition: transform .1s, box-shadow .1s, background .12s, border-color .12s;
   font-size: 15px;
 }
-.opt:hover { transform: translate(-1px, -1px); box-shadow: 3px 3px 0 var(--shadow); }
 .opt .tag {
   flex: none; width: 26px; height: 26px; border-radius: 50%; border: 2px solid var(--ink);
   display: flex; align-items: center; justify-content: center; font-size: 12.5px;
@@ -426,7 +425,8 @@ footer.site {
 @media (max-width: 780px) {
   .sticker { position: static; display: inline-block; transform: rotate(-1.5deg); margin: 0 10px 10px 0; }
   .sticker-2 { transform: rotate(1.5deg); }
-  .hero::before { height: 170px; }
+  /* 斜纹出血收窄到贴住视口边缘：-30px 出血在 390px 屏会横向溢出 10px */
+  .hero::before { height: 170px; left: -20px; right: -20px; }
 }
 @media (max-width: 640px) {
   .site-inner { gap: 12px; padding: 0 14px; }
@@ -435,6 +435,33 @@ footer.site {
   .stat-row { grid-template-columns: 100px 1fr 64px; }
   .hero h1 { font-size: 33px; }
   .card, .fact { box-shadow: 3px 3px 0 var(--shadow); }
+  /* —— 手机端适配 —— */
+  .badge { white-space: normal; } /* 长来源徽章在窄屏允许换行，否则撑破卡片（实测 scrollWidth 400>390） */
+  #bank-import-text, #rec-text { font-size: 16px !important; } /* iOS：聚焦输入件字号 <16px 会缩放视口 */
+  .tbl th { white-space: normal; } /* 表头允许换行，窄屏靠卡片横向滚动兜底 */
+  .opt { padding: 12px 14px; }     /* 加大选项 tap 目标（≥44px 触控标准） */
+  .fbtn { padding: 6px 16px; }
+  .btn.sm { padding: 8px 14px; }   /* 错题本删除按钮等小按钮 */
+  .session-head { gap: 8px 10px; }
+  #session-head-title { order: -1; flex-basis: 100%; } /* 标题独占首行，按钮/计时/开关成第二行 */
+  .actions .btn { flex: 1 1 auto; text-align: center; } /* 提交/返回按钮拉宽好按 */
+  #toast { left: 20px; text-align: center; } /* 长文案限宽居中，不溢出 */
+}
+
+/* ---------- 触屏适配：hover 态只在支持悬停的设备生效（防 tap 后样式残留） ---------- */
+@media (hover: hover) {
+  a:hover { text-decoration: underline; }
+  nav.tabs a:hover { color: var(--ink); text-decoration: none; background: var(--surface); border-color: var(--ink); }
+  .theme-btn:hover { transform: translate(-1px, -1px); box-shadow: 3.5px 3.5px 0 var(--shadow); }
+  .btn:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(--shadow); text-decoration: none; filter: brightness(1.05); }
+  .btn.sub:hover { filter: none; }
+  .fbtn:hover { transform: translate(-1px, -1px); box-shadow: 4px 4px 0 var(--shadow); }
+  .setcard:hover { transform: translate(-2px, -2px); box-shadow: 8px 8px 0 var(--shadow); border-color: var(--accent); }
+  .typegroup summary:hover { transform: translate(-1px, -1px); box-shadow: 5px 5px 0 var(--shadow); }
+  .opt:hover { transform: translate(-1px, -1px); box-shadow: 3px 3px 0 var(--shadow); }
+}
+@media (pointer: coarse) {
+  .kbd-hint { display: none; } /* 触屏没有键盘作答，提示无意义还占行 */
 }
 
 /* ---------- 减少动态效果（系统偏好） ---------- */

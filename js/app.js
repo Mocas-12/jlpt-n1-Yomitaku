@@ -243,6 +243,9 @@
     }
     if (h === 'review') renderReview();
     if (h === 'bank') renderBankPage();
+    /* 手机端：导航条可横向滚动，路由切换后把当前页签滚回可视区中央 */
+    var onTab = document.querySelector('nav.tabs a.on');
+    if (onTab) onTab.scrollIntoView({ block: 'nearest', inline: 'center' });
     window.scrollTo(0, 0);
   }
   window.addEventListener('hashchange', route);
