@@ -127,7 +127,9 @@
     var list = (typeof BANK !== 'undefined' && BANK ? BANK.slice() : []).concat(customSets());
     var seen = {}, out = [];
     list.forEach(function (s) {
-      if (!s || !s.id) return;
+      /* 非法 typeKey 一并剔除：导入校验只护新导入，localStorage 里的旧脏数据
+         若流到渲染侧（byType[s.typeKey]）会整页崩——渲染侧兜底，同 safeUrl 惯例 */
+      if (!s || !s.id || TYPE_KEYS.indexOf(s.typeKey) < 0) return;
       if (seen[s.id]) { out[seen[s.id] - 1] = s; } else { seen[s.id] = out.push(s); }
     });
     return out;
