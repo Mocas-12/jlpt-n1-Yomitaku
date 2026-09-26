@@ -433,7 +433,7 @@ test('模拟卷：官方構成组卷、全局计时、满分交卷', async ({ pa
   await page.click('#btn-mock');
   await expect(page.locator('#session-head-title')).toContainText('模拟卷');
   const qn = await page.locator('#session-body .qblock').count();
-  expect(qn).toBeGreaterThanOrEqual(18); // 蓝图抽题后 18~19 问（chobun 组 3 或 4 问）
+  expect(qn).toBeGreaterThanOrEqual(17); // 蓝图抽题后 17~19 问（chobun 组 3 或 4 问、shucho 组 2 或 3 问）
   expect(qn).toBeLessThanOrEqual(19);
   await expect(page.locator('#timer')).toContainText('目标');
 
