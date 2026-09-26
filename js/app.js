@@ -35,11 +35,19 @@
     catch (e) { toast('保存失败：浏览器本地存储不可用或已满', false); }
   }
 
-  /* ---------- 数据养护：history 上限 + 失效错题清理 ---------- */
+  /* ---------- 数据养护：history 上限 + 失效错题清理 + 练习日期回填 ---------- */
   var HISTORY_MAX = 200;
   function pruneData() {
     var d = load();
     var changed = false;
+    /* 旧数据迁移：练习日期（streak 用）先于 history 截断从完整历史回填，
+       重度用户（每天多会话）的连续打卡才不会被 200 条上限截掉早前的天数 */
+    if (!Array.isArray(d.days)) {
+      var days = [];
+      (d.history || []).forEach(function (r) { days.push(dstr(new Date(r.ts))); });
+      d.days = days.filter(function (x, i) { return days.indexOf(x) === i; });
+      changed = true;
+    }
     if (d.history && d.history.length > HISTORY_MAX) { d.history = d.history.slice(0, HISTORY_MAX); changed = true; }
     if (d.wrong) {
       Object.keys(d.wrong).forEach(function (qid) {
@@ -151,12 +159,14 @@
     }
     return arr;
   }
-  function calcStreak(history) { // 连续打卡天数：从练习历史推导，今天没练则从昨天起算
+  function dstr(dt) { return dt.getFullYear() + '-' + pad2(dt.getMonth() + 1) + '-' + pad2(dt.getDate()); }
+  function calcStreak(d) { // 连续打卡天数：优先读独立的练习日期记录（不受 history 上限截断影响），旧数据回退从 history 推导
     var days = {};
-    (history || []).forEach(function (r) { days[new Date(r.ts).toDateString()] = 1; });
-    var n = 0, d = new Date();
-    if (!days[d.toDateString()]) d.setDate(d.getDate() - 1);
-    while (days[d.toDateString()]) { n++; d.setDate(d.getDate() - 1); }
+    if (Array.isArray(d.days)) d.days.forEach(function (s) { days[s] = 1; });
+    else (d.history || []).forEach(function (r) { days[dstr(new Date(r.ts))] = 1; });
+    var n = 0, dt = new Date();
+    if (!days[dstr(dt)]) dt.setDate(dt.getDate() - 1);
+    while (days[dstr(dt)]) { n++; dt.setDate(dt.getDate() - 1); }
     return n;
   }
   function markTime(key) { // 每题用时：与上一题作答时刻的间隔（首题从开考起算）
@@ -260,7 +270,7 @@
     }).join('');
     var wrongN = d.wrong ? Object.keys(d.wrong).length : 0;
     var bankN = allSets().length;
-    var streak = calcStreak(d.history);
+    var streak = calcStreak(d);
     box.innerHTML =
       '<div class="grid cols-2">' +
       '<div class="card"><h3>按题型正确率</h3>' + rows +
@@ -635,6 +645,10 @@
     if (counted) {
       d.history.unshift({ ts: Date.now(), setId: session.setId || session.mode, title: session.title, c: c, t: totalQ, seconds: sec });
       d.history = d.history.slice(0, HISTORY_MAX);
+      var today = dstr(new Date()); // 练习日期独立于 history 存（streak 不受上限截断）
+      if (!Array.isArray(d.days)) d.days = [];
+      if (d.days.indexOf(today) < 0) d.days.unshift(today);
+      if (d.days.length > 730) d.days.length = 730; // 上限两年，远超任何可见的连续打卡
     }
     save(d);
     clearDraft();
@@ -759,6 +773,7 @@
     if (d.stats !== undefined && (typeof d.stats !== 'object' || d.stats === null)) throw new Error('data.stats 必须是对象');
     if (d.history !== undefined && !Array.isArray(d.history)) throw new Error('data.history 必须是数组');
     if (d.wrong !== undefined && (typeof d.wrong !== 'object' || d.wrong === null)) throw new Error('data.wrong 必须是对象');
+    if (d.days !== undefined && !Array.isArray(d.days)) throw new Error('data.days 必须是数组（练习日期，streak 用）');
     return d;
   }
 

@@ -463,6 +463,26 @@ test('连续打卡：有练习记录后首页显示 streak', async ({ page }) =>
   await expect(page.locator('.streakline')).toContainText('连续打卡 1 天');
 });
 
+test('streak 与 history 上限解耦：300 条截到 200 后，4 天连续打卡仍完整', async ({ page }) => {
+  await page.goto('/');
+  const day = 24 * 3600 * 1000;
+  await page.evaluate(({ day }) => {
+    const now = Date.now();
+    const hist = [];
+    for (let i = 0; i < 100; i++) hist.push({ ts: now, setId: 'sim-tan1', title: 't', c: 1, t: 2, seconds: 1 });
+    for (let i = 0; i < 100; i++) hist.push({ ts: now - day, setId: 'sim-tan1', title: 't', c: 1, t: 2, seconds: 1 });
+    for (let i = 0; i < 50; i++) hist.push({ ts: now - 2 * day, setId: 'sim-tan1', title: 't', c: 1, t: 2, seconds: 1 });
+    for (let i = 0; i < 50; i++) hist.push({ ts: now - 3 * day, setId: 'sim-tan1', title: 't', c: 1, t: 2, seconds: 1 });
+    localStorage.setItem('yt_n1_dokkai_v1', JSON.stringify({ stats: {}, history: hist, wrong: {} }));
+  }, { day });
+  await page.reload(); // pruneData 先从完整历史回填练习日期，再截断 history
+  await page.click('nav.tabs a[data-page="home"]');
+  await expect(page.locator('.streakline')).toContainText('连续打卡 4 天');
+  const d = await page.evaluate(() => JSON.parse(localStorage.getItem('yt_n1_dokkai_v1')));
+  expect(d.history.length).toBe(200); // 上限依旧生效
+  expect(d.days).toHaveLength(4); // 日期独立存储，未被截断
+});
+
 test('导入引导：两种做法卡片可见，示例题组可直接入库，AI 提示词可复制', async ({ page }) => {
   await page.goto('/#bank');
   await expect(page.locator('#page-bank')).toContainText('如何导入自己的题目');
