@@ -446,6 +446,11 @@ footer.site {
   #session-head-title { order: -1; flex-basis: 100%; } /* 标题独占首行，按钮/计时/开关成第二行 */
   .actions .btn { flex: 1 1 auto; text-align: center; } /* 提交/返回按钮拉宽好按 */
   #toast { left: 20px; text-align: center; } /* 长文案限宽居中，不溢出 */
+  /* header 两行式：brand 独占一行，tab 行铺满横向滑动——单行挤压会把最后一个 tab 裁到只剩半个字 */
+  .site-inner { flex-wrap: wrap; height: auto; row-gap: 0; padding-top: 9px; }
+  nav.tabs { width: 100%; margin-left: 0; scrollbar-width: none; }
+  nav.tabs::-webkit-scrollbar { display: none; }
+  nav.tabs a { padding: 4px 12px; font-size: 14.5px; }
 }
 
 /* ---------- 触屏适配：hover 态只在支持悬停的设备生效（防 tap 后样式残留） ---------- */
