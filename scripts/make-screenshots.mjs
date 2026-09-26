@@ -1,9 +1,9 @@
 /* 生成 README 界面截图（输出到 docs/，浅色 3 张 + 深色 1 张）。
    与 make-assets.mjs 同理：用 Playwright Chromium 渲染，可随时重新生成。
-   用法：node scripts/make-screenshots.mjs */
+   用法：node tests/server.mjs（默认 8321，与测试同端口）后 node scripts/make-screenshots.mjs */
 import { chromium } from '@playwright/test';
 
-const BASE = 'http://127.0.0.1:8123/';
+const BASE = 'http://127.0.0.1:8321/'; // 8123 是本机易撞车端口（曾跑过别的应用），统一用测试端口 8321
 const browser = await chromium.launch();
 
 async function newPage(theme) {
