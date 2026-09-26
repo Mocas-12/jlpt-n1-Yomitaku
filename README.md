@@ -24,7 +24,7 @@
 ## 📖 Table of Contents
 
 - [Features](#-features)
-- [Screenshots](#-screenshots)
+- [Screenshots](#️-screenshots)
 - [UI Design](#-ui-design)
 - [Training Loop](#-training-loop)
 - [Question Bank & Copyright](#-question-bank--copyright)
