@@ -15,7 +15,7 @@
 
 *打开页面 → 学技巧 → 计时训练 → 逐项解析 → 错题重练*
 
-[English](./README.md) | **简体中文**
+[English](./README.md) | **简体中文** | [日本語](./README.ja-JP.md)
 
 </div>
 

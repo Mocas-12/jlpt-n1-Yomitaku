@@ -15,7 +15,7 @@
 
 *Open the page → learn the techniques → timed practice → per-option explanations → re-drill your mistakes*
 
-**English** | [简体中文](./README.zh-CN.md)
+**English** | [简体中文](./README.zh-CN.md) | [日本語](./README.ja-JP.md)
 
 </div>
 
