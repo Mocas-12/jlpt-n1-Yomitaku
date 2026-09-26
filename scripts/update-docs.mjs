@@ -11,6 +11,7 @@ let touched = 0;
 for (const [file, re, repl] of [
   ['README.zh-CN.md', /(\d+) 组 (\d+) 问/g, () => `${sets} 组 ${qs} 问`],
   ['README.md', /(\d+) sets \/ (\d+) questions/g, () => `${sets} sets / ${qs} questions`],
+  ['README.ja-JP.md', /(\d+) セット \/ (\d+) 問/g, () => `${sets} セット / ${qs} 問`],
 ]) {
   const path = new URL('../' + file, import.meta.url);
   const before = readFileSync(path, 'utf8');
