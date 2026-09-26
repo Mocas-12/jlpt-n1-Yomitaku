@@ -87,6 +87,45 @@ for (const s of BANK) {
 const maxShare = Math.max(...ansDist) / totalQ;
 if (maxShare > 0.4) errors.push(`正解分布失衡：${ansDist.join('/')}（单选项占比 ${(maxShare * 100).toFixed(1)}%）`);
 
+/* ---- 命题效度指标（2026-09-26 内容审计新增，配方见 js/bank.js 头部）----
+   目前为告警不阻断；存量按批次回改达标后可收紧为 error。 */
+function lcSubstr(a, b) { // 最长连续公共子串长度
+  let best = 0;
+  let prev = new Array(b.length + 1).fill(0);
+  for (let i = 1; i <= a.length; i++) {
+    const cur = new Array(b.length + 1).fill(0);
+    for (let j = 1; j <= b.length; j++) {
+      if (a[i - 1] === b[j - 1]) { cur[j] = prev[j - 1] + 1; if (cur[j] > best) best = cur[j]; }
+    }
+    prev = cur;
+  }
+  return best;
+}
+let longestKeyed = 0;
+const copied = [];
+for (const s of BANK) {
+  const text = ((s.passageA || '') + (s.passageB || '') + (s.passage || '')).replace(/\s+/g, '');
+  for (const [i, q] of (s.questions || []).entries()) {
+    const L = q.options.map((o) => (o || '').length);
+    if (L[q.answer] > Math.max(...L.filter((_, k) => k !== q.answer))) longestKeyed++;
+    if (lcSubstr((q.options[q.answer] || '').replace(/\s+/g, ''), text) >= 12) copied.push(`${s.id}#${i}`);
+  }
+}
+const perTypeBias = TYPE_KEYS.map((k) => {
+  const qs = BANK.filter((s) => s.typeKey === k).flatMap((s) => s.questions);
+  if (!qs.length) return '';
+  const n = qs.filter((q) => {
+    const L = q.options.map((o) => o.length);
+    return L[q.answer] > Math.max(...L.filter((_, i) => i !== q.answer));
+  }).length;
+  return `${TYPE_NAMES[k]} ${(n / qs.length * 100).toFixed(0)}%`;
+}).filter(Boolean).join(' · ');
+console.log(`正解为严格最长选项: ${(longestKeyed / totalQ * 100).toFixed(0)}%（${perTypeBias}）— 目标 <70%`);
+if (longestKeyed / totalQ > 0.7) {
+  console.log('  ⚠ 长度偏置超标：干扰项须从原文取料做同长度改写型陷阱（存量回改中，新批次不得再增）');
+}
+console.log(`正解与原文连续照抄 ≥12 字: ${copied.length} 题${copied.length ? ' → ' + copied.slice(0, 15).join(', ') + (copied.length > 15 ? ' …' : '') : '（✓）'}`);
+
 console.log(`组数 ${BANK.length} · 问数 ${totalQ} · 正解 ${ansDist.join('/')}`);
 console.log('题型组数:', TYPE_KEYS.map((k) => `${TYPE_NAMES[k]} ${BANK.filter((s) => s.typeKey === k).length}`).join(' · '));
 console.log('字数中位数:', TYPE_KEYS.map((k) => {
