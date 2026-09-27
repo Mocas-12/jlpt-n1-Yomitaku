@@ -180,6 +180,7 @@ h1, h2, h3 { font-family: var(--serif); line-height: 1.4; }
 }
 .fact .num { font-family: var(--display); font-size: 26px; font-weight: 700; color: var(--accent); letter-spacing: 1px; }
 .fact .lbl { font-size: 12.5px; color: var(--muted); font-weight: 700; }
+.fact .lbl .keep { white-space: nowrap; } /* 说明里的括号补语整体不断行，窄屏换行落在语义边界 */
 .sticker {
   position: absolute; top: 2px; right: 6px; z-index: 1;
   font-family: var(--display); font-size: 16px; font-weight: 700; letter-spacing: 1px;
@@ -427,6 +428,9 @@ footer.site {
   .sticker-2 { transform: rotate(1.5deg); }
   /* 斜纹出血收窄到贴住视口边缘：-30px 出血在 390px 屏会横向溢出 10px */
   .hero::before { height: 170px; left: -20px; right: -20px; }
+  /* 数据框改等宽 2×2 网格：flex-wrap 下各框随文字长短伸缩，窄屏一框一行且右缘参差 */
+  .hero .facts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .fact { min-width: 0; }
 }
 @media (max-width: 640px) {
   .site-inner { gap: 12px; padding: 0 14px; }
@@ -435,6 +439,9 @@ footer.site {
   .stat-row { grid-template-columns: 100px 1fr 64px; }
   .hero h1 { font-size: 33px; }
   .card, .fact { box-shadow: 3px 3px 0 var(--shadow); }
+  .fact { padding: 10px 14px; }    /* 2×2 网格内收窄内边距，给两行说明留空间 */
+  .fact .num { font-size: 22px; }
+  .fact .lbl { line-height: 1.55; } /* 说明文字换行时行距收紧，两框等高不显空洞 */
   /* —— 手机端适配 —— */
   .badge { white-space: normal; } /* 长来源徽章在窄屏允许换行，否则撑破卡片（实测 scrollWidth 400>390） */
   #bank-import-text, #rec-text { font-size: 16px !important; } /* iOS：聚焦输入件字号 <16px 会缩放视口 */
