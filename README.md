@@ -2,7 +2,7 @@
 
 <img src="public/logo.svg" width="96" alt="Yomitaku Logo" />
 
-# 読解特訓 · Yomitaku
+# Yomitaku
 
 **A lean, hardcore JLPT N1 読解 (reading-comprehension) trainer — techniques, timed practice, per-option explanations and a mistake notebook, all in one static page**
 
