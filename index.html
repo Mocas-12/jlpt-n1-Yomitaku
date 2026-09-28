@@ -31,7 +31,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;800&family=Noto+Serif+JP:wght@400;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=b9d4e468">
+<link rel="stylesheet" href="css/style.css?v=8f57bd1f">
 </head>
 <body>
 
@@ -417,13 +417,25 @@
 </main>
 
 <footer class="site">
-  <div class="wrap foot-line">Yomitaku — 本页面为静态工具，不保存任何试题原文；练习记录仅存于本机浏览器。试题版权归 日本国際交流基金会／日本国際教育支援協会 所有。</div>
+  <div class="wrap foot-wrap">
+    <button id="install-btn" class="btn ghost sm" type="button" hidden>添加到主屏幕</button>
+    <div class="foot-line">Yomitaku — 本页面为静态工具，不保存任何试题原文；练习记录仅存于本机浏览器。试题版权归 日本国際交流基金会／日本国際教育支援協会 所有。</div>
+  </div>
+  <div id="install-guide" class="install-guide" hidden>
+    <b>iPhone / iPad 添加到主屏幕（需用 Safari 打开本页）：</b>
+    <ol>
+      <li>点浏览器底部工具栏的「分享」（方框加向上箭头的图标）</li>
+      <li>在弹出的菜单里选「添加到主屏幕」</li>
+      <li>点右上角「添加」完成。以后从主屏幕图标打开即为全屏应用，离线也能用</li>
+    </ol>
+    <button id="install-guide-close" class="btn ghost sm" type="button">知道了</button>
+  </div>
 </footer>
 
 <div id="toast"></div>
 
 <script src="js/bank.js?v=c60206a5"></script>
-<script src="js/app.js?v=4b136afc"></script>
+<script src="js/app.js?v=333c5c4d"></script>
 <script>
 /* PWA：注册 Service Worker（file:// 直接打开时自动跳过） */
 if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === '127.0.0.1' || location.hostname === 'localhost')) {

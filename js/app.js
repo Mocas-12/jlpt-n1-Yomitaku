@@ -196,6 +196,47 @@
     URL.revokeObjectURL(a.href);
   }
 
+  /* ---------- PWA：添加到主屏幕 ---------- */
+  function initInstall() {
+    var btn = document.getElementById('install-btn');
+    if (!btn) return;
+    var guide = document.getElementById('install-guide');
+    var deferred = null;
+    // 已从主屏幕图标（standalone）运行时，入口没有意义
+    if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) return;
+    // iOS 从不触发 beforeinstallprompt，也不在地址栏给安装图标：入口常显，点击给分步指引
+    // iPadOS 13+ 伪装桌面 UA，用平台+触点数补判
+    var isIOS = /iP(hone|ad|od)/.test(navigator.userAgent) ||
+      (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    if (isIOS) btn.hidden = false;
+    window.addEventListener('beforeinstallprompt', function (e) {
+      e.preventDefault(); // 不用浏览器自带的小图标入口，统一走页脚按钮
+      deferred = e;
+      btn.hidden = false;
+      try { // 一次性提示，帮用户发现页脚入口
+        if (!localStorage.getItem('yt_install_hint')) {
+          localStorage.setItem('yt_install_hint', '1');
+          toast('本站可安装到主屏幕离线使用——见页脚「添加到主屏幕」', true);
+        }
+      } catch (err) {}
+    });
+    btn.addEventListener('click', function () {
+      if (deferred) { // Chromium 系：原生安装弹窗
+        deferred.prompt();
+        deferred.userChoice.then(function (res) {
+          if (res && res.outcome === 'accepted') { btn.hidden = true; toast('已添加到主屏幕', true); }
+          deferred = null;
+        });
+        return;
+      }
+      if (isIOS) { guide.hidden = !guide.hidden; return; }
+      toast('此浏览器不支持一键安装：安卓/电脑可用 Chrome 地址栏的安装图标；iPhone 用 Safari「分享 → 添加到主屏幕」', false);
+    });
+    var closeBtn = document.getElementById('install-guide-close');
+    if (closeBtn) closeBtn.addEventListener('click', function () { guide.hidden = true; });
+    window.addEventListener('appinstalled', function () { btn.hidden = true; guide.hidden = true; });
+  }
+
   /* ---------- theme ---------- */
   function applyTheme(t) {
     document.documentElement.setAttribute('data-theme', t);
@@ -997,6 +1038,7 @@
     });
     initBankUI();
     pruneData();
+    initInstall();
     // 首屏/说明页的题库规模文案随 bank.js 自动对齐（data-bank-stat 钩子，防止静态数字过期）
     var bankAll = (typeof BANK !== 'undefined' && BANK) ? BANK : [];
     var bankQ = bankAll.reduce(function (a, s) { return a + s.questions.length; }, 0);

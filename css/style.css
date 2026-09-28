@@ -408,9 +408,27 @@ footer.site {
   background: var(--bg-glass); backdrop-filter: blur(6px);
   padding: 8px 0 calc(8px + env(safe-area-inset-bottom));
 }
+.foot-wrap { display: flex; align-items: center; justify-content: center; gap: 14px; flex-wrap: wrap; }
 .foot-line {
+  min-width: 0; max-width: 100%; /* flex 项里保住省略号 */
   text-align: center; font-size: 12.5px; font-weight: 600;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+[hidden] { display: none !important; } /* .btn 等自带 display 的元素上 hidden 属性也能生效 */
+/* iOS 等无原生安装事件的浏览器：点页脚按钮弹出的分步指引面板 */
+.install-guide {
+  position: absolute; left: 50%; transform: translateX(-50%);
+  bottom: calc(100% + 10px); z-index: 41;
+  width: min(520px, calc(100vw - 28px));
+  background: var(--surface); border: 3px solid var(--ink); border-radius: 14px;
+  box-shadow: 5px 5px 0 var(--shadow);
+  padding: 14px 18px; font-size: 13.5px; font-weight: 600; color: var(--ink);
+}
+.install-guide ol { margin: 8px 0 10px; padding-left: 20px; }
+.install-guide li { margin: 3px 0; }
+@media (max-width: 640px) {
+  .foot-wrap { flex-direction: column; gap: 4px; } /* 手机端按钮在上、文字贴底 */
+  .foot-line { width: 100%; } /* 纵向布局下 cross 轴不限宽，需显式给满宽省略号才生效 */
 }
 
 #toast {

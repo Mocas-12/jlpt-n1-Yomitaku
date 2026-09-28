@@ -528,3 +528,41 @@ test('题组列表折叠：默认收起、按题型分组、展开状态记忆',
   await page.goto('/#bank');
   await expect(page.locator('#bank-list details.typegroup')).toHaveCount(6);
 });
+
+test('添加到主屏幕：Chromium 收到安装事件后显示入口，接受安装后隐藏并提示', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.locator('#install-btn')).toBeHidden();
+
+  // 模拟 Chromium 的 beforeinstallprompt（真实事件带 prompt()/userChoice，此处手工补齐）
+  await page.evaluate(() => {
+    const e = new Event('beforeinstallprompt');
+    e.preventDefault = () => {};
+    e.prompt = () => {};
+    e.userChoice = Promise.resolve({ outcome: 'accepted' });
+    window.dispatchEvent(e);
+  });
+  await expect(page.locator('#install-btn')).toBeVisible();
+
+  await page.click('#install-btn');
+  await expect(page.locator('#toast.show')).toContainText('已添加到主屏幕');
+  await expect(page.locator('#install-btn')).toBeHidden();
+});
+
+test('添加到主屏幕：iOS Safari 无安装事件时入口常显，点击展开分步指引', async ({ browser }) => {
+  const ctx = await browser.newContext({
+    userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1',
+  });
+  await ctx.route(/fonts\.(googleapis|gstatic)\.com/, (route) => route.abort());
+  const page = await ctx.newPage();
+  await page.goto('/');
+
+  // iOS 不触发 beforeinstallprompt，按钮也应直接可见
+  await expect(page.locator('#install-btn')).toBeVisible();
+  await page.click('#install-btn');
+  await expect(page.locator('#install-guide')).toBeVisible();
+  await expect(page.locator('#install-guide')).toContainText('添加到主屏幕');
+
+  await page.click('#install-guide-close');
+  await expect(page.locator('#install-guide')).toBeHidden();
+  await ctx.close();
+});
