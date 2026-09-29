@@ -369,10 +369,16 @@ test('错题本闭环：收录 → 重练答对移出 → 单条删除与清空'
   await page.click('#btn-submit');
   await expect(page.locator('#session-result')).toContainText(/^\d+\/\d+/);
 
-  // 答对自动移出：错题本应为空
+  // 间隔重复：答对不再直接移出，而是推进到下一轮（1→3→7 天），错题本仍在、全部排到未来
   await page.click('nav.tabs a[data-page="review"]');
-  await expect(page.locator('#review-body .empty')).toBeVisible();
-  await expect(page.locator('#btn-wrong-session')).toBeHidden();
+  await expect(page.locator('#review-body .wrongitem')).toHaveCount(wrongCount);
+  await expect(page.locator('#review-body .badge.red')).toHaveCount(0); // 无今日到期
+  await expect(page.locator('#btn-review-due')).toBeHidden();
+  const stages = await page.evaluate(() => {
+    const d = JSON.parse(localStorage.getItem('yt_n1_dokkai_v1'));
+    return Object.keys(d.wrong).map((k) => d.wrong[k].stage);
+  });
+  expect(stages.every((s) => s === 1)).toBe(true); // 全部从第 1 轮推进到第 2 轮
 
   // 再造错题（前三组全部选①），测单条删除与清空错题本
   await page.click('nav.tabs a[data-page="practice"]');
@@ -397,6 +403,61 @@ test('错题本闭环：收录 → 重练答对移出 → 单条删除与清空'
   await expect(page.locator('#btn-clear-wrong')).toBeVisible();
   await page.click('#btn-clear-wrong');
   await expect(page.locator('#review-body .empty')).toBeVisible();
+});
+
+test('错题间隔重复：到期复习推进轮次，第三关毕业移出', async ({ page }) => {
+  // 种入同一题组的三道到期错题（stage 0/1/2 各一），一轮复习看遍推进与毕业
+  // （用长篇题组：每组 4 问，短文每组仅 1 问）
+  await page.goto('/');
+  await page.evaluate(() => {
+    const s = BANK.find((x) => x.typeKey === 'chobun');
+    const d = { stats: {}, history: [], days: [], wrong: {} };
+    [0, 1, 2].forEach((stage, i) => {
+      d.wrong[s.id + ':' + i] = { setId: s.id, chosen: 0, ts: Date.now() - 86400000, stage: stage, next: Date.now() - 3600000 };
+    });
+    localStorage.setItem('yt_n1_dokkai_v1', JSON.stringify(d));
+  });
+  await page.goto('/#review');
+  await expect(page.locator('#btn-review-due')).toContainText('（3 题）');
+  await expect(page.locator('#review-body .badge.red')).toHaveCount(3);
+
+  // 首页也应有待复习入口
+  await page.goto('/#home');
+  await expect(page.locator('#btn-home-review')).toBeVisible();
+
+  await page.goto('/#review');
+  await page.click('#btn-review-due');
+  await expect(page.locator('#session-head-title')).toContainText('到期复习（3 题）');
+  const plan = await page.evaluate(() => {
+    const d = JSON.parse(localStorage.getItem('yt_n1_dokkai_v1'));
+    const sid = Object.keys(d.wrong)[0].split(':')[0];
+    const s = BANK.find((x) => x.id === sid);
+    return [0, 1, 2].map((qi) => s.questions[qi].answer);
+  });
+  for (let i = 0; i < 3; i++) {
+    await page.locator('#session-body .qblock').nth(i).locator('.opt').nth(plan[i]).click();
+  }
+  await page.click('#btn-submit');
+  await expect(page.locator('#session-result')).toContainText('3/3');
+
+  // stage0→1（+3 天）、stage1→2（+7 天）、stage2→毕业删除
+  const after = await page.evaluate(() => {
+    const d = JSON.parse(localStorage.getItem('yt_n1_dokkai_v1'));
+    const keys = Object.keys(d.wrong);
+    return {
+      n: keys.length,
+      stages: keys.map((k) => d.wrong[k].stage).sort(),
+      gaps: keys.map((k) => Math.round((d.wrong[k].next - Date.now()) / 86400000)).sort(),
+    };
+  });
+  expect(after.n).toBe(2);
+  expect(after.stages).toEqual([1, 2]);
+  expect(after.gaps).toEqual([3, 7]);
+
+  // 复习页面：无今日到期，按钮隐藏
+  await page.goto('/#review');
+  await expect(page.locator('#review-body .badge.red')).toHaveCount(0);
+  await expect(page.locator('#btn-review-due')).toBeHidden();
 });
 
 test('随机混合 10 问：抽题计时、用时展示、旧分数不残留', async ({ page }) => {

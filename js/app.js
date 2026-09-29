@@ -37,6 +37,17 @@
 
   /* ---------- 数据养护：history 上限 + 失效错题清理 + 练习日期回填 ---------- */
   var HISTORY_MAX = 200;
+  var DAY = 86400000;
+  /* 错题间隔重复：stage 0/1/2 分别对应 1/3/7 天后再复习，stage 2 复习通过即毕业移出。
+     旧数据（无 stage/next 字段）视为 stage 0、已到期，走同一套推进 */
+  function dueKeys(d) {
+    var now = Date.now(), out = [];
+    if (d.wrong) Object.keys(d.wrong).forEach(function (qid) {
+      if (!(d.wrong[qid].next > now)) out.push(qid);
+    });
+    return out;
+  }
+  function dueCount(d) { return dueKeys(d).length; }
   function pruneData() {
     var d = load();
     var changed = false;
@@ -313,6 +324,7 @@
       return '<div class="histitem"><span>' + fmtDate(r.ts) + '</span><b style="flex:1">' + esc(r.title) + '</b><span>' + r.c + '/' + r.t + ' · ' + fmt(r.seconds) + '</span></div>';
     }).join('');
     var wrongN = d.wrong ? Object.keys(d.wrong).length : 0;
+    var dueN = dueCount(d);
     var bankN = allSets().length;
     var streak = calcStreak(d);
     box.innerHTML =
@@ -321,9 +333,12 @@
       '<p style="margin-top:12px;font-size:13.5px;color:var(--muted)">当前题库：' + bankN + ' 组题（<a href="#bank">真题·题库</a>导入/管理）</p></div>' +
       '<div class="card"><h3>最近练习</h3>' +
       (streak ? '<p class="streakline">🔥 连续打卡 <b>' + streak + '</b> 天</p>' : '') +
+      (dueN ? '<p class="dueline">📌 今日待复习错题 <b style="color:var(--accent)">' + dueN + '</b> 题 <button class="btn sm" id="btn-home-review">开始复习</button></p>' : '') +
       (hist || '<div class="empty">还没有练习记录。内置题库已就绪，去<a href="#practice">专项训练</a>开始第一组吧。</div>') +
-      (wrongN ? '<p style="margin-top:10px">错题本待消灭：<b style="color:var(--accent)">' + wrongN + '</b> 题 · <a href="#review">去看错题</a></p>' : '') +
+      (wrongN ? '<p style="margin-top:10px">错题本共 <b style="color:var(--accent)">' + wrongN + '</b> 题待消灭 · <a href="#review">去看错题</a></p>' : '') +
       '</div></div>';
+    var hr = document.getElementById('btn-home-review');
+    if (hr) hr.onclick = function () { startWrongSession(true); };
   }
 
   /* =========================================================
@@ -459,11 +474,16 @@
     saveDraft();
   }
 
-  function startWrongSession() {
+  function startWrongSession(dueOnly) {
     var d = load();
+    var qids = dueKeys(d);
     if (!d.wrong || !Object.keys(d.wrong).length) return;
+    if (dueOnly && !qids.length) { toast('到期的错题都复习完了，可以练点新的', true); return; }
+    var want = {};
+    (dueOnly ? qids : Object.keys(d.wrong)).forEach(function (qid) { want[qid] = 1; });
     var bySet = {};
     Object.keys(d.wrong).forEach(function (qid) {
+      if (!want[qid]) return;
       var i = qid.lastIndexOf(':');
       var sid = qid.slice(0, i);
       (bySet[sid] = bySet[sid] || []).push(parseInt(qid.slice(i + 1), 10));
@@ -477,7 +497,7 @@
     if (!groups.length) { toast('错题对应的题组已不存在，建议清空错题本', false); return; }
     stopTimer();
     var totalW = groups.reduce(function (n, g) { return n + g.qidx.length; }, 0);
-    session = { mode: 'wrong', title: '错题重练（' + totalW + ' 题）', regen: null, groups: groups, answers: {}, qtimes: {}, submitted: false, startTs: Date.now(), budgetSec: 0 };
+    session = { mode: 'wrong', title: (dueOnly ? '到期复习（' : '错题重练（') + totalW + ' 题）', regen: null, groups: groups, answers: {}, qtimes: {}, submitted: false, startTs: Date.now(), budgetSec: 0 };
     /* 会话渲染在训练页容器里：若当前在别的路由（如错题本页），需切到 #practice 才可见 */
     if (location.hash !== '#practice') {
       location.hash = '#practice'; // hashchange → route() 渲染
@@ -682,8 +702,16 @@
           d.stats[s.typeKey].t++;
           if (ok) d.stats[s.typeKey].c++;
         }
-        if (ok) delete d.wrong[key];
-        else d.wrong[key] = { setId: s.id, chosen: chosen, ts: Date.now() };
+        if (ok) {
+          var w = d.wrong[key];
+          if (w) { // 错题复习通过：推进间隔重复阶段（1d→3d→7d），第三关毕业移出
+            var stage = (w.stage || 0) + 1;
+            if (stage >= 3) delete d.wrong[key];
+            else d.wrong[key] = { setId: s.id, chosen: chosen, ts: w.ts, stage: stage, next: Date.now() + (stage === 1 ? 3 : 7) * DAY };
+          }
+        } else { // 错了（含未作答）：收录/打回第一阶段，明天再来
+          d.wrong[key] = { setId: s.id, chosen: chosen, ts: Date.now(), stage: 0, next: Date.now() + DAY };
+        }
       });
     });
     if (counted) {
@@ -719,10 +747,19 @@
     var d = load();
     var box = document.getElementById('review-body');
     var keys = d.wrong ? Object.keys(d.wrong).sort(function (a, b) { return d.wrong[b].ts - d.wrong[a].ts; }) : [];
+    var dueN = dueCount(d);
+    var dueBtn = document.getElementById('btn-review-due');
+    dueBtn.style.display = dueN ? '' : 'none';
+    dueBtn.textContent = '复习到期错题（' + dueN + ' 题）';
     document.getElementById('btn-wrong-session').style.display = keys.length ? '' : 'none';
     if (!keys.length) {
-      box.innerHTML = '<div class="empty">错题本是空的。做错的题会自动收录到这里，方便考前重练。</div>';
+      box.innerHTML = '<div class="empty">错题本是空的。做错的题会自动收录，按「明天→3天后→7天后」的节奏提醒你复习，三次答对才算消灭。</div>';
       return;
+    }
+    var now = Date.now();
+    function fmtDue(ts) {
+      var dt = new Date(ts);
+      return (dt.getMonth() + 1) + '月' + dt.getDate() + '日';
     }
     var rows = keys.map(function (qid) {
       var e = d.wrong[qid];
@@ -730,11 +767,14 @@
       var qi = parseInt(qid.split(':')[1], 10), q = s.questions[qi];
       if (!q) return '';
       var t = typeInfo(s.typeKey);
+      var stageTxt = (e.next > now)
+        ? '<span class="badge gray">' + fmtDue(e.next) + ' 复习</span>'
+        : '<span class="badge red">今日到期</span>';
       return '<div class="wrongitem">' +
-        '<span class="badge">' + t.label + '</span>' +
+        '<span class="badge">' + t.label + '</span>' + stageTxt +
         '<span class="qt"><b>' + esc(s.title) + '</b> 問' + (qi + 1) + '　' + esc(q.q) + '<br>' +
         '<span style="color:var(--muted);font-size:13px">你的答案：' + (e.chosen == null ? '未作答' : LABELS[e.chosen]) +
-        '｜正解：' + LABELS[q.answer] + '</span></span>' +
+        '｜正解：' + LABELS[q.answer] + '｜第 ' + ((e.stage || 0) + 1) + ' 轮</span></span>' +
         '<button class="btn sm ghost" data-del="' + esc(qid) + '">删除</button>' +
         '</div>';
     }).join('');
@@ -1013,6 +1053,7 @@
      ========================================================= */
   document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('btn-wrong-session').onclick = function () { startWrongSession(); };
+    document.getElementById('btn-review-due').onclick = function () { startWrongSession(true); };
     document.getElementById('btn-back-top').onclick = function () { backToList(); };
     // 随机混合 / 模拟卷入口
     document.getElementById('btn-mix10').onclick = function () { startMixSession(10); };
