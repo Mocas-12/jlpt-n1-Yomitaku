@@ -629,6 +629,25 @@ test('解析引用跳原文：点击解析条目，文章对应句子高亮', as
   }
 });
 
+test('成绩卡分享：出分后生成成绩图片（无 Web Share 文件能力时下载）', async ({ page }) => {
+  page.on('dialog', (d) => d.accept());
+  await page.goto('/#practice');
+  await page.click('#btn-mock');
+  await expect(page.locator('#session-view')).toBeVisible();
+  const n = await page.locator('#session-body .qblock').count();
+  for (let i = 0; i < n; i++) {
+    await page.locator('#session-body .qblock').nth(i).locator('.opt').first().click();
+  }
+  await page.click('#btn-submit');
+  await expect(page.locator('#btn-share')).toBeVisible();
+
+  const [download] = await Promise.all([
+    page.waitForEvent('download'),
+    page.click('#btn-share'),
+  ]);
+  expect(download.suggestedFilename()).toBe('yomitaku-score.png');
+});
+
 test('随机混合 10 问：抽题计时、用时展示、旧分数不残留', async ({ page }) => {
   await page.goto('/#practice');
   await page.click('#btn-mix10');

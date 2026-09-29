@@ -806,8 +806,11 @@
     } else {
       var redoLabel = session.regen ? (session.regen.kind === 'mock' ? '再考一次（重新组卷）' : '再抽一组') : (session.mode === 'wrong' ? '再练一遍错题' : '重做这一组');
       acts.innerHTML = '<button class="btn" id="btn-redo">' + redoLabel + '</button>' +
+        (session.score ? '<button class="btn sub" id="btn-share">分享成绩</button>' : '') +
         '<button class="btn sub" id="btn-back">返回列表</button>';
       document.getElementById('btn-redo').onclick = redoSession;
+      var sh = document.getElementById('btn-share');
+      if (sh) sh.onclick = shareScoreCard;
       document.getElementById('btn-back').onclick = backToList;
     }
     if (!session.submitted) markCurQ(false);
@@ -826,6 +829,7 @@
     stopTimer();
     session.submitted = true;
     var sec = Math.floor((Date.now() - session.startTs) / 1000);
+    session.score = null; // wrong 会话不计成绩
     var d = load();
     d.stats = d.stats || {}; d.history = d.history || []; d.wrong = d.wrong || {};
 
@@ -858,6 +862,7 @@
       });
     });
     if (counted) {
+      session.score = { c: c, total: totalQ, sec: sec };
       d.history.unshift({ ts: Date.now(), setId: session.setId || session.mode, title: session.title, c: c, t: totalQ, seconds: sec });
       d.history = d.history.slice(0, HISTORY_MAX);
       var today = dstr(new Date()); // 练习日期独立于 history 存（streak 不受上限截断）
@@ -881,6 +886,60 @@
     renderSetList();
     showSetList();
     window.scrollTo(0, 0);
+  }
+
+  /* ---------- 成绩卡分享：canvas 生成成绩图片，Web Share 优先、下载兜底 ---------- */
+  function shareScoreCard() {
+    if (!session || !session.score) return;
+    var sc = session.score;
+    var W = 900, H = 500;
+    var cv = document.createElement('canvas');
+    cv.width = W; cv.height = H;
+    var ctx = cv.getContext('2d');
+    var display = '"M PLUS Rounded 1c", "Segoe UI", "Microsoft YaHei", "PingFang SC", "Noto Sans JP", sans-serif';
+    // 底色与边框（浅色主题配色，分享卡固定浅色保证可读）
+    ctx.fillStyle = '#fff8ec'; ctx.fillRect(0, 0, W, H);
+    ctx.lineWidth = 6; ctx.strokeStyle = '#1b1b26';
+    ctx.strokeRect(14, 14, W - 28, H - 28);
+    ctx.fillStyle = '#e8433a'; ctx.fillRect(14, 14, W - 28, 12); // 顶部色条
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#1b1b26';
+    ctx.font = '700 30px ' + display;
+    ctx.fillText('Yomitaku · JLPT N1 読解特訓', W / 2, 86);
+    ctx.fillStyle = '#5f6470';
+    ctx.font = '600 20px ' + display;
+    ctx.fillText(session.title, W / 2, 128);
+    // 大分数
+    ctx.fillStyle = '#e8433a';
+    ctx.font = '800 110px ' + display;
+    ctx.fillText(sc.c + '/' + sc.total, W / 2, 268);
+    ctx.fillStyle = '#1b1b26';
+    ctx.font = '700 34px ' + display;
+    var pct = sc.total ? Math.round(sc.c / sc.total * 100) : 0;
+    ctx.fillText('正确率 ' + pct + '% · 用时 ' + fmt(sc.sec), W / 2, 330);
+    // 落款
+    ctx.fillStyle = '#5f6470';
+    ctx.font = '600 18px ' + display;
+    ctx.fillText(fmtDate(Date.now()), W / 2, 386);
+    ctx.font = '600 18px ' + display;
+    ctx.fillText('読解の極意、ここにあり！', W / 2, 428);
+    cv.toBlob(function (blob) {
+      if (!blob) { toast('成绩卡生成失败', false); return; }
+      var file = new File([blob], 'yomitaku-score.png', { type: 'image/png' });
+      // Web Share L2（可分享文件）优先；否则下载图片
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        navigator.share({ files: [file], title: 'Yomitaku 成绩卡', text: session.title + ' ' + sc.c + '/' + sc.total })
+          .then(function () { toast('成绩卡已分享'); })
+          .catch(function () { /* 用户取消分享不算失败 */ });
+      } else {
+        var a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'yomitaku-score.png';
+        a.click();
+        URL.revokeObjectURL(a.href);
+        toast('成绩卡已保存为图片', true);
+      }
+    }, 'image/png');
   }
 
   /* =========================================================
