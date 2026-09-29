@@ -1,9 +1,13 @@
-/* 同步两份 README 的题库规模数字（扩充批次后跑一次）：node scripts/update-docs.mjs
-   首页/题库页的规模文案走 data-bank-stat 动态注入，无需处理；bank.js 头部的
+/* 同步三份 README 的题库规模数字（扩充批次后跑一次）：node scripts/update-docs.mjs
+   首页/题库页的规模文案走 data-bank-stat 动态注入，无需处理；js/bank/core.js 头部的
    构成注释（如 21×4+1×3）随批次手写，不在此自动化。 */
 import { readFileSync, writeFileSync } from 'node:fs';
 
-const BANK = new Function(readFileSync(new URL('../js/bank.js', import.meta.url), 'utf8') + '\nreturn BANK;')();
+// 题库分片按序拼接，window 垫片让分片的 window.BANK 在函数作用域里可求值
+const src = ['core', 'tanbun', 'chubun', 'chobun', 'togo', 'shucho', 'joho']
+  .map((f) => readFileSync(new URL(`../js/bank/${f}.js`, import.meta.url), 'utf8'))
+  .join('\n');
+const BANK = new Function('window', src + '\nreturn window.BANK;')({});
 const sets = BANK.length;
 const qs = BANK.reduce((a, s) => a + s.questions.length, 0);
 

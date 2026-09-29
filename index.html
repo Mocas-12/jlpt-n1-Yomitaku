@@ -31,7 +31,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;800&family=Noto+Serif+JP:wght@400;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=8f57bd1f">
+<link rel="stylesheet" href="css/style.css?v=84c3539f">
 </head>
 <body>
 
@@ -445,8 +445,14 @@
 
 <div id="toast"></div>
 
-<script src="js/bank.js?v=c60206a5"></script>
-<script src="js/app.js?v=333c5c4d"></script>
+<script defer src="js/bank/core.js?v=9b64b363"></script>
+<script defer src="js/bank/tanbun.js?v=b6cad093"></script>
+<script defer src="js/bank/chubun.js?v=0afd1d55"></script>
+<script defer src="js/bank/chobun.js?v=ff59e77c"></script>
+<script defer src="js/bank/togo.js?v=31aaa2da"></script>
+<script defer src="js/bank/shucho.js?v=bddeec09"></script>
+<script defer src="js/bank/joho.js?v=68076865"></script>
+<script defer src="js/app.js?v=599cddc1"></script>
 <script>
 /* PWA：注册 Service Worker（file:// 直接打开时自动跳过） */
 if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === '127.0.0.1' || location.hostname === 'localhost')) {

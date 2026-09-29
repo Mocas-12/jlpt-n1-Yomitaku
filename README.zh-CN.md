@@ -117,8 +117,8 @@ jlpt-n1-Yomitaku/
 ├── css/
 │   └── style.css         # 和风纸质感主题样式
 ├── js/
-│   ├── bank.js           # 内置题库（原创模拟题，可直接编辑追加）
-│   └── app.js            # 训练引擎：计时、判分、解析、错题本、统计、导入导出
+│   ├── bank/             # 内置题库按题型分片（core.js + 6 个题型文件，原创模拟题）
+│   └── app.js            # 训练引擎：计时、判分、解析、错题间隔复习、统计、导入导出
 ├── public/               # logo.svg · icon-192/512.png · og-banner.png
 └── scripts/
     ├── version.mjs       # 按内容哈希改写 ?v= 版本号与 sw.js 缓存名（零依赖，幂等）

@@ -117,8 +117,8 @@ jlpt-n1-Yomitaku/
 ├── css/
 │   └── style.css         # Washi paper-texture theme styles
 ├── js/
-│   ├── bank.js           # Built-in question bank (original mock questions, editable to extend)
-│   └── app.js            # Training engine: timer, scoring, explanations, mistake notebook, stats, import/export
+│   ├── bank/             # Built-in question bank split by type (core.js + 6 type shards, original mock questions)
+│   └── app.js            # Training engine: timer, scoring, explanations, spaced-repetition review, import/export
 ├── public/               # logo.svg · icon-192/512.png · og-banner.png
 └── scripts/
     ├── version.mjs       # Rewrites ?v= params and the sw.js cache name from content hashes (zero-dep, idempotent)

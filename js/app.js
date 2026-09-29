@@ -1,5 +1,5 @@
 /* Yomitaku — 交互逻辑（无依赖，支持 file:// 直接打开）
-   题库来源：js/bank.js 中手写的 BANK + 「真题·题库」页导入的自定义题组（存 localStorage） */
+   题库来源：js/bank/ 分片（window.BANK）+ 「真题·题库」页导入的自定义题组（存 localStorage） */
 (function () {
   'use strict';
 
@@ -1034,7 +1034,7 @@
   function renderBankPage() {
     var sets = allSets();
     var customs = customSets();
-    document.getElementById('bank-count').textContent = sets.length + ' 组题（其中 ' + customs.length + ' 组来自页面导入，' + (sets.length - customs.length) + ' 组来自 js/bank.js 文件）';
+    document.getElementById('bank-count').textContent = sets.length + ' 组题（其中 ' + customs.length + ' 组来自页面导入，' + (sets.length - customs.length) + ' 组来自内置题库 js/bank/）';
     var byType = {};
     TYPE_KEYS.forEach(function (k) { byType[k] = []; });
     sets.forEach(function (s) {
@@ -1044,7 +1044,7 @@
         '<span class="badge">' + t.label + '</span>' +
         '<span class="qt"><b>' + esc(s.title) + '</b>　' + s.questions.length + ' 问' +
         (s.source ? '　<span class="badge gray">来源：' + esc(s.source) + '</span>' : '') + '</span>' +
-        (isCustom ? '<button class="btn sm ghost" data-rm="' + esc(s.id) + '">移除</button>' : '<span class="badge gray">bank.js</span>') +
+        (isCustom ? '<button class="btn sm ghost" data-rm="' + esc(s.id) + '">移除</button>' : '<span class="badge gray">内置</span>') +
         '</div>');
     });
     document.getElementById('bank-list').innerHTML = sets.length ? groupedTypeHTML(byType) : '<div class="empty">暂无题组</div>';

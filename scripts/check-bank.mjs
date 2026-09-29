@@ -15,12 +15,16 @@ const LEN_FLOOR = { tanbun: 150, chubun: 200, chobun: 500, togo: 300, shucho: 35
 const LEN_OFFICIAL = { tanbun: 200, chubun: 500, chobun: 1000, togo: 600, shucho: 1000, joho: 700 };
 const TYPE_NAMES = { tanbun: '短文', chubun: '中文', chobun: '长篇', togo: '統合', shucho: '主張', joho: '情報' };
 
-const src = readFileSync(new URL('../js/bank.js', import.meta.url), 'utf8');
+// 题库分片按序拼接（core + 六题型），window 垫片让分片的 window.BANK 在 vm 里可求值
+const bankSrc = ['core', ...TYPE_KEYS]
+  .map((f) => readFileSync(new URL(`../js/bank/${f}.js`, import.meta.url), 'utf8'))
+  .join('\n');
+const src = 'var window = globalThis;\n' + bankSrc;
 const ctx = (await import('node:vm')).createContext({});
 const vm = await import('node:vm');
-vm.runInContext(src, ctx); // bank.js 顶层 const 不上 global，需在同一上下文里再取一次
-const BANK = vm.runInContext('BANK', ctx);
-if (!Array.isArray(BANK)) { console.error('bank.js 未求值出 BANK 数组'); process.exit(1); }
+vm.runInContext(src, ctx);
+const BANK = vm.runInContext('window.BANK', ctx);
+if (!Array.isArray(BANK)) { console.error('js/bank/ 未求值出 BANK 数组'); process.exit(1); }
 
 const errors = [];
 const warns = [];
