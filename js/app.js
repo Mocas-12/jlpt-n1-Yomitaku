@@ -327,9 +327,15 @@
     var dueN = dueCount(d);
     var bankN = allSets().length;
     var streak = calcStreak(d);
+    // 弱点画像：错题的考点标签 Top3（点击直达该考点的定向训练）
+    var traps = Object.keys(d.traps || {}).map(function (l) { return [l, d.traps[l]]; })
+      .sort(function (a, b) { return b[1] - a[1]; }).slice(0, 3);
     box.innerHTML =
       '<div class="grid cols-2">' +
       '<div class="card"><h3>按题型正确率</h3>' + rows +
+      (traps.length ? '<p class="trapline" style="margin-top:12px"><b>常掉陷阱：</b>' +
+        traps.map(function (t) { return '<a href="#practice" data-trap="' + esc(t[0]) + '">【' + esc(t[0]) + '】×' + t[1] + '</a>'; }).join('　') +
+        '<span style="color:var(--muted);font-size:12.5px">（点标签直达定向训练）</span></p>' : '') +
       '<p style="margin-top:12px;font-size:13.5px;color:var(--muted)">当前题库：' + bankN + ' 组题（<a href="#bank">真题·题库</a>导入/管理）</p></div>' +
       '<div class="card"><h3>最近练习</h3>' +
       (streak ? '<p class="streakline">🔥 连续打卡 <b>' + streak + '</b> 天</p>' : '') +
@@ -339,6 +345,12 @@
       '</div></div>';
     var hr = document.getElementById('btn-home-review');
     if (hr) hr.onclick = function () { startWrongSession(true); };
+    box.querySelectorAll('[data-trap]').forEach(function (a) {
+      a.addEventListener('click', function () {
+        curLabel = a.getAttribute('data-trap');
+        curFilter = 'all'; curQuery = '';
+      }); // hash 跳转后 route → renderSetList 按状态渲染
+    });
   }
 
   /* =========================================================
@@ -354,6 +366,27 @@
   }
 
   var curFilter = 'all';
+  var curLabel = 'all';   // 考点标签筛选（题组含任一该标签的题即命中）
+  var curQuery = '';      // 标题关键词搜索
+  var curWrongLabel = 'all'; // 错题本的考点筛选
+  /* 考点标签固定词表（与 bank.js 出题配方一致；新标签出现时自动追加进筛选项） */
+  var QLABELS = ['主旨把握', '内容一致', '划线句含义', '理由说明', '共通点', '相違点', '条件筛选', '注意事项'];
+  function labelChipsHTML(sets, cur) { // 训练页/错题本共用的考点筛选 chips（只列出有题的标签）
+    var have = {};
+    sets.forEach(function (s) {
+      s.questions.forEach(function (q) { if (q.label) have[q.label] = (have[q.label] || 0) + 1; });
+    });
+    var html = '<button class="fbtn' + (cur === 'all' ? ' on' : '') + '" data-l="all">全部考点</button>';
+    QLABELS.forEach(function (l) {
+      if (!have[l]) return;
+      html += '<button class="fbtn' + (cur === l ? ' on' : '') + '" data-l="' + esc(l) + '">' + esc(l) + '（' + have[l] + '）</button>';
+    });
+    Object.keys(have).forEach(function (l) { // 非词表内的标签（自定义导入）也给出入口
+      if (QLABELS.indexOf(l) >= 0) return;
+      html += '<button class="fbtn' + (cur === l ? ' on' : '') + '" data-l="' + esc(l) + '">' + esc(l) + '（' + have[l] + '）</button>';
+    });
+    return html;
+  }
 
   function setCardHTML(s, d, customs) {
     var t = typeInfo(s.typeKey);
@@ -410,13 +443,33 @@
       chips += '<button class="fbtn' + (curFilter === k ? ' on' : '') + '" data-f="' + k + '">' + typeInfo(k).label + '（' + n + '）</button>';
     });
     document.getElementById('filterbar').innerHTML = chips;
+    document.getElementById('label-chips').innerHTML = labelChipsHTML(sets, curLabel);
+    var searchEl = document.getElementById('set-search');
+    if (searchEl && searchEl.value !== curQuery) searchEl.value = curQuery; // 保留输入框焦点态，仅同步状态值
 
     if (!sets.length) {
       document.getElementById('set-cards').innerHTML =
         '<div class="card" style="text-align:center;padding:48px 24px">' +
         '<h3 style="font-size:20px">题库还是空的</h3>' +
-        '<p style="color:var(--muted)">题库被清空了。可在 <a href="#bank">真题·题库</a> 页重新导入题组 JSON，<br>或恢复 js/bank.js 中的内置题库。</p>' +
+        '<p style="color:var(--muted)">题库被清空了。可在 <a href="#bank">真题·题库</a> 页重新导入题组 JSON，<br>或恢复 js/bank/ 中的内置题库。</p>' +
         '<p style="margin-top:16px"><a class="btn" href="#bank">去获取官方例题 →</a></p></div>';
+      return;
+    }
+
+    // 题型 × 考点 × 标题关键词 三重筛选
+    var q = curQuery.toLowerCase();
+    sets = sets.filter(function (s) {
+      if (curFilter !== 'all' && s.typeKey !== curFilter) return false;
+      if (curLabel !== 'all' && !s.questions.some(function (x) { return x.label === curLabel; })) return false;
+      if (q && s.title.toLowerCase().indexOf(q) < 0) return false;
+      return true;
+    });
+
+    if (!sets.length) {
+      document.getElementById('set-cards').innerHTML =
+        '<div class="card" style="text-align:center;padding:48px 24px">' +
+        '<h3 style="font-size:20px">没有匹配的题组</h3>' +
+        '<p style="color:var(--muted)">换个关键词，或清除考点/题型筛选再试试。</p></div>';
       return;
     }
 
@@ -424,7 +477,6 @@
     var byType = {};
     TYPE_KEYS.forEach(function (k) { byType[k] = []; });
     sets.forEach(function (s) {
-      if (curFilter !== 'all' && s.typeKey !== curFilter) return;
       byType[s.typeKey].push(setCardHTML(s, d, customs));
     });
     document.getElementById('set-cards').innerHTML =
@@ -474,13 +526,20 @@
     saveDraft();
   }
 
-  function startWrongSession(dueOnly) {
+  function startWrongSession(dueOnly, label) {
     var d = load();
     var qids = dueKeys(d);
     if (!d.wrong || !Object.keys(d.wrong).length) return;
     if (dueOnly && !qids.length) { toast('到期的错题都复习完了，可以练点新的', true); return; }
     var want = {};
     (dueOnly ? qids : Object.keys(d.wrong)).forEach(function (qid) { want[qid] = 1; });
+    if (label) { // 错题本的考点筛选：只重练筛选出来的题
+      Object.keys(want).forEach(function (qid) {
+        var e = d.wrong[qid], s = setById(e.setId);
+        var q = s && s.questions[parseInt(qid.split(':')[1], 10)];
+        if (!q || q.label !== label) delete want[qid];
+      });
+    }
     var bySet = {};
     Object.keys(d.wrong).forEach(function (qid) {
       if (!want[qid]) return;
@@ -494,10 +553,10 @@
       var qidx = bySet[sid].filter(function (qi) { return qi < s.questions.length; });
       return qidx.length ? { set: s, qidx: qidx.sort(function (a, b) { return a - b; }) } : null;
     }).filter(Boolean);
-    if (!groups.length) { toast('错题对应的题组已不存在，建议清空错题本', false); return; }
+    if (!groups.length) { toast(label ? '筛选的错题没有可重练的题' : '错题对应的题组已不存在，建议清空错题本', false); return; }
     stopTimer();
     var totalW = groups.reduce(function (n, g) { return n + g.qidx.length; }, 0);
-    session = { mode: 'wrong', title: (dueOnly ? '到期复习（' : '错题重练（') + totalW + ' 题）', regen: null, groups: groups, answers: {}, qtimes: {}, submitted: false, startTs: Date.now(), budgetSec: 0 };
+    session = { mode: 'wrong', title: (dueOnly ? '到期复习（' : label ? '定向重练 · ' + label + '（' : '错题重练（') + totalW + ' 题）', regen: null, groups: groups, answers: {}, qtimes: {}, submitted: false, startTs: Date.now(), budgetSec: 0 };
     /* 会话渲染在训练页容器里：若当前在别的路由（如错题本页），需切到 #practice 才可见 */
     if (location.hash !== '#practice') {
       location.hash = '#practice'; // hashchange → route() 渲染
@@ -709,8 +768,9 @@
             if (stage >= 3) delete d.wrong[key];
             else d.wrong[key] = { setId: s.id, chosen: chosen, ts: w.ts, stage: stage, next: Date.now() + (stage === 1 ? 3 : 7) * DAY };
           }
-        } else { // 错了（含未作答）：收录/打回第一阶段，明天再来
+        } else { // 错了（含未作答）：收录/打回第一阶段，明天再来；并累计陷阱标签画像
           d.wrong[key] = { setId: s.id, chosen: chosen, ts: Date.now(), stage: 0, next: Date.now() + DAY };
+          if (q.label) { d.traps = d.traps || {}; d.traps[q.label] = (d.traps[q.label] || 0) + 1; }
         }
       });
     });
@@ -751,7 +811,36 @@
     var dueBtn = document.getElementById('btn-review-due');
     dueBtn.style.display = dueN ? '' : 'none';
     dueBtn.textContent = '复习到期错题（' + dueN + ' 题）';
-    document.getElementById('btn-wrong-session').style.display = keys.length ? '' : 'none';
+
+    // 考点筛选 chips（按当前错题的标签计数）
+    var have = {};
+    keys.forEach(function (qid) {
+      var e = d.wrong[qid], s = setById(e.setId);
+      if (!s) return;
+      var q = s.questions[parseInt(qid.split(':')[1], 10)];
+      if (q && q.label) have[q.label] = (have[q.label] || 0) + 1;
+    });
+    var chips = '<button class="fbtn' + (curWrongLabel === 'all' ? ' on' : '') + '" data-wl="all">全部（' + keys.length + '）</button>';
+    Object.keys(have).sort(function (a, b) { return have[b] - have[a]; }).forEach(function (l) {
+      chips += '<button class="fbtn' + (curWrongLabel === l ? ' on' : '') + '" data-wl="' + esc(l) + '">' + esc(l) + '（' + have[l] + '）</button>';
+    });
+    var wfb = document.getElementById('wrong-filterbar');
+    wfb.style.display = keys.length ? '' : 'none';
+    wfb.innerHTML = chips;
+
+    var shown = keys.filter(function (qid) {
+      if (curWrongLabel === 'all') return true;
+      var e = d.wrong[qid], s = setById(e.setId);
+      if (!s) return false;
+      var q = s.questions[parseInt(qid.split(':')[1], 10)];
+      return q && q.label === curWrongLabel;
+    });
+
+    var redoBtn = document.getElementById('btn-wrong-session');
+    redoBtn.style.display = keys.length ? '' : 'none';
+    redoBtn.textContent = curWrongLabel === 'all'
+      ? '全部重练（答对按间隔推进）'
+      : '重练筛选错题（' + shown.length + ' 题）';
     if (!keys.length) {
       box.innerHTML = '<div class="empty">错题本是空的。做错的题会自动收录，按「明天→3天后→7天后」的节奏提醒你复习，三次答对才算消灭。</div>';
       return;
@@ -761,7 +850,7 @@
       var dt = new Date(ts);
       return (dt.getMonth() + 1) + '月' + dt.getDate() + '日';
     }
-    var rows = keys.map(function (qid) {
+    var rows = shown.map(function (qid) {
       var e = d.wrong[qid];
       var s = setById(e.setId); if (!s) return '';
       var qi = parseInt(qid.split(':')[1], 10), q = s.questions[qi];
@@ -778,8 +867,10 @@
         '<button class="btn sm ghost" data-del="' + esc(qid) + '">删除</button>' +
         '</div>';
     }).join('');
-    box.innerHTML = '<div class="card">' + rows + '</div>' +
-      '<p style="text-align:right"><button class="btn sm sub" id="btn-clear-wrong">清空错题本</button>　<button class="btn sm sub" id="btn-clear-all">清空全部记录</button></p>';
+    box.innerHTML = shown.length
+      ? '<div class="card">' + rows + '</div>' +
+        '<p style="text-align:right"><button class="btn sm sub" id="btn-clear-wrong">清空错题本</button>　<button class="btn sm sub" id="btn-clear-all">清空全部记录</button></p>'
+      : '<div class="empty">该考点下暂时没有错题。</div>';
     box.querySelectorAll('[data-del]').forEach(function (b) {
       b.onclick = function () {
         var dd = load();
@@ -1052,7 +1143,7 @@
      init
      ========================================================= */
   document.addEventListener('DOMContentLoaded', function () {
-    document.getElementById('btn-wrong-session').onclick = function () { startWrongSession(); };
+    document.getElementById('btn-wrong-session').onclick = function () { startWrongSession(false, curWrongLabel === 'all' ? null : curWrongLabel); };
     document.getElementById('btn-review-due').onclick = function () { startWrongSession(true); };
     document.getElementById('btn-back-top').onclick = function () { backToList(); };
     // 随机混合 / 模拟卷入口
@@ -1076,6 +1167,24 @@
       if (!b) return;
       curFilter = b.getAttribute('data-f');
       renderSetList();
+    });
+    // 考点标签筛选 + 标题搜索（同样委托；输入即时过滤）
+    document.getElementById('filterbar2').addEventListener('click', function (e) {
+      var b = e.target.closest ? e.target.closest('[data-l]') : null;
+      if (!b) return;
+      curLabel = b.getAttribute('data-l');
+      renderSetList();
+    });
+    document.getElementById('set-search').addEventListener('input', function () {
+      curQuery = this.value.trim();
+      renderSetList();
+    });
+    // 错题本的考点筛选：点 chips 过滤列表，重练按钮跟随筛选结果
+    document.getElementById('wrong-filterbar').addEventListener('click', function (e) {
+      var b = e.target.closest ? e.target.closest('[data-wl]') : null;
+      if (!b) return;
+      curWrongLabel = b.getAttribute('data-wl');
+      renderReview();
     });
     initBankUI();
     pruneData();

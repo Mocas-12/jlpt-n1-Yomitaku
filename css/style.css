@@ -249,6 +249,14 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14.5px; }
 .streakline b { color: var(--accent); font-size: 19px; }
 .qtime { margin-left: 10px; font-size: 12px; font-weight: 600; color: var(--muted); }
 .filterbar { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 22px; }
+.filterbar.subbar2 { margin-top: -12px; align-items: center; } /* 第二行：搜索 + 考点 chips */
+#set-search {
+  font-family: var(--sans); font-size: 14px; font-weight: 600;
+  padding: 6px 14px; border: 2.5px solid var(--ink); border-radius: 999px;
+  background: var(--surface); color: var(--ink); width: 200px; max-width: 100%;
+}
+#set-search:focus { outline: none; border-color: var(--accent); }
+#set-search::placeholder { color: var(--muted); }
 .fbtn {
   border: 2.5px solid var(--ink); background: var(--surface); color: var(--ink);
   padding: 4px 16px; border-radius: 999px; cursor: pointer; font-size: 15px;

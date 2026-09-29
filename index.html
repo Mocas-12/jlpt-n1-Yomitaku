@@ -232,6 +232,10 @@
         <button class="btn ghost" id="btn-mock">📝 模拟卷（官方構成 · 全局计时）</button>
       </div>
       <div class="filterbar" id="filterbar"></div>
+      <div class="filterbar subbar2" id="filterbar2">
+        <input id="set-search" type="search" placeholder="搜标题关键词…" autocomplete="off">
+        <span id="label-chips"></span>
+      </div>
       <div class="grid cols-2" id="set-cards"></div>
     </div>
 
@@ -255,6 +259,7 @@
     <p class="page-desc">做错的题自动收录，按「明天 → 3 天后 → 7 天后」的节奏提醒复习，连续三轮答对才算消灭。</p>
     <button class="btn" id="btn-review-due" style="display:none;margin-bottom:16px">复习到期错题</button>
     <button class="btn sub" id="btn-wrong-session" style="display:none;margin-bottom:16px">全部重练（答对按间隔推进）</button>
+    <div class="filterbar" id="wrong-filterbar" style="display:none;margin-bottom:16px"></div>
     <div id="review-body"></div>
   </section>
 

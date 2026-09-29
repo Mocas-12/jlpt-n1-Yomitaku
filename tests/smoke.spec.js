@@ -460,6 +460,92 @@ test('错题间隔重复：到期复习推进轮次，第三关毕业移出', as
   await expect(page.locator('#btn-review-due')).toBeHidden();
 });
 
+test('定向训练：考点筛选与标题搜索过滤题组列表', async ({ page }) => {
+  await page.goto('/#practice');
+  await expect(page.locator('#label-chips .fbtn').first()).toBeVisible();
+
+  // 考点筛选：主旨把握 → 只显示含该考点题的题组，数量与 BANK 实际一致
+  const expectLabel = await page.evaluate(() =>
+    BANK.filter((s) => s.questions.some((q) => q.label === '主旨把握')).length);
+  await page.locator('#label-chips .fbtn', { hasText: '主旨把握' }).click();
+  await expect(page.locator('#set-cards .setcard')).toHaveCount(expectLabel);
+
+  // 组合：在考点筛选内再按标题搜索
+  await page.fill('#set-search', '余白');
+  const expectBoth = await page.evaluate(() =>
+    BANK.filter((s) => s.questions.some((q) => q.label === '主旨把握') && s.title.includes('余白')).length);
+  await expect(page.locator('#set-cards .setcard')).toHaveCount(expectBoth);
+
+  // 无匹配的空态
+  await page.fill('#set-search', '不存在的关键词XYZ');
+  await expect(page.locator('#set-cards')).toContainText('没有匹配的题组');
+  await page.fill('#set-search', '');
+
+  // 清除考点筛选后恢复
+  await page.locator('#label-chips .fbtn', { hasText: '全部考点' }).click();
+  const all = await page.evaluate(() => BANK.length);
+  await expect(page.locator('#set-cards .setcard')).toHaveCount(all);
+});
+
+test('定向训练：错题本考点筛选 + 首页陷阱画像直达', async ({ page }) => {
+  page.on('dialog', (d) => d.accept());
+  // 制造两类错题：短文组全选① + 长篇组全选①（正解分布不同，产生多标签错题）
+  await page.goto('/#practice');
+  const makeWrong = async (idx) => {
+    await openGroups(page);
+    await page.locator('#set-cards .setcard h3').nth(idx).click();
+    await expect(page.locator('#session-view')).toBeVisible();
+    const n = await page.locator('#session-body .qblock').count();
+    for (let i = 0; i < n; i++) {
+      await page.locator('#session-body .qblock').nth(i).locator('.opt').first().click();
+    }
+    await page.click('#btn-submit');
+    await page.click('#btn-back');
+  };
+  await makeWrong(0);
+  const chobunCard = await page.evaluate(() => {
+    openAll();
+    function openAll() {
+      document.querySelectorAll('#set-cards details.typegroup').forEach((d) => { d.open = true; });
+    }
+    const cards = [...document.querySelectorAll('#set-cards .setcard')];
+    return cards.findIndex((c) => BANK.find((x) => x.id === c.dataset.id)?.typeKey === 'chobun');
+  });
+  await openGroups(page);
+  await page.locator('#set-cards .setcard h3').nth(chobunCard).click();
+  await expect(page.locator('#session-view')).toBeVisible();
+  const n2 = await page.locator('#session-body .qblock').count();
+  for (let i = 0; i < n2; i++) {
+    await page.locator('#session-body .qblock').nth(i).locator('.opt').first().click();
+  }
+  await page.click('#btn-submit');
+
+  // 首页出现「常掉陷阱」画像，点击标签直达定向训练（同文档跳转，内存筛选状态保留）
+  await page.goto('/#home');
+  await expect(page.locator('.trapline [data-trap]').first()).toBeVisible();
+  const trapLabel = await page.locator('.trapline [data-trap]').first().getAttribute('data-trap');
+  await page.locator('.trapline [data-trap]').first().click();
+  await expect(page.locator('#page-practice.on')).toBeVisible();
+  // 会话仍存活时路由会先显示会话视图：回组列表后筛选状态生效
+  await page.click('#btn-back-top');
+  const expectTrap = await page.evaluate((l) =>
+    BANK.filter((s) => s.questions.some((q) => q.label === l)).length, trapLabel);
+  await expect(page.locator('#label-chips .fbtn.on')).toContainText(trapLabel);
+  await expect(page.locator('#set-cards .setcard')).toHaveCount(expectTrap);
+
+  // 错题本：考点 chips 过滤列表，重练按钮跟随筛选结果
+  await page.goto('/#review');
+  const chipN = await page.locator('#wrong-filterbar .fbtn').count();
+  expect(chipN).toBeGreaterThan(1); // 两类错题 → 至少「全部」+两个考点
+  await page.locator('#wrong-filterbar [data-wl]:not([data-wl="all"])').first().click();
+  const filteredN = await page.locator('#review-body .wrongitem').count();
+  expect(filteredN).toBeGreaterThan(0);
+  await expect(page.locator('#btn-wrong-session')).toContainText('重练筛选错题（' + filteredN + ' 题）');
+  await page.click('#btn-wrong-session');
+  await expect(page.locator('#session-head-title')).toContainText('定向重练 · ');
+  await page.click('#btn-back-top');
+});
+
 test('随机混合 10 问：抽题计时、用时展示、旧分数不残留', async ({ page }) => {
   await page.goto('/#practice');
   await page.click('#btn-mix10');
