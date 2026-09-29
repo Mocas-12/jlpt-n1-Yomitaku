@@ -546,6 +546,59 @@ test('定向训练：错题本考点筛选 + 首页陷阱画像直达', async ({
   await page.click('#btn-back-top');
 });
 
+test('阅读设置：字号/行距即时生效并持久化', async ({ page }) => {
+  await page.goto('/#practice');
+  await openGroups(page);
+  await page.locator('#set-cards .setcard h3').first().click();
+  await expect(page.locator('#session-view')).toBeVisible();
+  const base = await page.evaluate(() =>
+    parseFloat(getComputedStyle(document.querySelector('.passage')).fontSize));
+
+  await page.click('#fs-plus');
+  const bigger = await page.evaluate(() =>
+    parseFloat(getComputedStyle(document.querySelector('.passage')).fontSize));
+  expect(bigger).toBeGreaterThan(base);
+  await page.click('#fs-plus');
+  const biggest = await page.evaluate(() =>
+    parseFloat(getComputedStyle(document.querySelector('.passage')).fontSize));
+  expect(biggest).toBeGreaterThan(bigger);
+  await expect(page.locator('#fs-plus')).toBeDisabled(); // 第 3 档封顶
+
+  await page.click('#lh-toggle');
+  expect(await page.evaluate(() => document.documentElement.getAttribute('data-rlh'))).toBe('1');
+
+  // 持久化：刷新后仍生效
+  await page.reload();
+  expect(await page.evaluate(() => document.documentElement.getAttribute('data-rfs'))).toBe('2');
+  const kept = await page.evaluate(() =>
+    parseFloat(getComputedStyle(document.querySelector('.passage')).fontSize));
+  expect(kept).toBe(biggest);
+
+  // 缩回标准档
+  await page.click('#fs-minus');
+  await page.click('#fs-minus');
+  expect(await page.evaluate(() => document.documentElement.hasAttribute('data-rfs'))).toBe(false);
+});
+
+test('深色模式：未手动选择时跟随系统切换', async ({ page }) => {
+  await page.goto('/');
+  await page.evaluate(() => localStorage.removeItem('yt_theme'));
+  await page.emulateMedia({ colorScheme: 'light' });
+  await page.reload();
+  expect(await page.evaluate(() => document.documentElement.getAttribute('data-theme'))).toBe('light');
+
+  // 系统切到深色 → 自动跟随（无显式偏好）
+  await page.emulateMedia({ colorScheme: 'dark' });
+  await expect.poll(() => page.evaluate(() => document.documentElement.getAttribute('data-theme'))).toBe('dark');
+
+  // 手动切换后为显式偏好，系统再变不再跟随
+  await page.click('#theme-toggle');
+  expect(await page.evaluate(() => document.documentElement.getAttribute('data-theme'))).toBe('light');
+  await page.emulateMedia({ colorScheme: 'dark' });
+  await page.waitForTimeout(200);
+  expect(await page.evaluate(() => document.documentElement.getAttribute('data-theme'))).toBe('light');
+});
+
 test('随机混合 10 问：抽题计时、用时展示、旧分数不残留', async ({ page }) => {
   await page.goto('/#practice');
   await page.click('#btn-mix10');

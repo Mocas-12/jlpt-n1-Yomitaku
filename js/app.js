@@ -260,6 +260,51 @@
     }
   }
 
+  /* ---------- 阅读设置：字号（标准/大/特大）与行距（标准/加宽），会话即时生效 ---------- */
+  var LS_READER = 'yt_reader';
+  function readerSettings() {
+    try {
+      var v = JSON.parse(localStorage.getItem(LS_READER)) || {};
+      return { fs: [0, 1, 2].indexOf(v.fs) >= 0 ? v.fs : 0, lh: v.lh === 1 ? 1 : 0 };
+    } catch (e) { return { fs: 0, lh: 0 }; }
+  }
+  function applyReader(r) {
+    var h = document.documentElement;
+    if (r.fs) h.setAttribute('data-rfs', r.fs); else h.removeAttribute('data-rfs');
+    if (r.lh) h.setAttribute('data-rlh', r.lh); else h.removeAttribute('data-rlh');
+  }
+  function saveReader(r) {
+    applyReader(r);
+    try { localStorage.setItem(LS_READER, JSON.stringify(r)); } catch (e) {}
+  }
+  function initReaderCtl() {
+    var r = readerSettings();
+    applyReader(r);
+    var minus = document.getElementById('fs-minus');
+    var plus = document.getElementById('fs-plus');
+    var lh = document.getElementById('lh-toggle');
+    function sync() {
+      minus.disabled = r.fs <= 0;
+      plus.disabled = r.fs >= 2;
+      lh.classList.toggle('on', r.lh === 1);
+    }
+    minus.addEventListener('click', function () { r.fs = Math.max(0, r.fs - 1); saveReader(r); sync(); });
+    plus.addEventListener('click', function () { r.fs = Math.min(2, r.fs + 1); saveReader(r); sync(); });
+    lh.addEventListener('click', function () { r.lh = r.lh ? 0 : 1; saveReader(r); sync(); });
+    sync();
+  }
+
+  /* 系统深浅色切换：用户未手动选过主题时跟随系统（选过则尊重显式偏好） */
+  function initSystemTheme() {
+    var mq = window.matchMedia('(prefers-color-scheme: dark)');
+    if (!mq.addEventListener) return;
+    mq.addEventListener('change', function () {
+      var saved = null;
+      try { saved = localStorage.getItem(LS_THEME); } catch (e) {}
+      if (saved !== 'dark' && saved !== 'light') applyTheme(mq.matches ? 'dark' : 'light');
+    });
+  }
+
   /* ---------- passage rendering ---------- */
   /* sigOn：信号词衬底高亮由开关控制（默认关，还原考场素卷）；
      ⟪…⟫ 划线句标记属于题面内容（划线句含义题依赖），不受开关影响 */
@@ -1156,6 +1201,8 @@
       applyTheme(next);
     };
     applyTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light');
+    initReaderCtl();
+    initSystemTheme();
     // 键盘作答：1〜4 选择、Enter 提交
     document.addEventListener('keydown', onKeydown);
     document.getElementById('sig-toggle').addEventListener('change', function () {

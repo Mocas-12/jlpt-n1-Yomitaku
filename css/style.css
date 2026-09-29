@@ -257,6 +257,9 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14.5px; }
 }
 #set-search:focus { outline: none; border-color: var(--accent); }
 #set-search::placeholder { color: var(--muted); }
+.reader-ctl { display: inline-flex; gap: 6px; margin-left: 8px; }
+.reader-ctl .btn:disabled { opacity: .4; cursor: default; }
+.reader-ctl .btn.on { background: var(--pop); color: var(--ink); }
 .fbtn {
   border: 2.5px solid var(--ink); background: var(--surface); color: var(--ink);
   padding: 4px 16px; border-radius: 999px; cursor: pointer; font-size: 15px;
@@ -319,6 +322,14 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14.5px; }
   box-shadow: 5px 5px 0 var(--shadow);
   padding: 26px 30px; margin-bottom: 24px; text-align: justify;
 }
+/* 阅读设置：字号两档放大（文章/设问/选项同步），行距加宽一档 */
+html[data-rfs="1"] .passage { font-size: 18px; }
+html[data-rfs="2"] .passage { font-size: 19.5px; }
+html[data-rfs="1"] .qstem { font-size: 17.5px; }
+html[data-rfs="2"] .qstem { font-size: 19px; }
+html[data-rfs="1"] .opt { font-size: 16.5px; }
+html[data-rfs="2"] .opt { font-size: 18px; }
+html[data-rlh="1"] .passage { line-height: 2.5; }
 .passage p { margin: 0 0 1.4em; }
 .passage p:last-child { margin-bottom: 0; }
 .passage .labelA { font-weight: 700; color: var(--sky); }
