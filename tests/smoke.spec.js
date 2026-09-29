@@ -599,6 +599,36 @@ test('深色模式：未手动选择时跟随系统切换', async ({ page }) => 
   expect(await page.evaluate(() => document.documentElement.getAttribute('data-theme'))).toBe('light');
 });
 
+test('解析引用跳原文：点击解析条目，文章对应句子高亮', async ({ page }) => {
+  page.on('dialog', (d) => d.accept());
+  await page.goto('/#practice');
+  await openGroups(page);
+  // 用长篇组（4 问、长文），提交后解析引用大概率可定位
+  const chobunCard = await page.evaluate(() => {
+    const cards = [...document.querySelectorAll('#set-cards .setcard')];
+    return cards.findIndex((c) => BANK.find((x) => x.id === c.dataset.id)?.typeKey === 'chobun');
+  });
+  await page.locator('#set-cards .setcard h3').nth(chobunCard).click();
+  await expect(page.locator('#session-view')).toBeVisible();
+  const n = await page.locator('#session-body .qblock').count();
+  for (let i = 0; i < n; i++) {
+    await page.locator('#session-body .qblock').nth(i).locator('.opt').first().click();
+  }
+  await page.click('#btn-submit');
+  await expect(page.locator('#session-result')).toContainText(/\d+\s*\/\s*\d+/);
+
+  const jqN = await page.locator('#session-body li.jq').count();
+  expect(jqN).toBeGreaterThan(0); // 多数解析都带可定位的「…」引用
+  await page.locator('#session-body li.jq').first().click();
+  const hlN = await page.locator('.passage .sent.hl').count();
+  expect(hlN).toBeGreaterThan(0); // 命中句子被高亮
+  // 再次点击另一条：旧高亮清除、新高亮生效（单处高亮语义）
+  if (jqN > 1) {
+    await page.locator('#session-body li.jq').nth(1).click();
+    expect(await page.locator('.passage .sent.hl').count()).toBeGreaterThan(0);
+  }
+});
+
 test('随机混合 10 问：抽题计时、用时展示、旧分数不残留', async ({ page }) => {
   await page.goto('/#practice');
   await page.click('#btn-mix10');

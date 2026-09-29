@@ -307,14 +307,46 @@
 
   /* ---------- passage rendering ---------- */
   /* sigOn：信号词衬底高亮由开关控制（默认关，还原考场素卷）；
-     ⟪…⟫ 划线句标记属于题面内容（划线句含义题依赖），不受开关影响 */
+     ⟪…⟫ 划线句标记属于题面内容（划线句含义题依赖），不受开关影响。
+     句级 <span class="sent"> 供「解析引用 → 跳原文高亮」定位使用，无视觉差异 */
   function passageHTML(text, sigOn) {
     return String(text).split('\n').map(function (para) {
-      var h = esc(para);
-      h = h.replace(/⟪(.+?)⟫/g, '<mark class="uline">$1</mark>');
-      if (sigOn) h = h.replace(SIG_RE, '<mark class="sig">$1</mark>');
+      var sents = para.match(/[^。？！]*[。？！]|[^。？！]+/g) || [para];
+      var h = sents.map(function (sen) {
+        var t = esc(sen);
+        t = t.replace(/⟪(.+?)⟫/g, '<mark class="uline">$1</mark>');
+        if (sigOn) t = t.replace(SIG_RE, '<mark class="sig">$1</mark>');
+        return '<span class="sent">' + t + '</span>';
+      }).join('');
       return '<p>' + h + '</p>';
     }).join('');
+  }
+  /* 解析里的「…」引用能否在原文中找到（去划线标记与空白后子串匹配） */
+  function quoteIn(e, hay) {
+    var ms = String(e).match(/「([^「」]{4,80})」/g) || [];
+    for (var i = 0; i < ms.length; i++) {
+      var q = ms[i].slice(1, -1).replace(/[『』\s]/g, '');
+      if (q.length >= 4 && hay.indexOf(q) >= 0) return q;
+    }
+    return null;
+  }
+  function jumpToQuote(g, quote) {
+    var p = document.querySelector('.passage[data-g="' + g + '"]');
+    if (!p) return;
+    var sents = Array.prototype.slice.call(p.querySelectorAll('.sent'));
+    var hay = '', map = [];
+    sents.forEach(function (sp, i) {
+      var t = sp.textContent.replace(/\s/g, '');
+      map.push({ i: i, start: hay.length, end: hay.length + t.length });
+      hay += t;
+    });
+    var at = hay.indexOf(quote);
+    if (at < 0) { toast('原文中未定位到该引用', false); return; }
+    var hit = map.filter(function (m) { return m.start < at + quote.length && m.end > at; })
+      .map(function (m) { return sents[m.i]; });
+    document.querySelectorAll('.passage .sent.hl').forEach(function (sp) { sp.classList.remove('hl'); });
+    hit.forEach(function (sp) { sp.classList.add('hl'); });
+    if (hit.length) hit[0].scrollIntoView({ block: 'center', behavior: motionOK() ? 'smooth' : 'auto' });
   }
 
   /* ---------- session state ---------- */
@@ -684,13 +716,15 @@
     var sigOn = document.getElementById('sig-toggle').checked; // 开关状态：喂给 passageHTML（曾因"从未读取"被误删）
     var body = '';
     var qnNo = 0; // 混合/模拟卷模式下按顺序重新编号
-    session.groups.forEach(function (g) {
+    var hayCache = {}; // gi → 原文纯文本（解析引用匹配用）
+    session.groups.forEach(function (g, gi) {
       var s = g.set, t = typeInfo(s.typeKey);
+      hayCache[gi] = ((s.passageA || '') + (s.passageB || '') + (s.passage || '')).replace(/[⟪⟫\s]/g, '');
       body += '<div class="card" style="padding:14px 18px"><h3 style="margin:0;font-size:16px">' + esc(s.title) +
         ' <span class="badge" style="margin-left:8px">' + t.label + '</span>' +
         (s.source ? ' <a class="badge gray" style="margin-left:6px" href="' + safeUrl(s.sourceUrl) + '" target="_blank" rel="noopener">来源：' + esc(s.source) + '</a>' : '') +
         '</h3></div>';
-      var phtml = '<div class="passage">';
+      var phtml = '<div class="passage" data-g="' + gi + '">';
       if (s.passageA) {
         phtml += '<p><span class="labelA">文A</span></p>' + passageHTML(s.passageA, sigOn);
         phtml += '<p><span class="labelA">文B</span></p>' + passageHTML(s.passageB, sigOn);
@@ -726,7 +760,11 @@
             exp += '<ul>' + q.explain.map(function (e, i) {
               var mark = i === q.answer ? '<b style="color:var(--ok)">［正解 ' + LABELS[i] + '］</b>' : '<b>［' + LABELS[i] + '］</b>';
               var opText = String(q.options[i] || '');
-              return '<li>' + mark + esc(opText).slice(0, 26) + (opText.length > 26 ? '…' : '') + ' <span class="why">' + esc(e) + '</span></li>';
+              var quote = quoteIn(e, hayCache[gi]); // 解析引用可定位原文 → 可点击跳转
+              return '<li' + (quote ? ' class="jq" data-g="' + gi + '" data-q="' + esc(quote) + '"' : '') + '>' +
+                mark + esc(opText).slice(0, 26) + (opText.length > 26 ? '…' : '') +
+                ' <span class="why">' + esc(e) + '</span>' +
+                (quote ? '<span class="jump">原文 ↗</span>' : '') + '</li>';
             }).join('') + '</ul>';
           } else {
             exp += '<p style="margin:4px 0 0">正解：<b style="color:var(--ok)">' + LABELS[q.answer] + ' ' + esc(q.options[q.answer]) + '</b></p>';
@@ -1205,6 +1243,12 @@
     initSystemTheme();
     // 键盘作答：1〜4 选择、Enter 提交
     document.addEventListener('keydown', onKeydown);
+    // 解析引用 → 原文定位（事件委托，重建后依然有效）
+    document.getElementById('session-body').addEventListener('click', function (e) {
+      var li = e.target.closest ? e.target.closest('li.jq') : null;
+      if (!li) return;
+      jumpToQuote(li.getAttribute('data-g'), li.getAttribute('data-q'));
+    });
     document.getElementById('sig-toggle').addEventListener('change', function () {
       if (session) renderSession();
     });
