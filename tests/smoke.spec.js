@@ -648,6 +648,31 @@ test('成绩卡分享：出分后生成成绩图片（无 Web Share 文件能力
   expect(download.suggestedFilename()).toBe('yomitaku-score.png');
 });
 
+test('划线句渲染：跨句号的 ⟪…⟫ 完整成 mark，不残留裸标记字符', async ({ page }) => {
+  // 数据里有 42 组划线句含句号（如 sim-tan169「えっと」の正体），句级切分曾把它们撕裂
+  await page.goto('/#practice');
+  await openGroups(page);
+  const tan169 = await page.evaluate(() => {
+    const cards = [...document.querySelectorAll('#set-cards .setcard')];
+    return cards.findIndex((c) => c.dataset.id === 'sim-tan169');
+  });
+  expect(tan169).toBeGreaterThanOrEqual(0);
+  await page.locator('#set-cards .setcard h3').nth(tan169).click();
+  await expect(page.locator('#session-view')).toBeVisible();
+
+  const probe = await page.evaluate(() => {
+    const p = document.querySelector('.passage');
+    return {
+      marks: p.querySelectorAll('mark.uline').length,
+      bare: /[⟪⟫]/.test(p.textContent), // 裸标记字符残留 = 撕裂
+      markText: p.querySelector('mark.uline')?.textContent || '',
+    };
+  });
+  expect(probe.marks).toBeGreaterThan(0);
+  expect(probe.bare).toBe(false);
+  expect(probe.markText).toContain('。'); // 跨句划线句整体在一个 mark 内
+});
+
 test('随机混合 10 问：抽题计时、用时展示、旧分数不残留', async ({ page }) => {
   await page.goto('/#practice');
   await page.click('#btn-mix10');

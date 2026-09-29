@@ -6,12 +6,15 @@
 <meta name="format-detection" content="telephone=no">
 <title>Yomitaku · JLPT N1 読解特訓</title>
 <script>
-/* 主题初始化：在样式表解析前定下 data-theme，避免暗色用户看到闪白 */
+/* 主题初始化：在样式表解析前定下 data-theme，避免暗色用户看到闪白；
+   theme-color meta 同步（defer 的题库会拖住 DOMContentLoaded，否则地址栏首帧是错的主题色） */
 (function () {
   var t = null;
   try { t = localStorage.getItem('yt_theme'); } catch (e) {}
   if (t !== 'dark' && t !== 'light') t = window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
   document.documentElement.setAttribute('data-theme', t);
+  var m = document.querySelector('meta[name="theme-color"]');
+  if (m) m.setAttribute('content', t === 'dark' ? '#171521' : '#e8433a');
 })();
 </script>
 <link rel="icon" type="image/svg+xml" href="public/logo.svg">
@@ -452,7 +455,7 @@
 <script defer src="js/bank/togo.js?v=31aaa2da"></script>
 <script defer src="js/bank/shucho.js?v=bddeec09"></script>
 <script defer src="js/bank/joho.js?v=68076865"></script>
-<script defer src="js/app.js?v=599cddc1"></script>
+<script defer src="js/app.js?v=d7fb8314"></script>
 <script>
 /* PWA：注册 Service Worker（file:// 直接打开时自动跳过） */
 if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === '127.0.0.1' || location.hostname === 'localhost')) {

@@ -91,7 +91,7 @@ for (const s of BANK) {
 const maxShare = Math.max(...ansDist) / totalQ;
 if (maxShare > 0.4) errors.push(`正解分布失衡：${ansDist.join('/')}（单选项占比 ${(maxShare * 100).toFixed(1)}%）`);
 
-/* ---- 命题效度指标（2026-09-26 内容审计新增，配方见 js/bank.js 头部）----
+/* ---- 命题效度指标（2026-09-26 内容审计新增，配方见 js/bank/core.js 头部）----
    目前为告警不阻断；存量按批次回改达标后可收紧为 error。 */
 function lcSubstr(a, b) { // 最长连续公共子串长度
   let best = 0;

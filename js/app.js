@@ -43,7 +43,8 @@
   function dueKeys(d) {
     var now = Date.now(), out = [];
     if (d.wrong) Object.keys(d.wrong).forEach(function (qid) {
-      if (!(d.wrong[qid].next > now)) out.push(qid);
+      var e = d.wrong[qid];
+      if (e && typeof e === 'object' && !(e.next > now)) out.push(qid);
     });
     return out;
   }
@@ -62,8 +63,20 @@
     if (d.history && d.history.length > HISTORY_MAX) { d.history = d.history.slice(0, HISTORY_MAX); changed = true; }
     if (d.wrong) {
       Object.keys(d.wrong).forEach(function (qid) {
-        if (!setById(d.wrong[qid].setId)) { delete d.wrong[qid]; changed = true; }
+        var e = d.wrong[qid];
+        var i = qid.lastIndexOf(':');
+        var s = setById(qid.slice(0, i));
+        /* 三重清理：题组没了；条目形状损坏（非对象）；题号越界（自定义题组“同 id 覆盖导入”
+           后题数变少会留下永远无法消化/删除的幽灵错题，污染到期计数） */
+        var qi = parseInt(qid.slice(i + 1), 10);
+        if (!s || !e || typeof e !== 'object' ||
+            !(typeof qi === 'number' && qi % 1 === 0 && qi >= 0 && qi < s.questions.length)) {
+          delete d.wrong[qid]; changed = true;
+        }
       });
+    }
+    if (d.traps !== undefined && (typeof d.traps !== 'object' || d.traps === null || Array.isArray(d.traps))) {
+      d.traps = {}; changed = true; // 画像计数被篡改成原始值时重置，防渲染侧崩溃
     }
     if (changed) save(d);
   }
@@ -311,14 +324,25 @@
      句级 <span class="sent"> 供「解析引用 → 跳原文高亮」定位使用，无视觉差异 */
   function passageHTML(text, sigOn) {
     return String(text).split('\n').map(function (para) {
-      var sents = para.match(/[^。？！]*[。？！]|[^。？！]+/g) || [para];
-      var h = sents.map(function (sen) {
-        var t = esc(sen);
-        t = t.replace(/⟪(.+?)⟫/g, '<mark class="uline">$1</mark>');
-        if (sigOn) t = t.replace(SIG_RE, '<mark class="sig">$1</mark>');
-        return '<span class="sent">' + t + '</span>';
-      }).join('');
-      return '<p>' + h + '</p>';
+      /* 划线句 ⟪…⟫ 整块一个句 span（可跨句号，42 组数据如此），
+         块外的普通文本再按句号切分——否则句级切分会把 mark 撕裂、留下裸 ⟪⟫ */
+      var out = '';
+      para.split(/(⟪[^⟫]*⟫)/).forEach(function (seg) {
+        if (!seg) return;
+        var t;
+        if (seg.charAt(0) === '⟪') {
+          t = esc(seg).replace(/⟪(.+?)⟫/g, '<mark class="uline">$1</mark>');
+          if (sigOn) t = t.replace(SIG_RE, '<mark class="sig">$1</mark>');
+          out += '<span class="sent">' + t + '</span>';
+          return;
+        }
+        (seg.match(/[^。？！]*[。？！]|[^。？！]+/g) || []).forEach(function (sen) {
+          t = esc(sen);
+          if (sigOn) t = t.replace(SIG_RE, '<mark class="sig">$1</mark>');
+          out += '<span class="sent">' + t + '</span>';
+        });
+      });
+      return '<p>' + out + '</p>';
     }).join('');
   }
   /* 解析里的「…」引用能否在原文中找到（去划线标记与空白后子串匹配） */
@@ -336,7 +360,8 @@
     var sents = Array.prototype.slice.call(p.querySelectorAll('.sent'));
     var hay = '', map = [];
     sents.forEach(function (sp, i) {
-      var t = sp.textContent.replace(/\s/g, '');
+      // 与 hayCache 同口径剥离 ⟪⟫（划线标记只是视觉层，不参与文本匹配）
+      var t = sp.textContent.replace(/[⟪⟫\s]/g, '');
       map.push({ i: i, start: hay.length, end: hay.length + t.length });
       hay += t;
     });
@@ -446,7 +471,7 @@
   var curLabel = 'all';   // 考点标签筛选（题组含任一该标签的题即命中）
   var curQuery = '';      // 标题关键词搜索
   var curWrongLabel = 'all'; // 错题本的考点筛选
-  /* 考点标签固定词表（与 bank.js 出题配方一致；新标签出现时自动追加进筛选项） */
+  /* 考点标签固定词表（与 js/bank/ 出题配方一致；新标签出现时自动追加进筛选项） */
   var QLABELS = ['主旨把握', '内容一致', '划线句含义', '理由说明', '共通点', '相違点', '条件筛选', '注意事项'];
   function labelChipsHTML(sets, cur) { // 训练页/错题本共用的考点筛选 chips（只列出有题的标签）
     var have = {};
@@ -522,7 +547,7 @@
     document.getElementById('filterbar').innerHTML = chips;
     document.getElementById('label-chips').innerHTML = labelChipsHTML(sets, curLabel);
     var searchEl = document.getElementById('set-search');
-    if (searchEl && searchEl.value !== curQuery) searchEl.value = curQuery; // 保留输入框焦点态，仅同步状态值
+    if (searchEl && searchEl.value.trim() !== curQuery) searchEl.value = curQuery; // trim 后比较，输入中的尾随空格不被吞
 
     if (!sets.length) {
       document.getElementById('set-cards').innerHTML =
@@ -532,6 +557,11 @@
         '<p style="margin-top:16px"><a class="btn" href="#bank">去获取官方例题 →</a></p></div>';
       return;
     }
+
+    // 考点筛选失效自愈：指向的标签已不在题库（题组被删/导入变更）时重置，避免不可见筛选锁死列表
+    var haveLabels = {};
+    sets.forEach(function (s) { s.questions.forEach(function (x) { if (x.label) haveLabels[x.label] = 1; }); });
+    if (curLabel !== 'all' && !haveLabels[curLabel]) curLabel = 'all';
 
     // 题型 × 考点 × 标题关键词 三重筛选
     var q = curQuery.toLowerCase();
@@ -612,8 +642,9 @@
     (dueOnly ? qids : Object.keys(d.wrong)).forEach(function (qid) { want[qid] = 1; });
     if (label) { // 错题本的考点筛选：只重练筛选出来的题
       Object.keys(want).forEach(function (qid) {
-        var e = d.wrong[qid], s = setById(e.setId);
-        var q = s && s.questions[parseInt(qid.split(':')[1], 10)];
+        var i = qid.lastIndexOf(':');
+        var e = d.wrong[qid], s = setById(qid.slice(0, i));
+        var q = s && s.questions[parseInt(qid.slice(i + 1), 10)];
         if (!q || q.label !== label) delete want[qid];
       });
     }
@@ -865,11 +896,12 @@
       session.score = { c: c, total: totalQ, sec: sec };
       d.history.unshift({ ts: Date.now(), setId: session.setId || session.mode, title: session.title, c: c, t: totalQ, seconds: sec });
       d.history = d.history.slice(0, HISTORY_MAX);
-      var today = dstr(new Date()); // 练习日期独立于 history 存（streak 不受上限截断）
-      if (!Array.isArray(d.days)) d.days = [];
-      if (d.days.indexOf(today) < 0) d.days.unshift(today);
-      if (d.days.length > 730) d.days.length = 730; // 上限两年，远超任何可见的连续打卡
     }
+    /* 打卡日不论模式都记（到期复习当天也是练习日，streak 不能因只复习而断） */
+    var today = dstr(new Date());
+    if (!Array.isArray(d.days)) d.days = [];
+    if (d.days.indexOf(today) < 0) d.days.unshift(today);
+    if (d.days.length > 730) d.days.length = 730;
     save(d);
     clearDraft();
 
@@ -896,6 +928,7 @@
     var cv = document.createElement('canvas');
     cv.width = W; cv.height = H;
     var ctx = cv.getContext('2d');
+    if (!ctx) { toast('此环境不支持生成成绩卡图片', false); return; }
     var display = '"M PLUS Rounded 1c", "Segoe UI", "Microsoft YaHei", "PingFang SC", "Noto Sans JP", sans-serif';
     // 底色与边框（浅色主题配色，分享卡固定浅色保证可读）
     ctx.fillStyle = '#fff8ec'; ctx.fillRect(0, 0, W, H);
@@ -908,7 +941,13 @@
     ctx.fillText('Yomitaku · JLPT N1 読解特訓', W / 2, 86);
     ctx.fillStyle = '#5f6470';
     ctx.font = '600 20px ' + display;
-    ctx.fillText(session.title, W / 2, 128);
+    // 超长自定义标题按像素宽截断加省略号（导入题组标题长度不设限）
+    var title = String(session.title || '');
+    if (ctx.measureText(title).width > W - 120) {
+      while (title.length > 1 && ctx.measureText(title + '…').width > W - 120) title = title.slice(0, -1);
+      title += '…';
+    }
+    ctx.fillText(title, W / 2, 128);
     // 大分数
     ctx.fillStyle = '#e8433a';
     ctx.font = '800 110px ' + display;
@@ -954,14 +993,19 @@
     dueBtn.style.display = dueN ? '' : 'none';
     dueBtn.textContent = '复习到期错题（' + dueN + ' 题）';
 
-    // 考点筛选 chips（按当前错题的标签计数）
+    // 考点筛选 chips（按当前错题的标签计数；qid 题号取最后一个冒号后的段，兼容含冒号的自定义 id）
     var have = {};
     keys.forEach(function (qid) {
-      var e = d.wrong[qid], s = setById(e.setId);
+      var e = d.wrong[qid];
+      var i = qid.lastIndexOf(':');
+      var s = setById(qid.slice(0, i));
       if (!s) return;
-      var q = s.questions[parseInt(qid.split(':')[1], 10)];
+      var q = s.questions[parseInt(qid.slice(i + 1), 10)];
       if (q && q.label) have[q.label] = (have[q.label] || 0) + 1;
     });
+    // 考点筛选失效自愈：所指考点的错题已删光时回到「全部」，避免不可见筛选 + 「（0 题）」按钮
+    if (curWrongLabel !== 'all' && !have[curWrongLabel]) curWrongLabel = 'all';
+
     var chips = '<button class="fbtn' + (curWrongLabel === 'all' ? ' on' : '') + '" data-wl="all">全部（' + keys.length + '）</button>';
     Object.keys(have).sort(function (a, b) { return have[b] - have[a]; }).forEach(function (l) {
       chips += '<button class="fbtn' + (curWrongLabel === l ? ' on' : '') + '" data-wl="' + esc(l) + '">' + esc(l) + '（' + have[l] + '）</button>';
@@ -972,9 +1016,10 @@
 
     var shown = keys.filter(function (qid) {
       if (curWrongLabel === 'all') return true;
-      var e = d.wrong[qid], s = setById(e.setId);
+      var i = qid.lastIndexOf(':');
+      var s = setById(qid.slice(0, i));
       if (!s) return false;
-      var q = s.questions[parseInt(qid.split(':')[1], 10)];
+      var q = s.questions[parseInt(qid.slice(i + 1), 10)];
       return q && q.label === curWrongLabel;
     });
 
@@ -994,8 +1039,9 @@
     }
     var rows = shown.map(function (qid) {
       var e = d.wrong[qid];
-      var s = setById(e.setId); if (!s) return '';
-      var qi = parseInt(qid.split(':')[1], 10), q = s.questions[qi];
+      var i = qid.lastIndexOf(':');
+      var s = setById(qid.slice(0, i)); if (!s) return '';
+      var qi = parseInt(qid.slice(i + 1), 10), q = s.questions[qi];
       if (!q) return '';
       var t = typeInfo(s.typeKey);
       var stageTxt = (e.next > now)
@@ -1021,7 +1067,10 @@
       };
     });
     var cw = document.getElementById('btn-clear-wrong');
-    if (cw) cw.onclick = function () { var dd = load(); dd.wrong = {}; save(dd); renderReview(); };
+    if (cw) cw.onclick = function () {
+      if (!confirm('确定清空整个错题本吗？所有错题的间隔复习进度（第几轮/下次日期）将一并丢失，且不可恢复。')) return;
+      var dd = load(); dd.wrong = {}; save(dd); renderReview();
+    };
     var ca = document.getElementById('btn-clear-all');
     if (ca) ca.onclick = function () {
       if (confirm('确定清空全部练习记录、错题本和统计吗？（导入的题库不受影响）')) { localStorage.removeItem(LS_KEY); renderReview(); }
@@ -1064,6 +1113,7 @@
       var at = '第 ' + (i + 1) + ' 组';
       if (!s || typeof s !== 'object') throw new Error(at + '：不是对象');
       if (!s.id) throw new Error(at + '：缺少 id');
+      if (String(s.id).indexOf(':') >= 0) throw new Error(at + '：id 不能包含冒号（冒号是错题记录 set:题号 的分隔符）');
       if (TYPE_KEYS.indexOf(s.typeKey) < 0) throw new Error(at + '：typeKey 必须是 ' + TYPE_KEYS.join(' / '));
       if (!s.title) throw new Error(at + '：缺少 title');
       if (s.sourceUrl && !/^https?:\/\//i.test(s.sourceUrl)) throw new Error(at + '：sourceUrl 必须以 http(s) 开头');
@@ -1339,7 +1389,7 @@
     initBankUI();
     pruneData();
     initInstall();
-    // 首屏/说明页的题库规模文案随 bank.js 自动对齐（data-bank-stat 钩子，防止静态数字过期）
+    // 首屏/说明页的题库规模文案随 js/bank/ 分片自动对齐（data-bank-stat 钩子，防止静态数字过期）
     var bankAll = (typeof BANK !== 'undefined' && BANK) ? BANK : [];
     var bankQ = bankAll.reduce(function (a, s) { return a + s.questions.length; }, 0);
     document.querySelectorAll('[data-bank-stat]').forEach(function (el) {

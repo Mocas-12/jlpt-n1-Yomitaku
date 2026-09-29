@@ -30,17 +30,26 @@ if (changed) await writeFile(htmlPath, html);
 console.log(`[version] ${htmlPath}: ${changed} 处已更新，其余未变`);
 
 /* sw.js 的缓存名与文件内容绑定（扣除缓存名本身后取哈希）：
-   SW 逻辑一变哈希就变，旧缓存随 activate 自动清理，不再依赖手动升版本 */
+   CACHE 名 = f(sw 逻辑, index.html 资产指纹)：分片/样式/脚本更新会换 index.html 的 ?v=，
+   指纹行随之变化并参与缓存名哈希——旧缓存随 activate 全量清理（否则旧 ?v= 条目
+   在同一缓存里永久累积） */
 try {
   let sw = await readFile(join(root, 'sw.js'), 'utf8');
+  const indexHash = createHash('sha256')
+    .update(await readFile(join(root, 'index.html'), 'utf8'))
+    .digest('hex').slice(0, 8);
   const m = sw.match(/var CACHE = '([^']*)';/);
-  if (!m) {
-    console.log('[version] sw.js 未找到 CACHE 声明，跳过');
+  const am = sw.match(/var ASSETS = '([^']*)';/);
+  if (!m || !am) {
+    console.log('[version] sw.js 未找到 CACHE/ASSETS 声明，跳过');
   } else {
-    const v = 'yomitaku-' + createHash('sha256').update(sw.replace(m[0], "var CACHE = '';")).digest('hex').slice(0, 8);
-    if (m[1] !== v) {
-      await writeFile(join(root, 'sw.js'), sw.replace(m[0], () => `var CACHE = '${v}';`));
-      console.log(`[version] sw.js CACHE: ${m[1]} -> ${v}`);
+    // ASSETS 行写入本轮 index.html 指纹；缓存名对「扣除 CACHE 行的全文」取哈希（含 ASSETS 行）
+    let body = sw.replace(m[0], "var CACHE = '';").replace(am[0], `var ASSETS = '${indexHash}';`);
+    const v = 'yomitaku-' + createHash('sha256').update(body).digest('hex').slice(0, 8);
+    const next = sw.replace(m[0], () => `var CACHE = '${v}';`).replace(am[0], () => `var ASSETS = '${indexHash}';`);
+    if (next !== sw) {
+      await writeFile(join(root, 'sw.js'), next);
+      console.log(`[version] sw.js CACHE: ${m[1]} -> ${v}（assets ${am[1] || '(空)'} -> ${indexHash}）`);
     } else {
       console.log('[version] sw.js CACHE 未变化');
     }

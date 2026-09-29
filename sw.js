@@ -2,9 +2,11 @@
    - 页面导航：网络优先，离线回落缓存 —— 部署后能尽快拿到引用了新 ?v= 哈希的新页面
    - 其余同源资源：缓存优先。静态资源在 index.html 里带内容哈希 ?v=，更新后 URL 变化自然穿透缓存
    - 跨域请求（Google Fonts）不拦截，交给浏览器
-   CACHE 缓存名由 scripts/version.mjs 按本文件内容哈希自动改写（本地/CI 部署前运行）：
-   逻辑一变缓存名就变，旧缓存随 activate 自动清理，无需手动升版本 */
-var CACHE = 'yomitaku-6d3aba7a';
+   CACHE 缓存名由 scripts/version.mjs 改写：该脚本同时把「index.html 资产指纹」写入本文件
+   的 ASSETS 行并参与缓存名哈希——任何分片/样式/脚本更新都会换缓存名，旧缓存随 activate
+   全量清理（否则旧 ?v= 条目会在同一缓存里永久累积） */
+var CACHE = 'yomitaku-d2bcdd03';
+var ASSETS = 'afc8103c'; // scripts/version.mjs 写入 index.html 的资产指纹（参与 CACHE 哈希）
 /* 预缓存强制与服务器核对（no-cache），避免安装时拿到浏览器 HTTP 缓存里的旧页面。
    注意用 ./ 相对路径：GitHub Pages 部署在 /jlpt-n1-Yomitaku/ 子路径下 */
 var PRECACHE = ['./', './index.html', './manifest.webmanifest', './public/logo.svg'].map(function (u) {
@@ -12,9 +14,26 @@ var PRECACHE = ['./', './index.html', './manifest.webmanifest', './public/logo.s
 });
 
 self.addEventListener('install', function (e) {
+  /* 首装即离线：页面样式与脚本（带 ?v= 的 css/js 分片）在 SW 接管前已被浏览器加载过，
+     不会进运行时缓存——install 时解析 index.html 把本轮资产一并预缓存，
+     否则"首次访问 → 安装 → 立即离线"会得到无样式无脚本的空壳 */
   e.waitUntil(
     caches.open(CACHE)
-      .then(function (c) { return c.addAll(PRECACHE); })
+      .then(function (c) {
+        return c.addAll(PRECACHE).then(function () {
+          return fetch('./index.html', { cache: 'no-cache' })
+            .then(function (res) { return res.text(); })
+            .then(function (html) {
+              var urls = [];
+              html.replace(/(?:src|href)="([^"?]+)\?v=[^"]*"/g, function (m, u) {
+                if (!/^https?:/.test(u)) urls.push('./' + u);
+                return m;
+              });
+              return c.addAll(urls.map(function (u) { return new Request(u, { cache: 'no-cache' }); }));
+            })
+            .catch(function () { /* index.html 拉取失败不阻塞安装，走运行时缓存兜底 */ });
+        });
+      })
       .then(function () { return self.skipWaiting(); })
   );
 });
