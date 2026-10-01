@@ -41,6 +41,8 @@ jobs:
           key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
       - name: Install dependencies
         run: npm ci
+      - name: Validate question bank
+        run: npm run check
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
       - name: Run smoke tests
@@ -64,11 +66,22 @@ jobs:
         run: node scripts/version.mjs
       - name: Setup Pages
         uses: actions/configure-pages@v5
+      - name: Stage site assets
+        run: |
+          mkdir -p _site
+          cp -r index.html css js public manifest.webmanifest sw.js _site/
+          # 自检：HTML 里的本地引用必须都存在于 _site
+          node -e '
+            const fs = require("fs");
+            const html = fs.readFileSync("_site/index.html", "utf8");
+            const refs = [...html.matchAll(/(?:src|href)="\.?\/?((?:css|js|public)[^"?]*)/g)].map((m) => m[1]);
+            const missing = refs.filter((r) => !fs.existsSync("_site/" + r));
+            if (missing.length) { console.error("缺少站点资源: " + missing.join(", ")); process.exit(1); }
+          '
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          # Upload entire repository
-          path: '.'
+          path: _site
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v5
