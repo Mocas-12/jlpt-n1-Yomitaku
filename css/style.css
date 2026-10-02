@@ -91,30 +91,51 @@ header.site {
   backdrop-filter: blur(8px);
   border-bottom: 3px solid var(--ink);
 }
-/* 顶部投币横幅：左「微信投币」弹收款码、右「面包多支持」新标签跳转（正常文档流，长文阅读时不占常驻空间） */
+/* 顶部投币横幅：文字 + 右侧箭头展开支持方式菜单（微信/面包多）；
+   正常文档流，长文阅读时不占常驻空间 */
 .support-banner {
-  display: flex; align-items: center; justify-content: center;
-  gap: 0; cursor: default;
+  position: relative; z-index: 60; /* 展开的菜单要盖住 sticky 页头（z 50） */
+  display: flex; align-items: center; justify-content: center; gap: 8px;
   background: var(--pop);
   border-bottom: 3px solid var(--ink);
-  padding: 0 10px;
+  padding: 5px 12px;
 }
-.support-banner .sb-wechat, .support-banner .sb-mbd {
-  appearance: none; background: none; border: 0; cursor: pointer;
+.support-banner .sb-text {
   font-family: var(--display); font-size: 13.5px; font-weight: 800;
-  color: var(--on-pop); letter-spacing: 1px; text-decoration: none;
-  padding: 7px 16px; display: inline-flex; align-items: center; gap: 5px;
-  transition: transform .12s, filter .15s;
+  color: var(--on-pop); letter-spacing: 1px;
 }
-.support-banner .sb-wechat:hover, .support-banner .sb-mbd:hover { transform: translateY(-1px); text-decoration: none; }
-.support-banner .sb-wechat .sb-rec {
+.support-banner .sb-arrow-btn {
+  appearance: none; cursor: pointer; line-height: 1;
+  font-family: var(--display); font-size: 15px; font-weight: 800;
+  background: var(--on-pop); color: var(--pop);
+  border: 2.5px solid var(--ink); border-radius: 999px;
+  padding: 3px 10px; box-shadow: 2px 2px 0 var(--shadow);
+  transition: transform .15s;
+}
+.support-banner .sb-arrow-btn:hover { transform: translateX(2px); }
+.support-banner .sb-arrow-btn.open { transform: rotate(90deg); }
+/* 下拉菜单：微信在上（优先），面包多在下 */
+.sb-menu {
+  position: absolute; top: calc(100% + 8px); right: 12px; z-index: 61;
+  min-width: 190px;
+  background: var(--surface); border: 3px solid var(--ink); border-radius: 12px;
+  box-shadow: 4px 4px 0 var(--shadow);
+  padding: 6px; display: flex; flex-direction: column; gap: 2px;
+}
+.sb-menu .sb-wechat, .sb-menu .sb-mbd {
+  appearance: none; background: none; border: 0; cursor: pointer; text-align: left;
+  font-family: var(--display); font-size: 14px; font-weight: 800;
+  color: var(--ink); text-decoration: none;
+  padding: 9px 12px; border-radius: 8px; display: flex; align-items: center; gap: 6px;
+}
+.sb-menu .sb-wechat:hover, .sb-menu .sb-mbd:hover { background: var(--pop-soft); text-decoration: none; }
+.sb-menu .sb-wechat .sb-rec {
   font-size: 10px; font-weight: 800; line-height: 1;
-  background: var(--ink); color: var(--pop);
-  border-radius: 999px; padding: 2px 6px; transform: translateY(-4px);
+  background: var(--accent); color: #fff;
+  border-radius: 999px; padding: 2px 6px;
 }
-.support-banner .sb-div { width: 2px; height: 16px; background: var(--ink); opacity: .35; }
-.support-banner .sb-arrow { display: inline-block; transition: transform .15s; }
-.support-banner .sb-mbd:hover .sb-arrow { transform: translateX(4px); }
+.sb-menu .sb-mbd .sb-arrow { display: inline-block; transition: transform .15s; }
+.sb-menu .sb-mbd:hover .sb-arrow { transform: translateX(3px); }
 /* 微信收款码弹层：遮罩 + 居中卡片（点遮罩/×/Esc 关闭） */
 .qr-modal {
   position: fixed; inset: 0; z-index: 120;

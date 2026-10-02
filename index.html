@@ -34,14 +34,17 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;800&family=Noto+Serif+JP:wght@400;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=5753791e">
+<link rel="stylesheet" href="css/style.css?v=dc8ad2eb">
 </head>
 <body>
 
 <div class="support-banner">
-  <button type="button" class="sb-wechat" id="sb-wechat" title="弹出微信收款码">💛 微信投币<sup class="sb-rec">推荐</sup></button>
-  <span class="sb-div" aria-hidden="true"></span>
-  <a class="sb-mbd" href="https://mbd.pub/o/bread/mbd-YZWblJ9paA==" target="_blank" rel="noopener" title="跳转到面包多支持页">面包多支持 <span class="sb-arrow">→</span></a>
+  <span class="sb-text">❤️ 支持开发者，请投币</span>
+  <button type="button" class="sb-arrow-btn" id="sb-arrow" aria-haspopup="true" aria-expanded="false" title="选择支持方式">→</button>
+  <div class="sb-menu" id="sb-menu" hidden>
+    <button type="button" class="sb-wechat" id="sb-wechat">❤️ 微信投币 <sup class="sb-rec">推荐</sup></button>
+    <a class="sb-mbd" href="https://mbd.pub/o/bread/mbd-YZWblJ9paA==" target="_blank" rel="noopener">面包多支持 <span class="sb-arrow">→</span></a>
+  </div>
 </div>
 
 <header class="site">
@@ -457,7 +460,7 @@
 <div id="qr-modal" class="qr-modal" hidden>
   <div class="qr-card" role="dialog" aria-label="微信收款码">
     <button class="qr-close" id="qr-close" type="button" aria-label="关闭">×</button>
-    <h3>💛 感谢支持！</h3>
+    <h3>❤️ 感谢支持！</h3>
     <img src="public/wechat-qr.jpg" alt="微信收款码（5 元）">
     <p class="qr-hint">手机端：长按保存图片 → 微信「扫一扫」→ 相册选择<br>桌面端：打开微信「扫一扫」对准即可</p>
   </div>
@@ -470,7 +473,7 @@
 <script defer src="js/bank/togo.js?v=31aaa2da"></script>
 <script defer src="js/bank/shucho.js?v=bddeec09"></script>
 <script defer src="js/bank/joho.js?v=68076865"></script>
-<script defer src="js/app.js?v=60fe2025"></script>
+<script defer src="js/app.js?v=40185254"></script>
 <script>
 /* PWA：注册 Service Worker（file:// 直接打开时自动跳过） */
 if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === '127.0.0.1' || location.hostname === 'localhost')) {
