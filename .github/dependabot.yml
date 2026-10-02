@@ -1,0 +1,11 @@
+version: 2
+updates:
+  # 站点本体零依赖；这里只看开发期依赖（Playwright）与 CI Action 版本
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
