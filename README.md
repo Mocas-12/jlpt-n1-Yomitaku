@@ -42,7 +42,7 @@
 - ⚡ **Quick technique library**: question-oriented reading, a quick reference for contrastive/concessive signal words (one-click highlighting during practice), a seven-category elimination checklist for trap options, and a 110-minute time budget table
 - ⏱️ **Timed practice**: each question set carries a difficulty-based time budget with a real-time timer; overtime is flagged in red, reproducing exam pacing
 - 🔍 **Per-option explanations**: after submitting, the correct answer and your choice are marked, and every option gets a text location plus a trap classification — not just an answer key
-- 🔁 **Mistake-notebook loop**: wrong answers are collected automatically; "re-drill all mistakes" is supported and a correct answer removes the item; before the exam, drill only your mistakes
+- 🔁 **Mistake-notebook loop**: wrong answers are collected automatically; "re-drill all mistakes" is supported and correct answers push items down the 1→3→7-day spaced-repetition schedule until they graduate out; before the exam, drill only your mistakes
 - 📊 **Per-type stats**: accuracy progress bars per question type + practice history — weak points at a glance
 - 🎲 **Mixed drill & mock exam**: one tap to shuffle 10 random questions across all types, or assemble a full mock following the official 問題7〜12 blueprint with a global timer; per-question timing shows up in the explanations
 - 🔥 **Daily streak**: consecutive practice days derived from your history, shown on the overview
