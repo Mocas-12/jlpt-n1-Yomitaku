@@ -134,6 +134,16 @@ header.site {
   padding: 20px 22px 16px; max-width: min(360px, 92vw);
 }
 .qr-card h3 { margin: 0 0 12px; font-family: var(--serif); font-size: 20px; }
+/* 感谢语：站点同款荧光笔衬底（透明度压低做柔化，两主题都不过分） */
+.qr-card .qr-quote {
+  margin: -4px 0 12px; font-family: var(--serif); font-size: 13.5px;
+  font-weight: 600; color: var(--ink); line-height: 2;
+}
+.qr-card .qr-quote em {
+  font-style: normal;
+  background: linear-gradient(transparent 74%, rgba(255, 210, 63, .4) 74%);
+  padding: 0 2px;
+}
 .qr-card img { display: block; width: 100%; border-radius: 10px; border: 2.5px solid var(--ink); }
 .qr-card .qr-hint { margin: 12px 0 0; font-size: 12.5px; font-weight: 600; color: var(--muted); line-height: 1.7; }
 .qr-card .qr-close {
