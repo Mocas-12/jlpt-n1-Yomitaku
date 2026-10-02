@@ -91,19 +91,51 @@ header.site {
   backdrop-filter: blur(8px);
   border-bottom: 3px solid var(--ink);
 }
-/* 顶部投币横幅：整条可点，新标签打开面包多（正常文档流，长文阅读时不占常驻空间） */
+/* 顶部投币横幅：左「微信投币」弹收款码、右「面包多支持」新标签跳转（正常文档流，长文阅读时不占常驻空间） */
 .support-banner {
-  display: block; text-align: center; cursor: pointer;
-  background: var(--pop); color: var(--on-pop);
-  font-family: var(--display); font-size: 13.5px; font-weight: 800;
-  letter-spacing: 1px; text-decoration: none;
-  padding: 7px 12px;
+  display: flex; align-items: center; justify-content: center;
+  gap: 0; cursor: default;
+  background: var(--pop);
   border-bottom: 3px solid var(--ink);
-  transition: filter .15s;
+  padding: 0 10px;
 }
-.support-banner:hover { filter: brightness(1.04); text-decoration: none; }
+.support-banner .sb-wechat, .support-banner .sb-mbd {
+  appearance: none; background: none; border: 0; cursor: pointer;
+  font-family: var(--display); font-size: 13.5px; font-weight: 800;
+  color: var(--on-pop); letter-spacing: 1px; text-decoration: none;
+  padding: 7px 16px; display: inline-flex; align-items: center; gap: 5px;
+  transition: transform .12s, filter .15s;
+}
+.support-banner .sb-wechat:hover, .support-banner .sb-mbd:hover { transform: translateY(-1px); text-decoration: none; }
+.support-banner .sb-wechat .sb-rec {
+  font-size: 10px; font-weight: 800; line-height: 1;
+  background: var(--ink); color: var(--pop);
+  border-radius: 999px; padding: 2px 6px; transform: translateY(-4px);
+}
+.support-banner .sb-div { width: 2px; height: 16px; background: var(--ink); opacity: .35; }
 .support-banner .sb-arrow { display: inline-block; transition: transform .15s; }
-.support-banner:hover .sb-arrow { transform: translateX(4px); }
+.support-banner .sb-mbd:hover .sb-arrow { transform: translateX(4px); }
+/* 微信收款码弹层：遮罩 + 居中卡片（点遮罩/×/Esc 关闭） */
+.qr-modal {
+  position: fixed; inset: 0; z-index: 120;
+  background: rgba(27, 27, 38, .55);
+  display: flex; align-items: center; justify-content: center; padding: 20px;
+}
+.qr-card {
+  position: relative; text-align: center;
+  background: var(--surface); border: 3px solid var(--ink); border-radius: 16px;
+  box-shadow: 6px 6px 0 var(--shadow);
+  padding: 20px 22px 16px; max-width: min(360px, 92vw);
+}
+.qr-card h3 { margin: 0 0 12px; font-family: var(--serif); font-size: 20px; }
+.qr-card img { display: block; width: 100%; border-radius: 10px; border: 2.5px solid var(--ink); }
+.qr-card .qr-hint { margin: 12px 0 0; font-size: 12.5px; font-weight: 600; color: var(--muted); line-height: 1.7; }
+.qr-card .qr-close {
+  position: absolute; top: 8px; right: 10px;
+  appearance: none; cursor: pointer; font-size: 20px; line-height: 1;
+  background: none; border: 0; color: var(--muted); padding: 4px;
+}
+.qr-card .qr-close:hover { color: var(--ink); }
 .site-inner {
   max-width: 1080px; margin: 0 auto; padding: 0 20px;
   display: flex; align-items: center; gap: 24px; height: 62px;

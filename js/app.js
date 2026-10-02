@@ -1301,6 +1301,12 @@
     }
   }
   function onKeydown(e) {
+    /* 收款码弹层打开时：Esc 关闭，其余键盘事件一律不穿透（不暗中作答） */
+    var qrm = document.getElementById('qr-modal');
+    if (qrm && !qrm.hidden) {
+      if (e.key === 'Escape') qrm.hidden = true;
+      return;
+    }
     if (!session || session.submitted) return;
     /* 只在训练页为当前路由时响应：会话进行中切到其他页（session 仍存活），
        数字键/Enter 不得暗中修改后台会话的作答或触发交卷。
@@ -1350,6 +1356,11 @@
     applyTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light');
     initReaderCtl();
     initSystemTheme();
+    // 投币横幅：微信投币弹收款码；面包多为链接由浏览器跳转
+    var qrModal = document.getElementById('qr-modal');
+    document.getElementById('sb-wechat').addEventListener('click', function () { qrModal.hidden = false; });
+    document.getElementById('qr-close').addEventListener('click', function () { qrModal.hidden = true; });
+    qrModal.addEventListener('click', function (e) { if (e.target === qrModal) qrModal.hidden = true; });
     // 键盘作答：1〜4 选择、Enter 提交
     document.addEventListener('keydown', onKeydown);
     // 解析引用 → 原文定位（事件委托，重建后依然有效）

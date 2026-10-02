@@ -34,13 +34,15 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;800&family=Noto+Serif+JP:wght@400;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=19abedea">
+<link rel="stylesheet" href="css/style.css?v=5753791e">
 </head>
 <body>
 
-<a class="support-banner" href="https://mbd.pub/o/bread/mbd-YZWblJ9paA==" target="_blank" rel="noopener" title="觉得有帮助的话，欢迎到面包多投币支持一下作者">
-  💛 支持开发者，请投币 <span class="sb-arrow">→</span>
-</a>
+<div class="support-banner">
+  <button type="button" class="sb-wechat" id="sb-wechat" title="弹出微信收款码">💛 微信投币<sup class="sb-rec">推荐</sup></button>
+  <span class="sb-div" aria-hidden="true"></span>
+  <a class="sb-mbd" href="https://mbd.pub/o/bread/mbd-YZWblJ9paA==" target="_blank" rel="noopener" title="跳转到面包多支持页">面包多支持 <span class="sb-arrow">→</span></a>
+</div>
 
 <header class="site">
   <div class="site-inner">
@@ -452,6 +454,15 @@
 
 <div id="toast"></div>
 
+<div id="qr-modal" class="qr-modal" hidden>
+  <div class="qr-card" role="dialog" aria-label="微信收款码">
+    <button class="qr-close" id="qr-close" type="button" aria-label="关闭">×</button>
+    <h3>💛 感谢支持！</h3>
+    <img src="public/wechat-qr.jpg" alt="微信收款码（5 元）">
+    <p class="qr-hint">手机端：长按保存图片 → 微信「扫一扫」→ 相册选择<br>桌面端：打开微信「扫一扫」对准即可</p>
+  </div>
+</div>
+
 <script defer src="js/bank/core.js?v=9b64b363"></script>
 <script defer src="js/bank/tanbun.js?v=b6cad093"></script>
 <script defer src="js/bank/chubun.js?v=0afd1d55"></script>
@@ -459,7 +470,7 @@
 <script defer src="js/bank/togo.js?v=31aaa2da"></script>
 <script defer src="js/bank/shucho.js?v=bddeec09"></script>
 <script defer src="js/bank/joho.js?v=68076865"></script>
-<script defer src="js/app.js?v=d7fb8314"></script>
+<script defer src="js/app.js?v=60fe2025"></script>
 <script>
 /* PWA：注册 Service Worker（file:// 直接打开时自动跳过） */
 if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === '127.0.0.1' || location.hostname === 'localhost')) {

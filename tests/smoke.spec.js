@@ -673,16 +673,33 @@ test('划线句渲染：跨句号的 ⟪…⟫ 完整成 mark，不残留裸标�
   expect(probe.markText).toContain('。'); // 跨句划线句整体在一个 mark 内
 });
 
-test('投币横幅：页首常驻、链到面包多、新标签打开', async ({ page }) => {
+test('投币横幅：微信投币（左）弹收款码，面包多（右）新标签跳转', async ({ page }) => {
   await page.goto('/');
-  const banner = page.locator('.support-banner');
-  await expect(banner).toBeVisible();
-  // 横幅在页头之上（页面第一个可交互元素），整条是链接
-  await expect(banner).toHaveAttribute('href', 'https://mbd.pub/o/bread/mbd-YZWblJ9paA==');
-  await expect(banner).toHaveAttribute('target', '_blank');
-  await expect(banner).toContainText('支持开发者，请投币');
-  const box = await banner.boundingBox();
-  expect(box.y).toBeLessThan(60); // 首屏最顶部
+  const wechat = page.locator('#sb-wechat');
+  const mbd = page.locator('.sb-mbd');
+  await expect(wechat).toBeVisible();
+  await expect(mbd).toBeVisible();
+
+  // 微信在左、面包多在右
+  const wb = await wechat.boundingBox();
+  const mb = await mbd.boundingBox();
+  expect(wb.x).toBeLessThan(mb.x);
+
+  // 面包多：原链接、新标签
+  await expect(mbd).toHaveAttribute('href', 'https://mbd.pub/o/bread/mbd-YZWblJ9paA==');
+  await expect(mbd).toHaveAttribute('target', '_blank');
+
+  // 微信：弹出收款码 + 感谢文案；× / 遮罩 / Esc 均可关闭
+  await wechat.click();
+  const modal = page.locator('#qr-modal');
+  await expect(modal).toBeVisible();
+  await expect(modal.locator('img')).toBeVisible();
+  await expect(modal).toContainText('感谢支持');
+  await page.keyboard.press('Escape');
+  await expect(modal).toBeHidden();
+  await wechat.click();
+  await page.locator('#qr-close').click();
+  await expect(modal).toBeHidden();
 });
 
 test('随机混合 10 问：抽题计时、用时展示、旧分数不残留', async ({ page }) => {
