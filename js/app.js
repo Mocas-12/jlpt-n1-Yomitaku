@@ -1301,15 +1301,6 @@
     }
   }
   function onKeydown(e) {
-    /* 投币菜单开着：Esc 收起，其余键盘不穿透 */
-    var sbMenu = document.getElementById('sb-menu');
-    if (sbMenu && !sbMenu.hidden && e.key === 'Escape') {
-      sbMenu.hidden = true;
-      var sbArrow = document.getElementById('sb-arrow');
-      sbArrow.setAttribute('aria-expanded', 'false');
-      sbArrow.classList.remove('open');
-      return;
-    }
     /* 收款码弹层打开时：Esc 关闭，其余键盘事件一律不穿透（不暗中作答） */
     var qrm = document.getElementById('qr-modal');
     if (qrm && !qrm.hidden) {
@@ -1365,28 +1356,9 @@
     applyTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light');
     initReaderCtl();
     initSystemTheme();
-    // 投币横幅：箭头展开支持方式菜单（微信/面包多）；微信项弹收款码
+    // 投币横幅：微信选项弹收款码（面包多为链接由浏览器跳转）
     var qrModal = document.getElementById('qr-modal');
-    var sbMenu = document.getElementById('sb-menu');
-    var sbArrow = document.getElementById('sb-arrow');
-    function closeSbMenu() {
-      sbMenu.hidden = true;
-      sbArrow.setAttribute('aria-expanded', 'false');
-      sbArrow.classList.remove('open');
-    }
-    sbArrow.addEventListener('click', function (e) {
-      e.stopPropagation();
-      sbMenu.hidden = !sbMenu.hidden;
-      sbArrow.setAttribute('aria-expanded', String(!sbMenu.hidden));
-      sbArrow.classList.toggle('open', !sbMenu.hidden);
-    });
-    document.addEventListener('click', function (e) {
-      if (!sbMenu.hidden && !e.target.closest('.support-banner')) closeSbMenu();
-    });
-    document.getElementById('sb-wechat').addEventListener('click', function () {
-      closeSbMenu();
-      qrModal.hidden = false;
-    });
+    document.getElementById('sb-wechat').addEventListener('click', function () { qrModal.hidden = false; });
     document.getElementById('qr-close').addEventListener('click', function () { qrModal.hidden = true; });
     qrModal.addEventListener('click', function (e) { if (e.target === qrModal) qrModal.hidden = true; });
     // 键盘作答：1〜4 选择、Enter 提交

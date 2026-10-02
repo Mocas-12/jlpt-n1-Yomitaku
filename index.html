@@ -34,17 +34,15 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;800&family=Noto+Serif+JP:wght@400;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=dc8ad2eb">
+<link rel="stylesheet" href="css/style.css?v=985b0b25">
 </head>
 <body>
 
 <div class="support-banner">
   <span class="sb-text">❤️ 支持开发者，请投币</span>
-  <button type="button" class="sb-arrow-btn" id="sb-arrow" aria-haspopup="true" aria-expanded="false" title="选择支持方式">→</button>
-  <div class="sb-menu" id="sb-menu" hidden>
-    <button type="button" class="sb-wechat" id="sb-wechat">❤️ 微信投币 <sup class="sb-rec">推荐</sup></button>
-    <a class="sb-mbd" href="https://mbd.pub/o/bread/mbd-YZWblJ9paA==" target="_blank" rel="noopener">面包多支持 <span class="sb-arrow">→</span></a>
-  </div>
+  <span class="sb-arrow" aria-hidden="true">→</span>
+  <button type="button" class="sb-opt sb-wechat" id="sb-wechat" title="弹出微信收款码">微信<sup class="sb-rec">荐</sup></button>
+  <a class="sb-opt sb-mbd" href="https://mbd.pub/o/bread/mbd-YZWblJ9paA==" target="_blank" rel="noopener" title="跳转到面包多支持页">面包多</a>
 </div>
 
 <header class="site">
@@ -473,7 +471,7 @@
 <script defer src="js/bank/togo.js?v=31aaa2da"></script>
 <script defer src="js/bank/shucho.js?v=bddeec09"></script>
 <script defer src="js/bank/joho.js?v=68076865"></script>
-<script defer src="js/app.js?v=40185254"></script>
+<script defer src="js/app.js?v=b009dc0e"></script>
 <script>
 /* PWA：注册 Service Worker（file:// 直接打开时自动跳过） */
 if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === '127.0.0.1' || location.hostname === 'localhost')) {

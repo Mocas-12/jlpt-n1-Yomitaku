@@ -673,39 +673,34 @@ test('划线句渲染：跨句号的 ⟪…⟫ 完整成 mark，不残留裸标�
   expect(probe.markText).toContain('。'); // 跨句划线句整体在一个 mark 内
 });
 
-test('投币横幅：文字+箭头菜单——微信弹收款码，面包多新标签', async ({ page }) => {
+test('投币横幅：文字+静态箭头+两个选项——微信弹收款码，面包多新标签', async ({ page }) => {
   await page.goto('/');
   await expect(page.locator('.sb-text')).toContainText('支持开发者，请投币');
-  const arrow = page.locator('#sb-arrow');
-  const menu = page.locator('#sb-menu');
-  await expect(menu).toBeHidden();
+  await expect(page.locator('.sb-arrow')).toContainText('→');
 
-  // 点箭头展开菜单：微信在上（优先）、面包多在下
-  await arrow.click();
-  await expect(menu).toBeVisible();
-  await expect(arrow).toHaveAttribute('aria-expanded', 'true');
+  // 选项在箭头右侧，微信在面包多左边
   const wechat = page.locator('#sb-wechat');
   const mbd = page.locator('.sb-mbd');
+  await expect(wechat).toBeVisible();
+  await expect(mbd).toBeVisible();
+  const ab = await page.locator('.sb-arrow').boundingBox();
   const wb = await wechat.boundingBox();
   const mb = await mbd.boundingBox();
-  expect(wb.y).toBeLessThan(mb.y);
+  expect(ab.x).toBeLessThan(wb.x);
+  expect(wb.x).toBeLessThan(mb.x);
+
+  // 面包多：原链接、新标签
   await expect(mbd).toHaveAttribute('href', 'https://mbd.pub/o/bread/mbd-YZWblJ9paA==');
   await expect(mbd).toHaveAttribute('target', '_blank');
 
-  // 点微信：菜单收起、收款码弹层出现；Esc 关闭弹层
+  // 微信：弹出收款码 + 感谢文案；Esc 关闭
   await wechat.click();
-  await expect(menu).toBeHidden();
   const modal = page.locator('#qr-modal');
   await expect(modal).toBeVisible();
+  await expect(modal.locator('img')).toBeVisible();
   await expect(modal).toContainText('感谢支持');
   await page.keyboard.press('Escape');
   await expect(modal).toBeHidden();
-
-  // 再展开后点页面其他处：菜单收起
-  await arrow.click();
-  await expect(menu).toBeVisible();
-  await page.locator('.hero h1').click();
-  await expect(menu).toBeHidden();
 });
 
 test('随机混合 10 问：抽题计时、用时展示、旧分数不残留', async ({ page }) => {
