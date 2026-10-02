@@ -5,8 +5,8 @@
    CACHE 缓存名由 scripts/version.mjs 改写：该脚本同时把「index.html 资产指纹」写入本文件
    的 ASSETS 行并参与缓存名哈希——任何分片/样式/脚本更新都会换缓存名，旧缓存随 activate
    全量清理（否则旧 ?v= 条目会在同一缓存里永久累积） */
-var CACHE = 'yomitaku-d2bcdd03';
-var ASSETS = 'afc8103c'; // scripts/version.mjs 写入 index.html 的资产指纹（参与 CACHE 哈希）
+var CACHE = 'yomitaku-259ae069';
+var ASSETS = '0075329c'; // scripts/version.mjs 写入 index.html 的资产指纹（参与 CACHE 哈希）
 /* 预缓存强制与服务器核对（no-cache），避免安装时拿到浏览器 HTTP 缓存里的旧页面。
    注意用 ./ 相对路径：GitHub Pages 部署在 /jlpt-n1-Yomitaku/ 子路径下 */
 var PRECACHE = ['./', './index.html', './manifest.webmanifest', './public/logo.svg'].map(function (u) {

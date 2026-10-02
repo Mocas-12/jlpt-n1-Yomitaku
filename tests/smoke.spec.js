@@ -673,6 +673,18 @@ test('划线句渲染：跨句号的 ⟪…⟫ 完整成 mark，不残留裸标�
   expect(probe.markText).toContain('。'); // 跨句划线句整体在一个 mark 内
 });
 
+test('投币横幅：页首常驻、链到面包多、新标签打开', async ({ page }) => {
+  await page.goto('/');
+  const banner = page.locator('.support-banner');
+  await expect(banner).toBeVisible();
+  // 横幅在页头之上（页面第一个可交互元素），整条是链接
+  await expect(banner).toHaveAttribute('href', 'https://mbd.pub/o/bread/mbd-YZWblJ9paA==');
+  await expect(banner).toHaveAttribute('target', '_blank');
+  await expect(banner).toContainText('支持开发者，请投币');
+  const box = await banner.boundingBox();
+  expect(box.y).toBeLessThan(60); // 首屏最顶部
+});
+
 test('随机混合 10 问：抽题计时、用时展示、旧分数不残留', async ({ page }) => {
   await page.goto('/#practice');
   await page.click('#btn-mix10');

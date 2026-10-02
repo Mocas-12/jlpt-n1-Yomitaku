@@ -91,6 +91,19 @@ header.site {
   backdrop-filter: blur(8px);
   border-bottom: 3px solid var(--ink);
 }
+/* 顶部投币横幅：整条可点，新标签打开面包多（正常文档流，长文阅读时不占常驻空间） */
+.support-banner {
+  display: block; text-align: center; cursor: pointer;
+  background: var(--pop); color: var(--on-pop);
+  font-family: var(--display); font-size: 13.5px; font-weight: 800;
+  letter-spacing: 1px; text-decoration: none;
+  padding: 7px 12px;
+  border-bottom: 3px solid var(--ink);
+  transition: filter .15s;
+}
+.support-banner:hover { filter: brightness(1.04); text-decoration: none; }
+.support-banner .sb-arrow { display: inline-block; transition: transform .15s; }
+.support-banner:hover .sb-arrow { transform: translateX(4px); }
 .site-inner {
   max-width: 1080px; margin: 0 auto; padding: 0 20px;
   display: flex; align-items: center; gap: 24px; height: 62px;
