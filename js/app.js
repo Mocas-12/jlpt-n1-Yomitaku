@@ -400,7 +400,12 @@
     /* 手机端：导航条可横向滚动，路由切换后把当前页签滚回可视区中央 */
     var onTab = document.querySelector('nav.tabs a.on');
     if (onTab) onTab.scrollIntoView({ block: 'nearest', inline: 'center' });
-    window.scrollTo(0, 0);
+    if (pendingScroll && pendingScroll.hash === '#' + h) {
+      window.scrollTo({ top: pendingScroll.y, behavior: 'instant' }); /* 练习返回：恢复发起页滚动位置 */
+      pendingScroll = null;
+    } else {
+      window.scrollTo(0, 0);
+    }
   }
   window.addEventListener('hashchange', route);
 
@@ -469,13 +474,18 @@
     document.getElementById('set-list').style.display = '';
     document.getElementById('session-view').style.display = 'none';
   }
-  var listScrollY = 0; // 进练习前题组列表的滚动位置：返回时恢复，免去每次重新下翻
+  /* 练习返回导航：记录发起练习的页面和滚动位置，返回时回到哪里（练习可能从
+     专项训练列表 / 错题本 / 概览的复习入口发起，不能一律扔回训练列表顶部） */
+  var returnNav = { hash: '#practice', y: 0 };
+  var pendingScroll = null; // 跨 hash 返回时的滚动恢复（route 渲染完后消费）
+  function beginReturn() {
+    var h = location.hash || '#home';
+    if (PAGES.indexOf(h.replace('#', '')) < 0) h = '#practice';
+    returnNav = { hash: h, y: window.scrollY };
+    var label = { '#practice': '← 组列表', '#review': '← 错题本', '#home': '← 概览' }[h] || '← 返回';
+    document.getElementById('btn-back-top').textContent = label;
+  }
   function showSessionView() {
-    /* 只有从专项训练的组列表进入才记录位置；错题本/概览发起的练习不覆盖 */
-    if (document.querySelector('#page-practice').classList.contains('on') &&
-        document.getElementById('set-list').style.display !== 'none') {
-      listScrollY = window.scrollY;
-    }
     document.getElementById('set-list').style.display = 'none';
     document.getElementById('session-view').style.display = '';
     window.scrollTo({ top: 0, behavior: 'instant' }); /* 练习从题干第一行开始 */
@@ -662,6 +672,7 @@
     var s = setById(setId);
     if (!s) { toast('该题组不存在，可能已被删除', false); return; }
     stopTimer();
+    beginReturn();
     /* 考点定向：考点筛选激活时只练带该标签的题（情報検索等一个题组含多个考点的题型，
        不定向的话选哪个考点练到的题都一样）。筛选后为空（导入题组无该考点）则回退全组。 */
     var qidx = s.questions.map(function (_, i) { return i; });
@@ -716,6 +727,8 @@
     }).filter(Boolean);
     if (!groups.length) { toast(label ? '筛选的错题没有可重练的题' : '错题对应的题组已不存在，建议清空错题本', false); return; }
     stopTimer();
+    beginReturn(); /* 必须在下方重定向到 #practice 之前记录发起页 */
+    var totalW
     var totalW = groups.reduce(function (n, g) { return n + g.qidx.length; }, 0);
     session = { mode: 'wrong', title: (dueOnly ? '到期复习（' : label ? '定向重练 · ' + label + '（' : '错题重练（') + totalW + ' 题）', regen: null, groups: groups, answers: {}, qtimes: {}, submitted: false, startTs: Date.now(), budgetSec: 0 };
     /* 会话渲染在训练页容器里：若当前在别的路由（如错题本页），需切到 #practice 才可见 */
@@ -731,6 +744,7 @@
 
   /* 随机混合：从全部题组抽 N 问（同题组的题归并渲染，文章只出现一次） */
   function startMixSession(count) {
+    beginReturn();
     var pool = [];
     allSets().forEach(function (s) {
       s.questions.forEach(function (_, qi) { pool.push({ set: s, qi: qi }); });
@@ -758,6 +772,7 @@
 
   /* 模拟卷：按官方大题构成（問題7〜12）抽题组卷，全局计时 */
   function startMockSession() {
+    beginReturn();
     var groups = [], budget = 0, total = 0;
     MOCK_BLUEPRINT.forEach(function (bp) {
       var pool = allSets().filter(function (s) { return s.typeKey === bp.key; });
@@ -968,9 +983,15 @@
     stopTimer();
     clearDraft();
     session = null;
+    if (returnNav.hash !== '#practice') {
+      /* 从错题本/概览发起的练习：回到发起页并恢复当时的滚动位置 */
+      pendingScroll = { hash: returnNav.hash, y: returnNav.y };
+      if (location.hash === returnNav.hash) route(); else location.hash = returnNav.hash;
+      return;
+    }
     renderSetList();
     showSetList();
-    window.scrollTo({ top: listScrollY, behavior: 'instant' }); /* 回到点开题目前的位置 */
+    window.scrollTo({ top: returnNav.y, behavior: 'instant' }); /* 回到点开题目前的位置 */
   }
 
   /* ---------- 成绩卡分享：canvas 生成成绩图片，Web Share 优先、下载兜底 ---------- */
