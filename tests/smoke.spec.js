@@ -27,7 +27,7 @@ test('完整链路：筛选 → 作答 → 提交出分 → 列表显示最好�
   const filtered = page.locator('#set-cards .setcard');
   await expect(filtered).toHaveCount(TANBUN);
   for (let i = 0; i < TANBUN; i++) {
-    await expect(filtered.nth(i).locator('.badge').first()).toContainText('短文');
+    await expect(filtered.nth(i).locator('.badge').first()).toContainText('短篇');
   }
 
   await page.click('#filterbar .fbtn[data-f="all"]');

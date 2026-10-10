@@ -310,11 +310,12 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14.5px; }
 .streakline b { color: var(--accent); font-size: 19px; }
 .qtime { margin-left: 10px; font-size: 12px; font-weight: 600; color: var(--muted); }
 .filterbar { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 22px; }
-.filterbar.subbar2 { margin-top: -12px; align-items: center; } /* 第二行：搜索 + 考点 chips */
+.filterbar.subbar2 { margin-top: -12px; } /* 考点 chips 行：紧贴题型行下方 */
+.searchbar { margin: 0 0 14px; }
 #set-search {
   font-family: var(--sans); font-size: 14px; font-weight: 600;
   padding: 6px 14px; border: 2.5px solid var(--ink); border-radius: 999px;
-  background: var(--surface); color: var(--ink); width: 200px; max-width: 100%;
+  background: var(--surface); color: var(--ink); width: min(100%, 460px);
 }
 #set-search:focus { outline: none; border-color: var(--accent); }
 #set-search::placeholder { color: var(--muted); }
@@ -480,7 +481,17 @@ mark.uline { background: none; color: inherit; border-bottom: 3px solid var(--ac
   transition: width .4s;
 }
 .pbar > i.low { background: repeating-linear-gradient(-45deg, var(--accent) 0 8px, #ff8177 8px 16px); }
-.stat-row { display: grid; grid-template-columns: 130px 1fr 74px; gap: 12px; align-items: center; margin: 10px 0; font-size: 14px; }
+.stat-row { display: flex; align-items: center; gap: 10px; margin: 10px 0; font-size: 13.5px; }
+.stat-row .sr-label { flex: 0 0 8.5em; white-space: nowrap; } /* 定宽对齐：8 字标签（内容理解（短篇））不折行 */
+.stat-row .pbar { flex: 1; min-width: 0; }
+.stat-row .sr-num { flex: 0 0 auto; min-width: 76px; text-align: right; white-space: nowrap; }
+.sr-num b { font-size: 13px; }
+.sr-short { display: none; }
+.result-note {
+  margin: -6px 0 14px; font-size: 13.5px; font-weight: 700; color: var(--muted);
+  display: inline-block; background: var(--surface); border: 2px solid var(--ink);
+  border-radius: 999px; padding: 2px 14px; box-shadow: 3px 3px 0 var(--shadow);
+}
 .histitem { display: flex; gap: 12px; font-size: 13.5px; color: var(--muted); padding: 6px 0; border-bottom: 2px dashed var(--line); }
 .histitem:last-child { border-bottom: none; }
 .histitem b { color: var(--ink); font-weight: 700; }
@@ -542,7 +553,12 @@ footer.site {
   .site-inner { gap: 12px; padding: 0 14px; }
   .brand .sub { display: none; }
   .passage { padding: 18px 16px; font-size: 15.5px; }
-  .stat-row { grid-template-columns: 100px 1fr 64px; }
+  /* 我的进度：窄屏数字列只显示百分比（c/t 收进 title 悬浮），标签定宽不折行 */
+  .stat-row { font-size: 12.5px; gap: 8px; }
+  .stat-row .sr-label { flex-basis: 8em; }
+  .sr-full { display: none; }
+  .sr-short { display: inline; }
+  .stat-row .sr-num { min-width: 40px; }
   .hero h1 { font-size: 33px; }
   .card, .fact { box-shadow: 3px 3px 0 var(--shadow); }
   .fact { padding: 10px 14px; }    /* 2×2 网格内收窄内边距，给两行说明留空间 */

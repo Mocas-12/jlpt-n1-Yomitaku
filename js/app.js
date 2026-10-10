@@ -151,7 +151,7 @@
     return /^https?:\/\//i.test(s) ? esc(s) : '#bank';
   }
   function typeInfo(key) {
-    var m = { tanbun: '内容理解（短文）·問題7', chubun: '内容理解（中文）·問題8', chobun: '内容理解（长篇）·問題9', togo: '統合理解·問題10', shucho: '主張理解（长篇）·問題11', joho: '情報検索·問題12' };
+    var m = { tanbun: '内容理解（短篇）·問題7', chubun: '内容理解（中篇）·問題8', chobun: '内容理解（长篇）·問題9', togo: '統合理解·問題10', shucho: '主張理解（长篇）·問題11', joho: '情報検索·問題12' };
     var p = (m[key] || key).split('·');
     return { key: key, label: p[0], no: p[1] || '' };
   }
@@ -417,11 +417,14 @@
       var st = (d.stats && d.stats[k]) || { c: 0, t: 0 };
       totalC += st.c; totalT += st.t;
       var pct = st.t ? Math.round(st.c / st.t * 100) : 0;
-      rows += '<div class="stat-row"><span>' + t.label + '</span>' +
-        '<span class="pbar"><i class="' + (st.t && pct < 50 ? 'low' : '') + '" style="width:' + (st.t ? pct : 0) + '%"></i></span>' +
-        '<span>' + (st.t ? st.c + '/' + st.t + '（' + pct + '%）' : '—') + '</span></div>';
+      rows += '<div class="stat-row"><span class="sr-label">' + t.label + '</span>' +
+        '<span class="pbar" title="' + (st.t ? '答对 ' + st.c + ' / ' + st.t + ' 题' : '还没有练习记录') + '"><i class="' + (st.t && pct < 50 ? 'low' : '') + '" style="width:' + (st.t ? pct : 0) + '%"></i></span>' +
+        '<span class="sr-num" title="' + (st.t ? '答对 ' + st.c + ' / ' + st.t + ' 题' : '还没有练习记录') + '">' +
+        (st.t ? '<b class="sr-full">' + st.c + '/' + st.t + '（' + pct + '%）</b><b class="sr-short">' + pct + '%</b>' : '—') + '</span></div>';
     });
-    rows += '<div class="stat-row"><span><b>合计</b></span><span class="pbar"><i class="' + (totalT && totalC / totalT < 0.5 ? 'low' : '') + '" style="width:' + (totalT ? Math.round(totalC / totalT * 100) : 0) + '%"></i></span><span>' + (totalT ? totalC + '/' + totalT + '（' + Math.round(totalC / totalT * 100) + '%）' : '—') + '</span></div>';
+    var tipAll = totalT ? '答对 ' + totalC + ' / ' + totalT + ' 题' : '还没有练习记录';
+    rows += '<div class="stat-row"><span class="sr-label"><b>合计</b></span><span class="pbar" title="' + tipAll + '"><i class="' + (totalT && totalC / totalT < 0.5 ? 'low' : '') + '" style="width:' + (totalT ? Math.round(totalC / totalT * 100) : 0) + '%"></i></span><span class="sr-num" title="' + tipAll + '">' +
+      (totalT ? '<b class="sr-full">' + totalC + '/' + totalT + '（' + Math.round(totalC / totalT * 100) + '%）</b><b class="sr-short">' + Math.round(totalC / totalT * 100) + '%</b>' : '—') + '</span></div>';
     var hist = (d.history || []).slice(0, 6).map(function (r) {
       return '<div class="histitem"><span>' + fmtDate(r.ts) + '</span><b style="flex:1">' + esc(r.title) + '</b><span>' + r.c + '/' + r.t + ' · ' + fmt(r.seconds) + '</span></div>';
     }).join('');
@@ -473,9 +476,10 @@
   var curWrongLabel = 'all'; // 错题本的考点筛选
   /* 考点标签固定词表（与 js/bank/ 出题配方一致；新标签出现时自动追加进筛选项） */
   var QLABELS = ['主旨把握', '内容一致', '划线句含义', '理由说明', '共通点', '相違点', '条件筛选', '注意事项'];
-  function labelChipsHTML(sets, cur) { // 训练页/错题本共用的考点筛选 chips（只列出有题的标签）
+  function labelChipsHTML(sets, cur, scopeType) { // 训练页/错题本共用的考点筛选 chips（只列出有题的标签）
     var have = {};
     sets.forEach(function (s) {
+      if (scopeType && s.typeKey !== scopeType) return; // 训练页限定当前题型：考点计数与可选范围随题型走，杜绝「题型×考点」组合出空
       s.questions.forEach(function (q) { if (q.label) have[q.label] = (have[q.label] || 0) + 1; });
     });
     var html = '<button class="fbtn' + (cur === 'all' ? ' on' : '') + '" data-l="all">全部考点</button>';
@@ -539,13 +543,20 @@
   function renderSetList() {
     var d = load();
     var sets = allSets();
+
+    // 考点筛选失效自愈（作用域 = 当前题型）：考点在当前题型下没有任何题组时自动回到「全部考点」，
+    // 从源头杜绝「题型 × 考点」组合搜出空结果（题组被删/导入变更导致的失效也一并覆盖）
+    var inScope = sets.filter(function (s) { return curFilter === 'all' || s.typeKey === curFilter; });
+    if (curLabel !== 'all' && !inScope.some(function (s) { return s.questions.some(function (x) { return x.label === curLabel; }); })) curLabel = 'all';
+
     var chips = '<button class="fbtn' + (curFilter === 'all' ? ' on' : '') + '" data-f="all">全部（' + sets.length + '）</button>';
     TYPE_KEYS.forEach(function (k) {
       var n = sets.filter(function (s) { return s.typeKey === k; }).length;
       chips += '<button class="fbtn' + (curFilter === k ? ' on' : '') + '" data-f="' + k + '">' + typeInfo(k).label + '（' + n + '）</button>';
     });
     document.getElementById('filterbar').innerHTML = chips;
-    document.getElementById('label-chips').innerHTML = labelChipsHTML(sets, curLabel);
+    // 考点 chips 按当前题型计数（全部题型时即全库计数）；搜索词不改变 chips
+    document.getElementById('label-chips').innerHTML = labelChipsHTML(sets, curLabel, curFilter === 'all' ? null : curFilter);
     var searchEl = document.getElementById('set-search');
     if (searchEl && searchEl.value.trim() !== curQuery) searchEl.value = curQuery; // trim 后比较，输入中的尾随空格不被吞
 
@@ -558,11 +569,6 @@
       return;
     }
 
-    // 考点筛选失效自愈：指向的标签已不在题库（题组被删/导入变更）时重置，避免不可见筛选锁死列表
-    var haveLabels = {};
-    sets.forEach(function (s) { s.questions.forEach(function (x) { if (x.label) haveLabels[x.label] = 1; }); });
-    if (curLabel !== 'all' && !haveLabels[curLabel]) curLabel = 'all';
-
     // 题型 × 考点 × 标题关键词 三重筛选
     var q = curQuery.toLowerCase();
     sets = sets.filter(function (s) {
@@ -573,21 +579,37 @@
     });
 
     if (!sets.length) {
+      // 只剩搜索词能筛空（题型×考点已在上面自愈）——给出一步清除的出口
+      var clearBtns = '';
+      if (curLabel !== 'all') clearBtns += '<button class="btn sm ghost" data-clear="label">清除考点筛选</button> ';
+      if (curQuery) clearBtns += '<button class="btn sm ghost" data-clear="query">清除搜索词</button>';
+      if (!clearBtns) clearBtns = '<button class="btn sm ghost" data-clear="all">清除全部筛选</button>';
       document.getElementById('set-cards').innerHTML =
-        '<div class="card" style="text-align:center;padding:48px 24px">' +
-        '<h3 style="font-size:20px">没有匹配的题组</h3>' +
-        '<p style="color:var(--muted)">换个关键词，或清除考点/题型筛选再试试。</p></div>';
+        '<div class="card" style="text-align:center;padding:48px 24px"><h3 style="font-size:20px">没有匹配的题组</h3>' +
+        '<p style="color:var(--muted)">换个关键词，或放宽筛选再试试。</p>' +
+        '<p style="margin-top:14px">' + clearBtns + '</p></div>';
+      document.querySelectorAll('#set-cards [data-clear]').forEach(function (b) {
+        b.onclick = function () {
+          var w = b.getAttribute('data-clear');
+          if (w === 'label') curLabel = 'all';
+          else if (w === 'query') curQuery = '';
+          else { curLabel = 'all'; curQuery = ''; curFilter = 'all'; }
+          renderSetList();
+        };
+      });
       return;
     }
 
+    var activeFilter = curFilter !== 'all' || curLabel !== 'all' || q;
     var customs = customSets();
     var byType = {};
     TYPE_KEYS.forEach(function (k) { byType[k] = []; });
     sets.forEach(function (s) {
       byType[s.typeKey].push(setCardHTML(s, d, customs));
     });
+    var note = activeFilter ? '<div class="result-note">匹配 <b>' + sets.length + '</b> 组题</div>' : '';
     document.getElementById('set-cards').innerHTML =
-      curFilter === 'all' ? groupedTypeHTML(byType) : byType[curFilter].join('');
+      note + (curFilter === 'all' ? groupedTypeHTML(byType) : byType[curFilter].join(''));
     document.getElementById('set-cards').classList.toggle('grouped', curFilter === 'all');
     wireTypeGroups('set-cards');
     document.querySelectorAll('#set-cards .setcard').forEach(function (c) {
