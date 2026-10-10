@@ -484,7 +484,7 @@ mark.uline { background: none; color: inherit; border-bottom: 3px solid var(--ac
 .stat-row { display: flex; align-items: center; gap: 10px; margin: 10px 0; font-size: 13.5px; }
 .stat-row .sr-label { flex: 0 0 8.5em; white-space: nowrap; } /* 定宽对齐：8 字标签（内容理解（短篇））不折行 */
 .stat-row .pbar { flex: 1; min-width: 0; }
-.stat-row .sr-num { flex: 0 0 auto; min-width: 76px; text-align: right; white-space: nowrap; }
+.stat-row .sr-num { flex: 0 0 96px; min-width: 0; text-align: right; white-space: nowrap; } /* 定宽列：进度条右端点逐行对齐，不随内容长短漂移 */
 .sr-num b { font-size: 13px; }
 .sr-short { display: none; }
 /* 没练过的题型：不渲染空进度条，用紧凑灰字替代，卡片不再一片空长条 */
@@ -563,7 +563,7 @@ footer.site {
   .stat-row .sr-label { flex-basis: 8em; }
   .sr-full { display: none; }
   .sr-short { display: inline; }
-  .stat-row .sr-num { min-width: 40px; }
+  .stat-row .sr-num { flex-basis: 44px; }
   .hero h1 { font-size: 33px; }
   .card, .fact { box-shadow: 3px 3px 0 var(--shadow); }
   .fact { padding: 10px 14px; }    /* 2×2 网格内收窄内边距，给两行说明留空间 */
