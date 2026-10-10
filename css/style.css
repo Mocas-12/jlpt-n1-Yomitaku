@@ -487,6 +487,9 @@ mark.uline { background: none; color: inherit; border-bottom: 3px solid var(--ac
 .stat-row .sr-num { flex: 0 0 auto; min-width: 76px; text-align: right; white-space: nowrap; }
 .sr-num b { font-size: 13px; }
 .sr-short { display: none; }
+/* 没练过的题型：不渲染空进度条，用紧凑灰字替代，卡片不再一片空长条 */
+.stat-row.is-empty { margin: 7px 0; }
+.sr-empty-hint { font-size: 12.5px; color: var(--muted); }
 .result-note {
   margin: -6px 0 14px; font-size: 13.5px; font-weight: 700; color: var(--muted);
   display: inline-block; background: var(--surface); border: 2px solid var(--ink);

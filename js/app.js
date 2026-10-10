@@ -417,14 +417,18 @@
       var st = (d.stats && d.stats[k]) || { c: 0, t: 0 };
       totalC += st.c; totalT += st.t;
       var pct = st.t ? Math.round(st.c / st.t * 100) : 0;
-      rows += '<div class="stat-row"><span class="sr-label">' + t.label + '</span>' +
-        '<span class="pbar" title="' + (st.t ? '答对 ' + st.c + ' / ' + st.t + ' 题' : '还没有练习记录') + '"><i class="' + (st.t && pct < 50 ? 'low' : '') + '" style="width:' + (st.t ? pct : 0) + '%"></i></span>' +
-        '<span class="sr-num" title="' + (st.t ? '答对 ' + st.c + ' / ' + st.t + ' 题' : '还没有练习记录') + '">' +
-        (st.t ? '<b class="sr-full">' + st.c + '/' + st.t + '（' + pct + '%）</b><b class="sr-short">' + pct + '%</b>' : '—') + '</span></div>';
+      rows += (st.t
+        ? '<div class="stat-row"><span class="sr-label">' + t.label + '</span>' +
+          '<span class="pbar" title="答对 ' + st.c + ' / ' + st.t + ' 题"><i class="' + (pct < 50 ? 'low' : '') + '" style="width:' + pct + '%"></i></span>' +
+          '<span class="sr-num" title="答对 ' + st.c + ' / ' + st.t + ' 题">' +
+          '<b class="sr-full">' + st.c + '/' + st.t + '（' + pct + '%）</b><b class="sr-short">' + pct + '%</b></span></div>'
+        : '<div class="stat-row is-empty"><span class="sr-label">' + t.label + '</span><span class="sr-empty-hint">还没练过</span></div>');
     });
     var tipAll = totalT ? '答对 ' + totalC + ' / ' + totalT + ' 题' : '还没有练习记录';
-    rows += '<div class="stat-row"><span class="sr-label"><b>合计</b></span><span class="pbar" title="' + tipAll + '"><i class="' + (totalT && totalC / totalT < 0.5 ? 'low' : '') + '" style="width:' + (totalT ? Math.round(totalC / totalT * 100) : 0) + '%"></i></span><span class="sr-num" title="' + tipAll + '">' +
-      (totalT ? '<b class="sr-full">' + totalC + '/' + totalT + '（' + Math.round(totalC / totalT * 100) + '%）</b><b class="sr-short">' + Math.round(totalC / totalT * 100) + '%</b>' : '—') + '</span></div>';
+    rows += (totalT
+      ? '<div class="stat-row"><span class="sr-label"><b>合计</b></span><span class="pbar" title="' + tipAll + '"><i class="' + (totalC / totalT < 0.5 ? 'low' : '') + '" style="width:' + Math.round(totalC / totalT * 100) + '%"></i></span><span class="sr-num" title="' + tipAll + '">' +
+        '<b class="sr-full">' + totalC + '/' + totalT + '（' + Math.round(totalC / totalT * 100) + '%）</b><b class="sr-short">' + Math.round(totalC / totalT * 100) + '%</b></span></div>'
+      : '<div class="stat-row is-empty"><span class="sr-label"><b>合计</b></span><span class="sr-empty-hint">还没有练习记录，去专项训练开始第一组吧</span></div>');
     var hist = (d.history || []).slice(0, 6).map(function (r) {
       return '<div class="histitem"><span>' + fmtDate(r.ts) + '</span><b style="flex:1">' + esc(r.title) + '</b><span>' + r.c + '/' + r.t + ' · ' + fmt(r.seconds) + '</span></div>';
     }).join('');
