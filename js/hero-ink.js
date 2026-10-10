@@ -22,7 +22,9 @@
     });
   }
 
-  /* —— 数据卡数字滚动（含动态统计 [data-bank-stat] 的卡片跳过，避免和 app.js 打架） —— */
+  /* —— 题库规模数字滚动：只滚 [data-bank-stat] 卡（题库是自家的，滚动有增长感）；
+     考试分数（110/60/19）是固定事实，静态显示。
+     app.js 为 defer 脚本，会在本脚本之后才把真值填进来，用 MutationObserver 接住填充时刻 —— */
   function count(node, target, t0) {
     var p = Math.min(1, (performance.now() - t0) / 900);
     p = 1 - Math.pow(1 - p, 3); /* easeOutCubic */
@@ -30,17 +32,16 @@
     if (p < 1) requestAnimationFrame(function () { count(node, target, t0); });
   }
   if (!reduced) {
-    var nums = hero.querySelectorAll('.fact .num');
-    setTimeout(function () {
-      for (var k = 0; k < nums.length; k++) {
-        var el = nums[k];
-        if (el.querySelector('[data-bank-stat]')) continue;
-        var node = el.firstChild;
-        var target = parseInt(node.nodeValue, 10);
-        if (!isFinite(target) || target <= 0) continue;
-        count(node, target, performance.now());
-      }
-    }, 380);
+    var statEl = hero.querySelector('.num [data-bank-stat="sets"]');
+    if (statEl && 'MutationObserver' in window) {
+      var mo = new MutationObserver(function () {
+        var target = parseInt(statEl.textContent, 10);
+        if (!isFinite(target) || target <= 0) return;
+        mo.disconnect(); /* 只滚第一次填充，后续写入与滚动互不干扰 */
+        count(statEl.firstChild, target, performance.now());
+      });
+      mo.observe(statEl, { childList: true, characterData: true, subtree: true });
+    }
   }
 
   /* —— 水墨晕染画布 —— */
