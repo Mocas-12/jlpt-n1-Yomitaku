@@ -495,6 +495,8 @@ mark.uline { background: none; color: inherit; border-bottom: 3px solid var(--ac
   display: inline-block; background: var(--surface); border: 2px solid var(--ink);
   border-radius: 999px; padding: 2px 14px; box-shadow: 3px 3px 0 var(--shadow);
 }
+.result-note b { color: var(--accent); }
+.result-note[hidden] { display: none; }
 .histitem { display: flex; gap: 12px; font-size: 13.5px; color: var(--muted); padding: 6px 0; border-bottom: 2px dashed var(--line); }
 .histitem:last-child { border-bottom: none; }
 .histitem b { color: var(--ink); font-weight: 700; }

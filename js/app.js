@@ -605,15 +605,23 @@
     }
 
     var activeFilter = curFilter !== 'all' || curLabel !== 'all' || q;
+    var noteEl = document.getElementById('result-note');
+    if (activeFilter) {
+      noteEl.innerHTML = '匹配 <b>' + sets.length + '</b> 组题' +
+        (curLabel !== 'all' ? ' · 点开题组只练【' + esc(curLabel) + '】考点的题' : '');
+      noteEl.hidden = false;
+    } else {
+      noteEl.hidden = true;
+      noteEl.innerHTML = '';
+    }
     var customs = customSets();
     var byType = {};
     TYPE_KEYS.forEach(function (k) { byType[k] = []; });
     sets.forEach(function (s) {
       byType[s.typeKey].push(setCardHTML(s, d, customs));
     });
-    var note = activeFilter ? '<div class="result-note">匹配 <b>' + sets.length + '</b> 组题</div>' : '';
     document.getElementById('set-cards').innerHTML =
-      note + (curFilter === 'all' ? groupedTypeHTML(byType) : byType[curFilter].join(''));
+      curFilter === 'all' ? groupedTypeHTML(byType) : byType[curFilter].join('');
     document.getElementById('set-cards').classList.toggle('grouped', curFilter === 'all');
     wireTypeGroups('set-cards');
     document.querySelectorAll('#set-cards .setcard').forEach(function (c) {
@@ -647,11 +655,23 @@
     var s = setById(setId);
     if (!s) { toast('该题组不存在，可能已被删除', false); return; }
     stopTimer();
+    /* 考点定向：考点筛选激活时只练带该标签的题（情報検索等一个题组含多个考点的题型，
+       不定向的话选哪个考点练到的题都一样）。筛选后为空（导入题组无该考点）则回退全组。 */
+    var qidx = s.questions.map(function (_, i) { return i; });
+    var directed = '';
+    if (curLabel !== 'all') {
+      var hit = qidx.filter(function (i) { return s.questions[i].label === curLabel; });
+      if (hit.length) {
+        qidx = hit;
+        directed = '（定向：' + curLabel + '）';
+      }
+    }
+    var budget = Math.max(60, Math.round((s.minutes || 3) * 60 * qidx.length / s.questions.length));
     session = {
-      mode: 'set', setId: setId, title: s.title, regen: null,
-      groups: [{ set: s, qidx: s.questions.map(function (_, i) { return i; }) }],
+      mode: 'set', setId: setId, title: s.title + directed, regen: null,
+      groups: [{ set: s, qidx: qidx }],
       answers: {}, qtimes: {}, submitted: false, startTs: Date.now(),
-      budgetSec: (s.minutes || 3) * 60
+      budgetSec: budget
     };
     renderSession();
     showSessionView();
