@@ -11,7 +11,15 @@ async function newPage(theme) {
   await page.addInitScript((t) => localStorage.setItem('yt_theme', t), theme);
   await page.goto(BASE, { waitUntil: 'networkidle' });
   await page.evaluate(() => document.fonts.ready);
+  await page.waitForTimeout(1700); // hero 入场编排 + 数字滚动落定后再截图
   return page;
+}
+
+/* 题组列表默认按题型折叠（details.typegroup），截图前先全部展开。
+   列表在切到专项训练标签后异步渲染，先等元素挂载再展开 */
+async function expandSets(page) {
+  await page.locator('#set-cards details.typegroup').first().waitFor({ state: 'attached' });
+  await page.evaluate(() => document.querySelectorAll('#set-cards details.typegroup').forEach((d) => { d.open = true; }));
 }
 
 /* 1. 概览 hero（浅色） */
@@ -26,6 +34,7 @@ async function newPage(theme) {
 {
   const page = await newPage('light');
   await page.click('nav.tabs a[data-page="practice"]');
+  await expandSets(page);
   await page.locator('#set-cards .setcard').first().waitFor();
   await page.waitForTimeout(300);
   await page.screenshot({ path: 'docs/shot-list.png', clip: { x: 0, y: 0, width: 1200, height: 780 } });
@@ -37,6 +46,7 @@ async function newPage(theme) {
 {
   const page = await newPage('light');
   await page.click('nav.tabs a[data-page="practice"]');
+  await expandSets(page);
   await page.locator('#set-cards .setcard h3').first().click();
   await page.locator('#sig-toggle').check();
   await page.locator('#session-body .qblock').first().locator('.opt').first().click();
@@ -62,6 +72,7 @@ async function newPage(theme) {
 {
   const page = await newPage('light');
   await page.click('nav.tabs a[data-page="practice"]');
+  await expandSets(page);
   await page.locator('#set-cards .setcard h3').first().click();
   const qn = await page.locator('#session-body .qblock').count();
   for (let i = 0; i < qn; i++) {
@@ -78,6 +89,7 @@ async function newPage(theme) {
 {
   const page = await newPage('dark');
   await page.click('nav.tabs a[data-page="practice"]');
+  await expandSets(page);
   await page.locator('#set-cards .setcard h3').first().click();
   await page.locator('#sig-toggle').check();
   await page.locator('#session-body .qblock').first().locator('.opt').nth(1).click();
