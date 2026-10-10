@@ -382,7 +382,9 @@ test('错题本闭环：收录 → 重练答对移出 → 单条删除与清空'
 
   // 再造错题（前三组全部选①），测单条删除与清空错题本
   await page.click('nav.tabs a[data-page="practice"]');
-  await page.click('#btn-back'); // 上次提交的会话视图还在，先回到组列表
+  await page.click('#btn-back'); // 会话从错题本发起：返回 now 回到错题本页（origin-aware）
+  await expect(page.locator('#page-review.on')).toBeVisible();
+  await page.click('nav.tabs a[data-page="practice"]'); // 会话已清空，切回训练页显示组列表
   await openGroups(page);
   for (const idx of [0, 1, 2]) {
     await page.locator('#set-cards .setcard h3').nth(idx).click();
