@@ -469,9 +469,16 @@
     document.getElementById('set-list').style.display = '';
     document.getElementById('session-view').style.display = 'none';
   }
+  var listScrollY = 0; // 进练习前题组列表的滚动位置：返回时恢复，免去每次重新下翻
   function showSessionView() {
+    /* 只有从专项训练的组列表进入才记录位置；错题本/概览发起的练习不覆盖 */
+    if (document.querySelector('#page-practice').classList.contains('on') &&
+        document.getElementById('set-list').style.display !== 'none') {
+      listScrollY = window.scrollY;
+    }
     document.getElementById('set-list').style.display = 'none';
     document.getElementById('session-view').style.display = '';
+    window.scrollTo({ top: 0, behavior: 'instant' }); /* 练习从题干第一行开始 */
   }
 
   var curFilter = 'all';
@@ -963,7 +970,7 @@
     session = null;
     renderSetList();
     showSetList();
-    window.scrollTo(0, 0);
+    window.scrollTo({ top: listScrollY, behavior: 'instant' }); /* 回到点开题目前的位置 */
   }
 
   /* ---------- 成绩卡分享：canvas 生成成绩图片，Web Share 优先、下载兜底 ---------- */
