@@ -64,19 +64,20 @@
   <!-- ================= 概览 ================= -->
   <section class="page" id="page-home">
     <div class="hero">
+      <canvas class="ink" id="hero-ink" aria-hidden="true"></canvas>
       <span class="sticker">読解の極意、ここにあり！</span>
       <span class="sticker sticker-2">毎日10分、メキメキ上がる</span>
-      <p class="eyebrow">読解６割を取れば、合格は見えてくる</p>
-      <h1>JLPT N1 <em>読解</em> 特訓</h1>
-      <p class="lead">按官方六大题型整理快速解题技巧，配「计时训练 → 逐项解析 → 错题重练」的闭环。内置一套按官方出题目标编写的原创模拟题库（明确标注非真题），也支持导入你自己的题库；练习数据只保存在你的浏览器里。</p>
+      <p class="eyebrow" data-reveal>読解６割を取れば、合格は見えてくる</p>
+      <h1 data-reveal>JLPT N1 <em>読解</em> 特訓</h1>
+      <p class="lead" data-reveal>按官方六大题型整理快速解题技巧，配「计时训练 → 逐项解析 → 错题重练」的闭环。内置一套按官方出题目标编写的原创模拟题库（明确标注非真题），也支持导入你自己的题库；练习数据只保存在你的浏览器里。</p>
       <div class="facts">
-        <div class="fact"><div class="num">110<small> 分</small></div><div class="lbl">言語知識・読解 <span class="keep">考试总时长</span></div></div>
-        <div class="fact"><div class="num">60<small> 点</small></div><div class="lbl">読解 满分<span class="keep">（总分 180）</span></div></div>
-        <div class="fact"><div class="num">19<small> 点</small></div><div class="lbl">読解 基准点<span class="keep">（低于即不合格）</span></div></div>
-        <div class="fact"><div class="num"><span data-bank-stat="sets">80</span><small> 组题</small></div><div class="lbl">原创模拟题 · <span data-bank-stat="q">155</span>&nbsp;问 · 六大题型全覆盖</div></div>
+        <div class="fact" data-reveal><div class="num">110<small> 分</small></div><div class="lbl">言語知識・読解 <span class="keep">考试总时长</span></div></div>
+        <div class="fact" data-reveal><div class="num">60<small> 点</small></div><div class="lbl">読解 满分<span class="keep">（总分 180）</span></div></div>
+        <div class="fact" data-reveal><div class="num">19<small> 点</small></div><div class="lbl">読解 基准点<span class="keep">（低于即不合格）</span></div></div>
+        <div class="fact" data-reveal><div class="num"><span data-bank-stat="sets">80</span><small> 组题</small></div><div class="lbl">原创模拟题 · <span data-bank-stat="q">155</span>&nbsp;问 · 六大题型全覆盖</div></div>
       </div>
-      <a class="btn" href="#practice">开始专项训练 →</a>
-      <a class="btn ghost" href="#tech" style="margin-left:10px">先学解题技巧</a>
+      <a class="btn" href="#practice" data-reveal>开始专项训练 →</a>
+      <a class="btn ghost" href="#tech" style="margin-left:10px" data-reveal>先学解题技巧</a>
     </div>
 
     <h2 class="page-title" style="margin-top:34px">官方出题构成（N1 読解）</h2>
@@ -473,6 +474,7 @@
 <script defer src="js/bank/shucho.js?v=bddeec09"></script>
 <script defer src="js/bank/joho.js?v=68076865"></script>
 <script defer src="js/app.js?v=b009dc0e"></script>
+<script src="./js/hero-ink.js"></script>
 <script>
 /* PWA：注册 Service Worker（file:// 直接打开时自动跳过） */
 if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === '127.0.0.1' || location.hostname === 'localhost')) {
