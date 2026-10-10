@@ -693,12 +693,13 @@ test('投币横幅：文字+静态箭头+两个选项——微信弹收款码，
   await expect(mbd).toHaveAttribute('href', 'https://mbd.pub/o/bread/mbd-YZWblJ9paA==');
   await expect(mbd).toHaveAttribute('target', '_blank');
 
-  // 微信：弹出收款码 + 感谢文案；Esc 关闭
+  // 微信：弹出收款码 + 支持文案（奶茶锚点 + 钱的去向）；Esc 关闭
   await wechat.click();
   const modal = page.locator('#qr-modal');
   await expect(modal).toBeVisible();
   await expect(modal.locator('img')).toBeVisible();
-  await expect(modal).toContainText('感谢支持');
+  await expect(modal).toContainText('请我喝杯奶茶');
+  await expect(modal).toContainText('下一组原创模拟题');
   await page.keyboard.press('Escape');
   await expect(modal).toBeHidden();
 });
