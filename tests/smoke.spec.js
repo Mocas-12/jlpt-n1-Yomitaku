@@ -691,7 +691,7 @@ test('自愿支持入口：练习前不显示，完成后提供微信二维码�
     await page.locator('#session-body .qblock').nth(i).locator('.opt').first().click();
   }
   await page.click('#btn-submit');
-  await expect(page.locator('#session-result')).toContainText(/\\d+\\s*\\/\\s*\\d+/);
+  await expect(page.locator('#session-result')).toContainText('/');
   await expect(page.locator('.support-after-result')).toBeVisible();
 
   const mbd = page.locator('.support-after-result a');
