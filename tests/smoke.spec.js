@@ -675,34 +675,36 @@ test('划线句渲染：跨句号的 ⟪…⟫ 完整成 mark，不残留裸标�
   expect(probe.markText).toContain('。'); // 跨句划线句整体在一个 mark 内
 });
 
-test('投币横幅：文字+静态箭头+两个选项——微信弹收款码，面包多新标签', async ({ page }) => {
+test('自愿支持入口：练习前不显示，完成后提供微信二维码与面包多链接', async ({ page }) => {
   await page.goto('/');
-  await expect(page.locator('.sb-text')).toContainText('支持开发者，请投币');
-  await expect(page.locator('.sb-arrow')).toContainText('→');
+  await expect(page.locator('.support-after-result')).toHaveCount(0);
+  await expect(page.locator('#btn-support-wechat')).toHaveCount(0);
 
-  // 选项在箭头右侧，微信在面包多左边
-  const wechat = page.locator('#sb-wechat');
-  const mbd = page.locator('.sb-mbd');
-  await expect(wechat).toBeVisible();
-  await expect(mbd).toBeVisible();
-  const ab = await page.locator('.sb-arrow').boundingBox();
-  const wb = await wechat.boundingBox();
-  const mb = await mbd.boundingBox();
-  expect(ab.x).toBeLessThan(wb.x);
-  expect(wb.x).toBeLessThan(mb.x);
+  await page.goto('/#practice');
+  await openGroups(page);
+  await page.locator('#set-cards .setcard h3').first().click();
+  await expect(page.locator('#session-view')).toBeVisible();
+  await expect(page.locator('.support-after-result')).toHaveCount(0);
 
-  // 面包多：原链接、新标签
+  const qn = await page.locator('#session-body .qblock').count();
+  for (let i = 0; i < qn; i++) {
+    await page.locator('#session-body .qblock').nth(i).locator('.opt').first().click();
+  }
+  await page.click('#btn-submit');
+  await expect(page.locator('#session-result')).toContainText('/');
+  await expect(page.locator('.support-after-result')).toBeVisible();
+
+  const mbd = page.locator('.support-after-result a');
   await expect(mbd).toHaveAttribute('href', 'https://mbd.pub/o/bread/mbd-YZWblJ9paA==');
   await expect(mbd).toHaveAttribute('target', '_blank');
 
-  // 微信：弹出收款码 + 支持文案（奶茶锚点 + 钱的去向）；Esc 关闭
-  await wechat.click();
   const modal = page.locator('#qr-modal');
+  await page.click('#btn-support-wechat');
   await expect(modal).toBeVisible();
   await expect(modal.locator('img')).toBeVisible();
-  await expect(modal).toContainText('请我喝杯奶茶');
-  await expect(modal).toContainText('下一组原创模拟题');
-  await page.keyboard.press('Escape');
+  await expect(modal).toContainText('自愿支持 Yomitaku');
+  await expect(modal).toContainText('不支持也可以继续免费使用');
+  await page.click('#qr-close');
   await expect(modal).toBeHidden();
 });
 
