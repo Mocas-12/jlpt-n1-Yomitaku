@@ -45,6 +45,7 @@
 - 🔁 **Mistake-notebook loop**: wrong answers are collected automatically; "re-drill all mistakes" is supported and correct answers push items down the 1→3→7-day spaced-repetition schedule until they graduate out; before the exam, drill only your mistakes
 - 📊 **Per-type stats**: accuracy progress bars per question type + practice history — weak points at a glance
 - 🎲 **Mixed drill & mock exam**: one tap to shuffle 10 random questions across all types, or assemble a full mock following the official 問題7〜12 blueprint with a global timer; per-question timing shows up in the explanations
+- 💛 **Optional support after practice**: after finishing a session and reviewing explanations, support the project via WeChat or MBD; the site remains free either way
 - 🔥 **Daily streak**: consecutive practice days derived from your history, shown on the overview
 - 📥 **Extensible question bank**: paste JSON / upload a file to import your own question sets (same ID auto-overwrites); export backup supported
 - 📴 **Installable & offline (PWA)**: web manifest + a minimal service worker — add to home screen and keep drilling with no network; SEO / Open-Graph social meta tags included
