@@ -906,8 +906,13 @@
       var redoLabel = session.regen ? (session.regen.kind === 'mock' ? '再考一次（重新组卷）' : '再抽一组') : (session.mode === 'wrong' ? '再练一遍错题' : '重做这一组');
       acts.innerHTML = '<button class="btn" id="btn-redo">' + redoLabel + '</button>' +
         (session.score ? '<button class="btn sub" id="btn-share">分享成绩</button>' : '') +
-        '<button class="btn sub" id="btn-back">返回列表</button>';
+        '<button class="btn sub" id="btn-back">返回列表</button>' +
+        '<div class="support-after-result"><span>练习完成了？如果这些题目或解析对你有帮助，欢迎自愿支持 Yomitaku。</span>' +
+        '<div class="support-result-actions"><button type="button" class="btn sub" id="btn-support-wechat">微信支持</button>' +
+        '<a class="btn sub" href="https://mbd.pub/o/bread/mbd-YZWblJ9paA==" target="_blank" rel="noopener">面包多支持</a></div></div>';
       document.getElementById('btn-redo').onclick = redoSession;
+      var supportWechat = document.getElementById('btn-support-wechat');
+      supportWechat.onclick = function () { document.getElementById('qr-modal').hidden = false; };
       var sh = document.getElementById('btn-share');
       if (sh) sh.onclick = shareScoreCard;
       document.getElementById('btn-back').onclick = backToList;
@@ -1430,9 +1435,8 @@
     applyTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light');
     initReaderCtl();
     initSystemTheme();
-    // 投币横幅：微信选项弹收款码（面包多为链接由浏览器跳转）
+    // 完成练习后可选择微信支持；面包多为结果区链接
     var qrModal = document.getElementById('qr-modal');
-    document.getElementById('sb-wechat').addEventListener('click', function () { qrModal.hidden = false; });
     document.getElementById('qr-close').addEventListener('click', function () { qrModal.hidden = true; });
     qrModal.addEventListener('click', function (e) { if (e.target === qrModal) qrModal.hidden = true; });
     // 键盘作答：1〜4 选择、Enter 提交
