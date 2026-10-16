@@ -79,7 +79,7 @@ jobs:
             if (missing.length) { console.error("缺少站点资源: " + missing.join(", ")); process.exit(1); }
           '
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v5
         with:
           path: _site
       - name: Deploy to GitHub Pages
