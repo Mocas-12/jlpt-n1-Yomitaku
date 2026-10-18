@@ -62,10 +62,12 @@
     }
     if (d.history && d.history.length > HISTORY_MAX) { d.history = d.history.slice(0, HISTORY_MAX); changed = true; }
     if (d.wrong) {
+      var setMap = {};
+      allSets().forEach(function (x) { setMap[x.id] = x; });
       Object.keys(d.wrong).forEach(function (qid) {
         var e = d.wrong[qid];
         var i = qid.lastIndexOf(':');
-        var s = setById(qid.slice(0, i));
+        var s = setMap[qid.slice(0, i)];
         /* 三重清理：题组没了；条目形状损坏（非对象）；题号越界（自定义题组“同 id 覆盖导入”
            后题数变少会留下永远无法消化/删除的幽灵错题，污染到期计数） */
         var qi = parseInt(qid.slice(i + 1), 10);
@@ -420,6 +422,7 @@
     TYPE_KEYS.forEach(function (k) {
       var t = typeInfo(k);
       var st = (d.stats && d.stats[k]) || { c: 0, t: 0 };
+      st = { c: st.c | 0, t: st.t | 0 };
       totalC += st.c; totalT += st.t;
       var pct = st.t ? Math.round(st.c / st.t * 100) : 0;
       rows += (st.t
@@ -435,14 +438,14 @@
         '<b class="sr-full">' + totalC + '/' + totalT + '（' + Math.round(totalC / totalT * 100) + '%）</b><b class="sr-short">' + Math.round(totalC / totalT * 100) + '%</b></span></div>'
       : '<div class="stat-row is-empty"><span class="sr-label"><b>合计</b></span><span class="sr-empty-hint">还没有练习记录，去专项训练开始第一组吧</span></div>');
     var hist = (d.history || []).slice(0, 6).map(function (r) {
-      return '<div class="histitem"><span>' + fmtDate(r.ts) + '</span><b style="flex:1">' + esc(r.title) + '</b><span>' + r.c + '/' + r.t + ' · ' + fmt(r.seconds) + '</span></div>';
+      return '<div class="histitem"><span>' + fmtDate(r.ts) + '</span><b style="flex:1">' + esc(r.title) + '</b><span>' + (r.c | 0) + '/' + (r.t | 0) + ' · ' + fmt(r.seconds) + '</span></div>';
     }).join('');
     var wrongN = d.wrong ? Object.keys(d.wrong).length : 0;
     var dueN = dueCount(d);
     var bankN = allSets().length;
     var streak = calcStreak(d);
     // 弱点画像：错题的考点标签 Top3（点击直达该考点的定向训练）
-    var traps = Object.keys(d.traps || {}).map(function (l) { return [l, d.traps[l]]; })
+    var traps = Object.keys(d.traps || {}).map(function (l) { return [l, d.traps[l] | 0]; })
       .sort(function (a, b) { return b[1] - a[1]; }).slice(0, 3);
     box.innerHTML =
       '<div class="grid cols-2">' +
@@ -728,7 +731,6 @@
     if (!groups.length) { toast(label ? '筛选的错题没有可重练的题' : '错题对应的题组已不存在，建议清空错题本', false); return; }
     stopTimer();
     beginReturn(); /* 必须在下方重定向到 #practice 之前记录发起页 */
-    var totalW
     var totalW = groups.reduce(function (n, g) { return n + g.qidx.length; }, 0);
     session = { mode: 'wrong', title: (dueOnly ? '到期复习（' : label ? '定向重练 · ' + label + '（' : '错题重练（') + totalW + ' 题）', regen: null, groups: groups, answers: {}, qtimes: {}, submitted: false, startTs: Date.now(), budgetSec: 0 };
     /* 会话渲染在训练页容器里：若当前在别的路由（如错题本页），需切到 #practice 才可见 */
@@ -1130,7 +1132,7 @@
         '<span class="badge">' + t.label + '</span>' + stageTxt +
         '<span class="qt"><b>' + esc(s.title) + '</b> 問' + (qi + 1) + '　' + esc(q.q) + '<br>' +
         '<span style="color:var(--muted);font-size:13px">你的答案：' + (e.chosen == null ? '未作答' : LABELS[e.chosen]) +
-        '｜正解：' + LABELS[q.answer] + '｜第 ' + ((e.stage || 0) + 1) + ' 轮</span></span>' +
+        '｜正解：' + LABELS[q.answer] + '｜第 ' + ((e.stage | 0) + 1) + ' 轮</span></span>' +
         '<button class="btn sm ghost" data-del="' + esc(qid) + '">删除</button>' +
         '</div>';
     }).join('');

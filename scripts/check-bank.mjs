@@ -20,8 +20,8 @@ const bankSrc = ['core', ...TYPE_KEYS]
   .map((f) => readFileSync(new URL(`../js/bank/${f}.js`, import.meta.url), 'utf8'))
   .join('\n');
 const src = 'var window = globalThis;\n' + bankSrc;
-const ctx = (await import('node:vm')).createContext({});
 const vm = await import('node:vm');
+const ctx = vm.createContext({});
 vm.runInContext(src, ctx);
 const BANK = vm.runInContext('window.BANK', ctx);
 if (!Array.isArray(BANK)) { console.error('js/bank/ 未求值出 BANK 数组'); process.exit(1); }
